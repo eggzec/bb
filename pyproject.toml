@@ -1,7 +1,59 @@
 [project]
 name = "bb"
 version = "0.1.0"
-description = "Add your description here"
+description = "Bitbucket CLI and Python SDK"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "typer>=0.9.0",
+    "httpx>=0.27.0",
+    "attrs>=23.0.0",
+    "pyjwt>=2.10.0",
+    "python-dateutil>=2.9.0",
+    "typing-extensions>=4.5.0",
+]
+
+[project.scripts]
+bb = "bb.cli:app"
+
+[tool.uv.build-backend]
+module-name = "bb"
+module-root = "src"
+
+[build-system]
+requires = ["uv_build>=0.10.0,<0.11.0"]
+build-backend = "uv_build"
+
+
+[dependency-groups]
+dev = [
+    "pyrefly>=0.43.0",
+    "pytest>=8.0",
+    "pytest-asyncio>=0.24",
+    "schemathesis>=3.38",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["F", "I", "UP"]
+
+[tool.pyrefly]
+project-includes = [
+    "src/bb/cloud/deprecation.py",
+    "src/bb/cloud/sdk/_*.py",
+    "tests/test_deprecation_module.py",
+]
+project-excludes = [
+    "src/bb/cloud/api/**/*.py",
+    "src/bb/cloud/models/**/*.py",
+    "src/bb/cloud/client.py",
+    "src/bb/cloud/types.py",
+    "src/bb/cloud/errors.py",
+]

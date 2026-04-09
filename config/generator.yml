@@ -1,0 +1,32 @@
+# openapi-python-client generator configuration
+# Used with the generator workflow in CLAUDE.md.
+#
+# openapi-python-client ALWAYS wraps output in a project directory scaffold —
+# there is no option to emit only the package without the surrounding project.
+# The generator therefore runs with --output-path /tmp/<tmpdir>/ (outside the
+# repo). After generation the package at /tmp/<tmpdir>/bb/bb/ is synced into
+# src/bb/ and the tmp dir is deleted. No staging dir lives in this repo.
+#
+# Generated package layout (after sync into src/bb/):
+#   src/bb/models/   ← generated Pydantic models
+#   src/bb/api/      ← generated API endpoint modules
+#   src/bb/client.py ← generated HTTP client base
+#   src/bb/types.py  ← generated base types
+#   src/bb/errors.py ← generated error types
+#
+# NOTE: __init__.py is NOT synced — hand-written src/bb/__init__.py is kept.
+
+package_name_override: "bb"
+project_name_override: "bb"
+
+# Set to true to generate for all tags (not just first)
+generate_all_tags: true
+
+# Moves attribute descriptions to individual attr docstrings
+docstrings_on_attributes: true
+
+# Post-generation hooks for code quality (run inside temp gen dir)
+post_hooks:
+  - "python3 ${BB_PROJECT_ROOT}/scripts/apply_deprecations.py"
+  - "ruff check . --fix --quiet"
+  - "ruff format . --quiet"

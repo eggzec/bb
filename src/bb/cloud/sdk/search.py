@@ -1,0 +1,179 @@
+from __future__ import annotations
+
+from bb.cloud.api.search import search_account, search_team, search_workspace
+from bb.cloud.models.search_code_search_result import SearchCodeSearchResult
+from bb.cloud.sdk._auth_validation import AuthMethod, require_auth
+from bb.cloud.sdk._client import BBClient
+from bb.cloud.sdk._pagination import async_paginate
+from bb.cloud.types import UNSET, Unset
+
+__all__ = ["code", "account", "team"]
+
+
+@require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
+async def code(
+    client: BBClient,
+    workspace: str,
+    *,
+    query: str,
+    search_query: str | Unset = UNSET,
+    pagelen: int = 10,
+) -> list[SearchCodeSearchResult]:
+    """Search for code in a workspace.
+
+    Args:
+        client: Authenticated :class:`~bb.cloud.sdk._client.BBClient` instance.
+        workspace: Workspace slug or UUID.
+        query: The search query string.
+        search_query: Alternative parameter name used by the API (maps to ``search_query``).
+            If both are given, ``search_query`` takes precedence.
+        pagelen: Number of results per page (max 100). Defaults to ``10``.
+
+    Returns:
+        List of :class:`~bb.cloud.models.search_code_search_result.SearchCodeSearchResult`
+        objects matching the query.
+
+    Raises:
+        :exc:`~bb.cloud.sdk._errors.AuthenticationError`: If ``client`` uses an unrecognised or unsupported auth method.
+        :exc:`~bb.cloud.errors.UnexpectedStatus`: If the API returns an unexpected HTTP status.
+        :exc:`httpx.HTTPError`: On network-level failures.
+
+    Example:
+        ```python
+        from bb.cloud import BBClient
+        from bb.cloud.sdk import search
+
+        client = BBClient.from_env()
+        results = await search.code(client, workspace="myws", query="def my_function")
+        ```
+
+    References:
+        `GET /2.0/workspaces/{workspace}/search/code
+        <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-search/>`_
+    """
+    effective_query = search_query if not isinstance(search_query, type(UNSET)) else query
+    return [
+        r
+        async for r in async_paginate(
+            search_workspace.asyncio,
+            workspace,
+            client=client.auth,
+            search_query=effective_query,
+            pagelen=pagelen,
+        )
+        if isinstance(r, SearchCodeSearchResult)
+    ]
+
+
+@require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
+async def account(
+    client: BBClient,
+    selected_user: str,
+    *,
+    search_query: str,
+    pagelen: int = 10,
+) -> list[SearchCodeSearchResult]:
+    """Search for code in a user account.
+
+    Warning:
+        Deprecated. This endpoint is no longer recommended by Atlassian.
+        Use :func:`code` with a workspace slug instead.
+
+    Args:
+        client: Authenticated :class:`~bb.cloud.sdk._client.BBClient` instance.
+        selected_user: The user's UUID, account ID, or username (slug).
+        search_query: The search query string.
+        pagelen: Number of results per page (max 100). Defaults to ``10``.
+
+    Returns:
+        List of :class:`~bb.cloud.models.search_code_search_result.SearchCodeSearchResult`
+        objects matching the query.
+
+    Raises:
+        :exc:`~bb.cloud.sdk._errors.AuthenticationError`: If ``client`` uses an unrecognised or unsupported auth method.
+        :exc:`~bb.cloud.errors.UnexpectedStatus`: If the API returns an unexpected HTTP status.
+        :exc:`httpx.HTTPError`: On network-level failures.
+
+    Example:
+        ```python
+        from bb.cloud import BBClient
+        from bb.cloud.sdk import search
+
+        client = BBClient.from_env()
+        results = await search.account(
+            client, selected_user="jsmith", search_query="def my_function"
+        )
+        ```
+
+    References:
+        `GET /2.0/users/{selected_user}/search/code
+        <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-search/>`_
+    """
+    return [
+        r
+        async for r in async_paginate(
+            search_account.asyncio,
+            selected_user,
+            client=client.auth,
+            search_query=search_query,
+            pagelen=pagelen,
+        )
+        if isinstance(r, SearchCodeSearchResult)
+    ]
+
+
+@require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
+async def team(
+    client: BBClient,
+    username: str,
+    *,
+    search_query: str,
+    pagelen: int = 10,
+) -> list[SearchCodeSearchResult]:
+    """Search for code in a team.
+
+    Warning:
+        Deprecated. This endpoint is no longer recommended by Atlassian.
+        Use :func:`code` with a workspace slug instead.
+
+    Args:
+        client: Authenticated :class:`~bb.cloud.sdk._client.BBClient` instance.
+        username: The team's username (slug).
+        search_query: The search query string.
+        pagelen: Number of results per page (max 100). Defaults to ``10``.
+
+    Returns:
+        List of :class:`~bb.cloud.models.search_code_search_result.SearchCodeSearchResult`
+        objects matching the query.
+
+    Raises:
+        :exc:`~bb.cloud.sdk._errors.AuthenticationError`: If ``client`` uses an unrecognised or unsupported auth method.
+        :exc:`~bb.cloud.errors.UnexpectedStatus`: If the API returns an unexpected HTTP status.
+        :exc:`httpx.HTTPError`: On network-level failures.
+
+    Example:
+        ```python
+        from bb.cloud import BBClient
+        from bb.cloud.sdk import search
+
+        client = BBClient.from_env()
+        results = await search.team(
+            client, username="myteam", search_query="def my_function"
+        )
+        ```
+
+    References:
+        `GET /2.0/teams/{username}/search/code
+        <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-search/>`_
+    """
+    return [
+        r
+        async for r in async_paginate(
+            search_team.asyncio,
+            username,
+            client=client.auth,
+            search_query=search_query,
+            pagelen=pagelen,
+        )
+        if isinstance(r, SearchCodeSearchResult)
+    ]
