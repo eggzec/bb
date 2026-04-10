@@ -1,0 +1,236 @@
+from http import HTTPStatus
+from typing import Any
+from urllib.parse import quote
+
+import httpx
+
+from ... import errors
+from ...client import AuthenticatedClient, Client
+from ...models.get_3_response_401 import Get3Response401
+from ...models.get_3_response_404 import Get3Response404
+from ...models.rest_pull_request import RestPullRequest
+from ...types import UNSET, Response, Unset
+
+
+def _get_kwargs(
+    project_key: str,
+    repository_slug: str,
+    pull_request_id: str,
+    *,
+    with_properties: str | Unset = UNSET,
+) -> dict[str, Any]:
+
+    params: dict[str, Any] = {}
+
+    params["withProperties"] = with_properties
+
+    params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
+
+    _kwargs: dict[str, Any] = {
+        "method": "get",
+        "url": "/api/latest/projects/{project_key}/repos/{repository_slug}/pull-requests/{pull_request_id}".format(
+            project_key=quote(str(project_key), safe=""),
+            repository_slug=quote(str(repository_slug), safe=""),
+            pull_request_id=quote(str(pull_request_id), safe=""),
+        ),
+        "params": params,
+    }
+
+    return _kwargs
+
+
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Get3Response401 | Get3Response404 | RestPullRequest | None:
+    if response.status_code == 200:
+        response_200 = RestPullRequest.from_dict(response.json())
+
+        return response_200
+
+    if response.status_code == 401:
+        response_401 = Get3Response401.from_dict(response.json())
+
+        return response_401
+
+    if response.status_code == 404:
+        response_404 = Get3Response404.from_dict(response.json())
+
+        return response_404
+
+    if client.raise_on_unexpected_status:
+        raise errors.UnexpectedStatus(response.status_code, response.content)
+    else:
+        return None
+
+
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Get3Response401 | Get3Response404 | RestPullRequest]:
+    return Response(
+        status_code=HTTPStatus(response.status_code),
+        content=response.content,
+        headers=response.headers,
+        parsed=_parse_response(client=client, response=response),
+    )
+
+
+def sync_detailed(
+    project_key: str,
+    repository_slug: str,
+    pull_request_id: str,
+    *,
+    client: AuthenticatedClient | Client,
+    with_properties: str | Unset = UNSET,
+) -> Response[Get3Response401 | Get3Response404 | RestPullRequest]:
+    """Get pull request
+
+     Retrieve a pull request.
+
+    The authenticated user must have <strong>REPO_READ</strong> permission for the repository that this
+    pull request targets to call this resource.
+
+    Args:
+        project_key (str):
+        repository_slug (str):
+        pull_request_id (str):
+        with_properties (str | Unset):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        Response[Get3Response401 | Get3Response404 | RestPullRequest]
+    """
+
+    kwargs = _get_kwargs(
+        project_key=project_key,
+        repository_slug=repository_slug,
+        pull_request_id=pull_request_id,
+        with_properties=with_properties,
+    )
+
+    response = client.get_httpx_client().request(
+        **kwargs,
+    )
+
+    return _build_response(client=client, response=response)
+
+
+def sync(
+    project_key: str,
+    repository_slug: str,
+    pull_request_id: str,
+    *,
+    client: AuthenticatedClient | Client,
+    with_properties: str | Unset = UNSET,
+) -> Get3Response401 | Get3Response404 | RestPullRequest | None:
+    """Get pull request
+
+     Retrieve a pull request.
+
+    The authenticated user must have <strong>REPO_READ</strong> permission for the repository that this
+    pull request targets to call this resource.
+
+    Args:
+        project_key (str):
+        repository_slug (str):
+        pull_request_id (str):
+        with_properties (str | Unset):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        Get3Response401 | Get3Response404 | RestPullRequest
+    """
+
+    return sync_detailed(
+        project_key=project_key,
+        repository_slug=repository_slug,
+        pull_request_id=pull_request_id,
+        client=client,
+        with_properties=with_properties,
+    ).parsed
+
+
+async def asyncio_detailed(
+    project_key: str,
+    repository_slug: str,
+    pull_request_id: str,
+    *,
+    client: AuthenticatedClient | Client,
+    with_properties: str | Unset = UNSET,
+) -> Response[Get3Response401 | Get3Response404 | RestPullRequest]:
+    """Get pull request
+
+     Retrieve a pull request.
+
+    The authenticated user must have <strong>REPO_READ</strong> permission for the repository that this
+    pull request targets to call this resource.
+
+    Args:
+        project_key (str):
+        repository_slug (str):
+        pull_request_id (str):
+        with_properties (str | Unset):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        Response[Get3Response401 | Get3Response404 | RestPullRequest]
+    """
+
+    kwargs = _get_kwargs(
+        project_key=project_key,
+        repository_slug=repository_slug,
+        pull_request_id=pull_request_id,
+        with_properties=with_properties,
+    )
+
+    response = await client.get_async_httpx_client().request(**kwargs)
+
+    return _build_response(client=client, response=response)
+
+
+async def asyncio(
+    project_key: str,
+    repository_slug: str,
+    pull_request_id: str,
+    *,
+    client: AuthenticatedClient | Client,
+    with_properties: str | Unset = UNSET,
+) -> Get3Response401 | Get3Response404 | RestPullRequest | None:
+    """Get pull request
+
+     Retrieve a pull request.
+
+    The authenticated user must have <strong>REPO_READ</strong> permission for the repository that this
+    pull request targets to call this resource.
+
+    Args:
+        project_key (str):
+        repository_slug (str):
+        pull_request_id (str):
+        with_properties (str | Unset):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        Get3Response401 | Get3Response404 | RestPullRequest
+    """
+
+    return (
+        await asyncio_detailed(
+            project_key=project_key,
+            repository_slug=repository_slug,
+            pull_request_id=pull_request_id,
+            client=client,
+            with_properties=with_properties,
+        )
+    ).parsed

@@ -5,11 +5,11 @@
 
 - **CLI** (`src/bb/cli/`): Typer-based commands — shared across targets, dispatches to the right SDK
 - **Cloud SDK** (`src/bb/cloud/sdk/`): Hand-written wrappers over the generated Cloud API layer
-- **Datacenter SDK** (`src/bb/datacenter/sdk/`): Hand-written wrappers over the generated DC API layer (future)
+- **Datacenter SDK** (`src/bb/datacenter/sdk/`): Hand-written wrappers over the generated DC API layer
 - **Generated (Cloud)**: `src/bb/cloud/{api,models,client.py,types.py,errors.py}` — never edit manually
 - **Generated (DC)**: `src/bb/datacenter/{api,models,client.py,types.py,errors.py}` — never edit manually
 
-**Current focus: Cloud SDK only. CLI comes after SDK is complete.**
+**Both Cloud SDK and DC SDK are implemented. CLI comes after SDK is complete.**
 
 ---
 
@@ -23,10 +23,13 @@ bb/                                       # project root
 ├── amdb.toml                             # amdb ignore list config
 ├── bb_cloud.openapi.json                 # original Bitbucket Cloud OpenAPI spec — NEVER MODIFY
 ├── bb_cloud_fixed.openapi.json           # fixed spec used for generation — NEVER MODIFY
+├── bb_datacenter.openapi.json            # Bitbucket Data Center OpenAPI spec — NEVER MODIFY
+├── bb_datacenter_fixed.openapi.json      # fixed spec used for generation — regenerate via scripts/fix_dc_spec.py, NEVER edit manually
 ├── cmd_outputs/                          # captured stdout/stderr — always timestamped, always separate files
 │   └── YYYYMMDD_HHMMSS_<name>_{stdout,stderr}.txt
 ├── config/
-│   └── generator.yml                     # openapi-python-client config (Cloud)
+│   ├── generator.yml                     # openapi-python-client config (Cloud)
+│   └── generator_dc.yml                  # openapi-python-client config (Data Center)
 ├── context/                              # reference docs — fetch once, reuse
 │   ├── amdb_guide.md
 │   ├── typer/                            # typer docs (*.md + *.ast.json)
@@ -45,10 +48,20 @@ bb/                                       # project root
 │       │   ├── client.py                 # generated — Client + AuthenticatedClient
 │       │   ├── types.py                  # generated — Response[T], Unset, UNSET
 │       │   └── errors.py                 # generated — UnexpectedStatus
-│       └── datacenter/                   # Bitbucket Data Center target (future)
-│           ├── __init__.py
-│           └── sdk/
-│               └── __init__.py
+│       └── datacenter/                   # Bitbucket Data Center target
+│           ├── __init__.py               # hand-written — DC SDK public surface
+│           └── sdk/                      # hand-written DC SDK wrappers
+│               ├── __init__.py
+│               ├── _auth.py              # PersonalAccessTokenAuth, BasicAuth
+│               ├── _auth_validation.py   # require_auth decorator
+│               ├── _client.py            # BBDCClient
+│               ├── _errors.py            # AuthenticationError
+│               ├── _pagination.py        # start/limit/isLastPage paginators
+│               ├── branches.py
+│               ├── commits.py
+│               ├── projects.py
+│               ├── prs.py
+│               └── repos.py
 ├── templates/                            # custom Jinja2 overrides for openapi-python-client
 ├── TODO.md                               # agentic task tracker — keep updated
 ├── CLAUDE.md                             # this file
@@ -69,6 +82,11 @@ bb/                                       # project root
 | `src/bb/cloud/errors.py` | `UnexpectedStatus` exception |
 | `src/bb/cloud/models/` | 382 attrs-based data models + `__init__.py` with `__all__` |
 | `src/bb/cloud/api/` | One module per endpoint: `_get_kwargs`, `_parse_response`, `_build_response`, `sync`, `sync_detailed`, `asyncio`, `asyncio_detailed` |
+| `src/bb/datacenter/client.py` | `Client` + `AuthenticatedClient` (same structure as Cloud) |
+| `src/bb/datacenter/types.py` | `Response[T]`, `Unset`, `UNSET`, `File` |
+| `src/bb/datacenter/errors.py` | `UnexpectedStatus` exception |
+| `src/bb/datacenter/models/` | ~233 attrs-based data models + `__init__.py` with `__all__` |
+| `src/bb/datacenter/api/` | One module per endpoint, organised by tag |
 
 ### Hand-written — yours to maintain
 
@@ -77,10 +95,11 @@ bb/                                       # project root
 | `src/bb/__init__.py` | Package init |
 | `src/bb/cloud/__init__.py` | Cloud SDK public surface |
 | `src/bb/cloud/sdk/` | Cloud SDK wrappers (unwrap unions, auth factory, pagination) |
-| `src/bb/datacenter/__init__.py` | DC SDK public surface (future) |
-| `src/bb/datacenter/sdk/` | DC SDK wrappers (future) |
+| `src/bb/datacenter/__init__.py` | DC SDK public surface |
+| `src/bb/datacenter/sdk/` | DC SDK wrappers (auth factory, pagination, resource modules) |
 | `src/bb/cli/` | Typer CLI commands (after SDK is complete) |
-| `config/generator.yml` | Generator config |
+| `config/generator.yml` | Generator config (Cloud) |
+| `config/generator_dc.yml` | Generator config (Data Center) |
 | `templates/` | Jinja2 template overrides |
 | `pyproject.toml` | Dependencies, entry point, build |
 | `amdb.toml` | amdb ignore list |
@@ -248,6 +267,49 @@ Generated files use `from ...client import` (3 levels up). From `cloud/api/repos
 
 ---
 
+## Generator Workflow (Data Center)
+
+Same pattern as Cloud but using `config/generator_dc.yml` and `bb_datacenter_fixed.openapi.json`.
+The fixed spec is produced by `scripts/fix_dc_spec.py` from `bb_datacenter.openapi.json`; run the
+script whenever `bb_datacenter.openapi.json` is updated before regenerating.
+
+```bash
+# (Re-)generate the fixed spec whenever the original changes:
+python3 scripts/fix_dc_spec.py
+
+GEN_TMP=$(mktemp -d)
+TS=$(date +%Y%m%d_%H%M%S)
+
+BB_PROJECT_ROOT=$(pwd) uvx openapi-python-client generate \
+  --path bb_datacenter_fixed.openapi.json \
+  --output-path "$GEN_TMP" \
+  --config config/generator_dc.yml \
+  --overwrite \
+  > cmd_outputs/${TS}_dc_generate_stdout.txt \
+  2> cmd_outputs/${TS}_dc_generate_stderr.txt
+
+# Target: 0 warnings (all spec issues are fixed in bb_datacenter_fixed.openapi.json):
+grep -c "Endpoint will not be generated\|Cannot parse" cmd_outputs/${TS}_dc_generate_stderr.txt
+
+# Sync into src/bb/datacenter/ (package is at $GEN_TMP/bb/ directly)
+rsync -a --delete "$GEN_TMP/bb/models/" src/bb/datacenter/models/
+rsync -a --delete "$GEN_TMP/bb/api/"    src/bb/datacenter/api/
+cp "$GEN_TMP/bb/client.py"              src/bb/datacenter/client.py
+cp "$GEN_TMP/bb/types.py"               src/bb/datacenter/types.py
+cp "$GEN_TMP/bb/errors.py"              src/bb/datacenter/errors.py
+# __init__.py NOT synced — hand-written src/bb/datacenter/__init__.py is preserved
+
+rm -rf "$GEN_TMP"
+```
+
+**DC-specific notes:**
+- Pagination uses `start`/`limit` (not `page`/`pagelen`). Responses have `is_last_page`, `next_page_start`, `values`.
+- Auth: `PersonalAccessTokenAuth` (Bearer) or `BasicAuth` (Basic). Set `BB_DC_TOKEN` or `BB_DC_USERNAME`+`BB_DC_PASSWORD`, plus `BB_DC_BASE_URL`.
+- DC endpoint names use `operationId` (not path-based), so names are non-descriptive (e.g., `get_3.py`, `create_1.py`). Use `head` + grep to discover the right module.
+- Post-hooks: `apply_deprecations_dc.py` patches deprecated endpoints; ruff fixes/formats.
+
+---
+
 ## CLI Design (build after SDK is complete)
 
 | Command group | Module | API tag |
@@ -265,8 +327,8 @@ Global options: `--workspace`/`BB_WORKSPACE`, `--json`, `--verbose`, `--target c
 
 ## Key Constraints
 
-1. Never modify `bb_cloud.openapi.json` or `bb_cloud_fixed.openapi.json`
-2. Never edit generated files under `src/bb/cloud/{api,models,client.py,types.py,errors.py}`
+1. Never modify `bb_cloud.openapi.json`, `bb_cloud_fixed.openapi.json`, `bb_datacenter.openapi.json`, or `bb_datacenter_fixed.openapi.json` by hand — `bb_datacenter_fixed.openapi.json` is regenerated by `scripts/fix_dc_spec.py`
+2. Never edit generated files under `src/bb/cloud/{api,models,client.py,types.py,errors.py}` or `src/bb/datacenter/{api,models,client.py,types.py,errors.py}`
 3. Never bypass declined tool calls; never hallucinate
 4. Plan changes and reason to ≥90% confidence before implementing
 5. Document repeated mistakes in `context/pitfalls.md`

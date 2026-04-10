@@ -6,8 +6,15 @@ only contains :exc:`~bb.cloud.errors.UnexpectedStatus`.
 
 from __future__ import annotations
 
+from bb.shared._errors import AuthenticationError as _Base
 
-class AuthenticationError(Exception):
+_HINT = (
+    "Use APITokenAuth, OAuthTokenAuth, OAuthClientCredsAuth, or JWTAuth "
+    "to build a BBClient with an accepted auth method."
+)
+
+
+class AuthenticationError(_Base):
     """Raised when a :class:`~bb.cloud.sdk._client.BBClient`'s auth method is
     not accepted by a Bitbucket Cloud API endpoint.
 
@@ -40,12 +47,4 @@ class AuthenticationError(Exception):
     """
 
     def __init__(self, *, allowed: frozenset, actual: str) -> None:
-        self.allowed = allowed
-        self.actual = actual
-        allowed_names = ", ".join(sorted(v.value if hasattr(v, "value") else str(v) for v in allowed))
-        super().__init__(
-            f"Auth method {actual!r} is not accepted by this endpoint. "
-            f"Accepted: {allowed_names}. "
-            f"Use APITokenAuth, OAuthTokenAuth, OAuthClientCredsAuth, or JWTAuth "
-            f"to build a BBClient with an accepted auth method."
-        )
+        super().__init__(allowed=allowed, actual=actual, hint=_HINT)

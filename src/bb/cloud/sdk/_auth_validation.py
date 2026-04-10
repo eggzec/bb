@@ -32,19 +32,15 @@ that if a single endpoint's security scheme changes, only that decorator needs u
 
 from __future__ import annotations
 
-import functools
-from collections.abc import Awaitable, Callable
 from enum import StrEnum
-from typing import TYPE_CHECKING, ParamSpec, TypeVar
+from typing import TYPE_CHECKING
 
 from bb.cloud.sdk._errors import AuthenticationError
+from bb.shared._auth_validation import make_require_auth
 
 if TYPE_CHECKING:
     from bb.cloud.client import AuthenticatedClient
     from bb.cloud.sdk._client import BBClient
-
-P = ParamSpec("P")
-R = TypeVar("R")
 
 
 class AuthMethod(StrEnum):
@@ -123,56 +119,40 @@ def _validate(client: BBClient, allowed: frozenset[AuthMethod]) -> None:
         raise AuthenticationError(allowed=allowed, actual=str(method))
 
 
-def require_auth(
-    *methods: AuthMethod,
-) -> Callable[[Callable[P, Awaitable[R]]], Callable[P, Awaitable[R]]]:
-    """Decorator factory that declares and enforces the accepted auth methods.
+# Bind the shared decorator factory to this target's validation function.
+# ``require_auth`` has the same call signature and semantics as before;
+# the only change is that the decorator machinery lives in bb.shared.
+require_auth = make_require_auth(_validate)
+"""Decorator factory that declares and enforces accepted Cloud auth methods.
 
-    Apply to every SDK function that wraps an authenticated Bitbucket Cloud
-    endpoint.  Pass each :class:`AuthMethod` the endpoint accepts individually
-    so that if a single endpoint's security scheme changes, only that function's
-    decorator needs updating — not a shared constant.
+Apply to every SDK function that wraps an authenticated Bitbucket Cloud
+endpoint.  Pass each :class:`AuthMethod` the endpoint accepts individually
+so that if a single endpoint's security scheme changes, only that function's
+decorator needs updating — not a shared constant.
 
-    ``client`` (always the first positional argument in SDK functions) is
-    validated before the wrapped function body runs.  ``"Basic"`` wire-format
-    satisfies both :attr:`AuthMethod.BASIC` and :attr:`AuthMethod.API_KEY`.
+``client`` (always the first positional argument in SDK functions) is
+validated before the wrapped function body runs.  ``"Basic"`` wire-format
+satisfies both :attr:`AuthMethod.BASIC` and :attr:`AuthMethod.API_KEY`.
 
-    Args:
-        *methods: One or more :class:`AuthMethod` values accepted by this
-                  endpoint.  For all current Bitbucket Cloud endpoints pass::
+Args:
+    *methods: One or more :class:`AuthMethod` values accepted by this
+              endpoint.  For all current Bitbucket Cloud endpoints pass::
 
-                      AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY
+                  AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY
 
-    Returns:
-        A decorator that wraps an ``async def`` SDK function.
+Raises:
+    :exc:`~bb.cloud.sdk._errors.AuthenticationError`: Raised *at call
+        time* if the ``client`` argument does not carry a recognised,
+        allowed auth method.
 
-    Raises:
-        :exc:`~bb.cloud.sdk._errors.AuthenticationError`: Raised *at call
-            time* if the ``client`` argument does not carry a recognised,
-            allowed auth method.
+Example::
 
-    Example::
+    from bb.cloud.sdk._auth_validation import AuthMethod, require_auth
 
-        from bb.cloud.sdk._auth_validation import AuthMethod, require_auth
-
-        @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-        async def get(client: BBClient, workspace: str, repo_slug: str) -> Repository | None:
-            result = await get_repositories_workspace_repo_slug.asyncio(
-                workspace, repo_slug, client=client.auth
-            )
-            return result if isinstance(result, Repository) else None
-    """
-    allowed: frozenset[AuthMethod] = frozenset(methods)
-
-    def decorator(
-        func: Callable[P, Awaitable[R]],
-    ) -> Callable[P, Awaitable[R]]:
-        @functools.wraps(func)
-        async def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
-            # ``client`` is always the first positional argument in SDK functions.
-            _validate(args[0], allowed)  # type: ignore[arg-type]
-            return await func(*args, **kwargs)
-
-        return wrapper
-
-    return decorator
+    @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
+    async def get(client: BBClient, workspace: str, repo_slug: str) -> Repository | None:
+        result = await get_repositories_workspace_repo_slug.asyncio(
+            workspace, repo_slug, client=client.auth
+        )
+        return result if isinstance(result, Repository) else None
+"""

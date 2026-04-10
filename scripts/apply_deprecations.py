@@ -48,8 +48,10 @@ def find_project_root() -> Path:
         "Set BB_PROJECT_ROOT to the project directory and retry."
     )
 
+
 PROJECT_ROOT = find_project_root()
 SPEC_FILE = PROJECT_ROOT / "bb_cloud_fixed.openapi.json"
+
 
 # Determine target API directory - could be in generated temp dir or project dir
 def find_api_dir() -> Path | None:
@@ -71,6 +73,7 @@ def find_api_dir() -> Path | None:
         return project_api
 
     return None
+
 
 API_DIR = find_api_dir()
 
@@ -123,28 +126,20 @@ def inject_deprecated_import(content: str) -> str:
         return (
             content[:errors_import]
             + "from ...deprecation import deprecated_endpoint\nfrom ... import errors"
-            + content[errors_import + len("from ... import errors"):]
+            + content[errors_import + len("from ... import errors") :]
         )
-    
+
     # Look for any "from ..." import
     relative_import_pattern = re.search(r"^from \.\.\. import", content, re.MULTILINE)
     if relative_import_pattern:
         insert_pos = relative_import_pattern.start()
-        return (
-            content[:insert_pos]
-            + "from ...deprecation import deprecated_endpoint\n"
-            + content[insert_pos:]
-        )
+        return content[:insert_pos] + "from ...deprecation import deprecated_endpoint\n" + content[insert_pos:]
 
     # Fallback - add after all imports
     import_section = re.search(r"^((?:from .* import .*\n|import .*\n)+)", content, re.MULTILINE)
     if import_section:
         end_pos = import_section.end()
-        return (
-            content[:end_pos]
-            + "from ...deprecation import deprecated_endpoint\n"
-            + content[end_pos:]
-        )
+        return content[:end_pos] + "from ...deprecation import deprecated_endpoint\n" + content[end_pos:]
 
     # Last resort
     return re.sub(
@@ -187,7 +182,7 @@ def apply_decorator_to_function(content: str, func_name: str, deprecation_date: 
     else:
         escaped_date = deprecation_date.replace("\\", "\\\\").replace("'", "\\'")
         decorator = f"{indent}@deprecated_endpoint('{escaped_date}')\n"
-    
+
     # Use a replacement function to avoid re.sub interpreting escape sequences
     def replacer(m):
         return decorator + m.group(0)

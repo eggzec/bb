@@ -1,0 +1,34 @@
+# openapi-python-client generator configuration for Bitbucket Data Center
+# Used with the generator workflow in CLAUDE.md (DC variant).
+#
+# Input spec: bb_datacenter_fixed.openapi.json  (produced by scripts/fix_dc_spec.py)
+# Never run this against bb_datacenter.openapi.json directly — 28 warnings result.
+#
+# The generator always wraps output in a project directory scaffold.
+# Run with --output-path /tmp/<tmpdir>/ (outside the repo). After generation
+# the package at /tmp/<tmpdir>/bb/ is synced into src/bb/datacenter/ and the
+# tmp dir is deleted.
+#
+# Generated package layout (after sync into src/bb/datacenter/):
+#   src/bb/datacenter/models/   ← generated attrs models
+#   src/bb/datacenter/api/      ← generated API endpoint modules
+#   src/bb/datacenter/client.py ← generated HTTP client base
+#   src/bb/datacenter/types.py  ← generated base types
+#   src/bb/datacenter/errors.py ← generated error types
+#
+# NOTE: __init__.py is NOT synced — hand-written src/bb/datacenter/__init__.py is kept.
+
+package_name_override: "bb"
+project_name_override: "bb"
+
+# Set to true to generate for all tags (not just first)
+generate_all_tags: true
+
+# Moves attribute descriptions to individual attr docstrings
+docstrings_on_attributes: true
+
+# Post-generation hooks for code quality (run inside temp gen dir)
+post_hooks:
+  - "python3 ${BB_PROJECT_ROOT}/scripts/apply_deprecations_dc.py"
+  - "ruff check . --fix --quiet"
+  - "ruff format . --quiet"

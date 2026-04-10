@@ -46,8 +46,14 @@ select = ["F", "I", "UP"]
 
 [tool.pyrefly]
 project-includes = [
+    "src/bb/shared/__init__.py",
+    "src/bb/shared/_*.py",
     "src/bb/cloud/deprecation.py",
     "src/bb/cloud/sdk/_*.py",
+    "src/bb/datacenter/__init__.py",
+    "src/bb/datacenter/deprecation.py",
+    "src/bb/datacenter/sdk/_*.py",
+    "src/bb/datacenter/sdk/*.py",
     "tests/test_deprecation_module.py",
 ]
 project-excludes = [
@@ -56,4 +62,9 @@ project-excludes = [
     "src/bb/cloud/client.py",
     "src/bb/cloud/types.py",
     "src/bb/cloud/errors.py",
+    "src/bb/datacenter/api/**/*.py",
+    "src/bb/datacenter/models/**/*.py",
+    "src/bb/datacenter/client.py",
+    "src/bb/datacenter/types.py",
+    "src/bb/datacenter/errors.py",
 ]
