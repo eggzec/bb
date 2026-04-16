@@ -21,6 +21,8 @@ def _get_kwargs(
     *,
     q: str | Unset = UNSET,
     sort: str | Unset = UNSET,
+    page: int | Unset = 1,
+    pagelen: int | Unset = 10,
 ) -> dict[str, Any]:
 
     params: dict[str, Any] = {}
@@ -28,6 +30,10 @@ def _get_kwargs(
     params["q"] = q
 
     params["sort"] = sort
+
+    params["page"] = page
+
+    params["pagelen"] = pagelen
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
@@ -71,6 +77,8 @@ def sync_detailed(
     client: AuthenticatedClient,
     q: str | Unset = UNSET,
     sort: str | Unset = UNSET,
+    page: int | Unset = 1,
+    pagelen: int | Unset = 10,
 ) -> Response[ParsedPayload]:
     r"""List repository permissions for a user
 
@@ -103,6 +111,8 @@ def sync_detailed(
     Args:
         q (str | Unset):
         sort (str | Unset):
+        page (int | Unset):  Default: 1.
+        pagelen (int | Unset):  Default: 10.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -115,6 +125,8 @@ def sync_detailed(
     kwargs = _get_kwargs(
         q=q,
         sort=sort,
+        page=page,
+        pagelen=pagelen,
     )
 
     response = client.get_httpx_client().request(
@@ -130,6 +142,8 @@ def sync(
     client: AuthenticatedClient,
     q: str | Unset = UNSET,
     sort: str | Unset = UNSET,
+    page: int | Unset = 1,
+    pagelen: int | Unset = 10,
 ) -> ParsedPayload | None:
     r"""List repository permissions for a user
 
@@ -162,6 +176,8 @@ def sync(
     Args:
         q (str | Unset):
         sort (str | Unset):
+        page (int | Unset):  Default: 1.
+        pagelen (int | Unset):  Default: 10.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -175,6 +191,8 @@ def sync(
         client=client,
         q=q,
         sort=sort,
+        page=page,
+        pagelen=pagelen,
     ).parsed
 
 
@@ -184,6 +202,8 @@ async def asyncio_detailed(
     client: AuthenticatedClient,
     q: str | Unset = UNSET,
     sort: str | Unset = UNSET,
+    page: int | Unset = 1,
+    pagelen: int | Unset = 10,
 ) -> Response[ParsedPayload]:
     r"""List repository permissions for a user
 
@@ -216,6 +236,8 @@ async def asyncio_detailed(
     Args:
         q (str | Unset):
         sort (str | Unset):
+        page (int | Unset):  Default: 1.
+        pagelen (int | Unset):  Default: 10.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -228,6 +250,8 @@ async def asyncio_detailed(
     kwargs = _get_kwargs(
         q=q,
         sort=sort,
+        page=page,
+        pagelen=pagelen,
     )
 
     response = await client.get_async_httpx_client().request(**kwargs)
@@ -241,6 +265,8 @@ async def asyncio(
     client: AuthenticatedClient,
     q: str | Unset = UNSET,
     sort: str | Unset = UNSET,
+    page: int | Unset = 1,
+    pagelen: int | Unset = 10,
 ) -> ParsedPayload | None:
     r"""List repository permissions for a user
 
@@ -273,6 +299,8 @@ async def asyncio(
     Args:
         q (str | Unset):
         sort (str | Unset):
+        page (int | Unset):  Default: 1.
+        pagelen (int | Unset):  Default: 10.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -287,5 +315,7 @@ async def asyncio(
             client=client,
             q=q,
             sort=sort,
+            page=page,
+            pagelen=pagelen,
         )
     ).parsed

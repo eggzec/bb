@@ -730,6 +730,31 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "page",
+            "description": "The page number of elements to retrieve.",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "pagelen",
+            "description": "The maximum number of results to return.",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
+            }
           }
         ],
         "security": [
@@ -4876,6 +4901,33 @@
         "x-atlassian-auth-types": [
           "forge-oauth2",
           "api-token"
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "description": "The page number of elements to retrieve.",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "pagelen",
+            "description": "The maximum number of results to return.",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
+            }
+          }
         ]
       },
       "parameters": [
@@ -6898,6 +6950,33 @@
         "x-atlassian-auth-types": [
           "forge-oauth2",
           "api-token"
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "description": "The page number of elements to retrieve.",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "pagelen",
+            "description": "The maximum number of results to return.",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
+            }
+          }
         ]
       },
       "parameters": [
@@ -7541,6 +7620,31 @@
             "required": false,
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "description": "The page number of elements to retrieve.",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "pagelen",
+            "description": "The maximum number of results to return.",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
             }
           }
         ],
@@ -10943,6 +11047,33 @@
         "x-atlassian-auth-types": [
           "forge-oauth2",
           "api-token"
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "description": "The page number of elements to retrieve.",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "pagelen",
+            "description": "The maximum number of results to return.",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
+            }
+          }
         ]
       },
       "parameters": [
@@ -11391,6 +11522,33 @@
         "x-atlassian-auth-types": [
           "forge-oauth2",
           "api-token"
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "description": "The page number of elements to retrieve.",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "pagelen",
+            "description": "The maximum number of results to return.",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
+            }
+          }
         ]
       },
       "parameters": [
@@ -15968,6 +16126,33 @@
         "x-atlassian-auth-types": [
           "forge-oauth2",
           "api-token"
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "description": "The page number of elements to retrieve.",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "pagelen",
+            "description": "The maximum number of results to return.",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
+            }
+          }
         ]
       },
       "parameters": [
@@ -19317,6 +19502,31 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "page",
+            "description": "The page number of elements to retrieve.",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "pagelen",
+            "description": "The maximum number of results to return.",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
+            }
           }
         ],
         "security": [
@@ -20140,6 +20350,33 @@
         "x-atlassian-auth-types": [
           "forge-oauth2",
           "api-token"
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "description": "The page number of elements to retrieve.",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "pagelen",
+            "description": "The maximum number of results to return.",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
+            }
+          }
         ]
       },
       "parameters": [
@@ -23109,6 +23346,31 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "page",
+            "description": "The page number of elements to retrieve.",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "pagelen",
+            "description": "The maximum number of results to return.",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
+            }
           }
         ],
         "security": [
@@ -23216,6 +23478,31 @@
             "required": false,
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "description": "The page number of elements to retrieve.",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "pagelen",
+            "description": "The maximum number of results to return.",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
             }
           }
         ],
@@ -23333,6 +23620,31 @@
             "required": false,
             "schema": {
               "type": "boolean"
+            }
+          },
+          {
+            "name": "page",
+            "description": "The page number of elements to retrieve.",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "pagelen",
+            "description": "The maximum number of results to return.",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
             }
           }
         ],
@@ -23536,6 +23848,31 @@
             "required": false,
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "description": "The page number of elements to retrieve.",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "pagelen",
+            "description": "The maximum number of results to return.",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
             }
           }
         ],
@@ -25911,6 +26248,33 @@
         "x-atlassian-auth-types": [
           "forge-oauth2",
           "api-token"
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "description": "The page number of elements to retrieve.",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "pagelen",
+            "description": "The maximum number of results to return.",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
+            }
+          }
         ]
       },
       "parameters": [
@@ -26092,6 +26456,31 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "page",
+            "description": "The page number of elements to retrieve.",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "pagelen",
+            "description": "The maximum number of results to return.",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
+            }
           }
         ],
         "security": [
@@ -26235,6 +26624,31 @@
             "required": false,
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "description": "The page number of elements to retrieve.",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "pagelen",
+            "description": "The maximum number of results to return.",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
             }
           }
         ],
@@ -29779,6 +30193,31 @@
                 "DECLINED",
                 "SUPERSEDED"
               ]
+            }
+          },
+          {
+            "name": "page",
+            "description": "The page number of elements to retrieve.",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "pagelen",
+            "description": "The maximum number of results to return.",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
             }
           }
         ],

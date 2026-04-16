@@ -25,6 +25,8 @@ def _get_kwargs(
     role: GetRepositoriesWorkspaceRepoSlugForksRole | Unset = UNSET,
     q: str | Unset = UNSET,
     sort: str | Unset = UNSET,
+    page: int | Unset = 1,
+    pagelen: int | Unset = 10,
 ) -> dict[str, Any]:
 
     params: dict[str, Any] = {}
@@ -38,6 +40,10 @@ def _get_kwargs(
     params["q"] = q
 
     params["sort"] = sort
+
+    params["page"] = page
+
+    params["pagelen"] = pagelen
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
@@ -86,6 +92,8 @@ def sync_detailed(
     role: GetRepositoriesWorkspaceRepoSlugForksRole | Unset = UNSET,
     q: str | Unset = UNSET,
     sort: str | Unset = UNSET,
+    page: int | Unset = 1,
+    pagelen: int | Unset = 10,
 ) -> Response[ParsedPayload]:
     """List repository forks
 
@@ -98,6 +106,8 @@ def sync_detailed(
         role (GetRepositoriesWorkspaceRepoSlugForksRole | Unset):
         q (str | Unset):
         sort (str | Unset):
+        page (int | Unset):  Default: 1.
+        pagelen (int | Unset):  Default: 10.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -113,6 +123,8 @@ def sync_detailed(
         role=role,
         q=q,
         sort=sort,
+        page=page,
+        pagelen=pagelen,
     )
 
     response = client.get_httpx_client().request(
@@ -130,6 +142,8 @@ def sync(
     role: GetRepositoriesWorkspaceRepoSlugForksRole | Unset = UNSET,
     q: str | Unset = UNSET,
     sort: str | Unset = UNSET,
+    page: int | Unset = 1,
+    pagelen: int | Unset = 10,
 ) -> ParsedPayload | None:
     """List repository forks
 
@@ -142,6 +156,8 @@ def sync(
         role (GetRepositoriesWorkspaceRepoSlugForksRole | Unset):
         q (str | Unset):
         sort (str | Unset):
+        page (int | Unset):  Default: 1.
+        pagelen (int | Unset):  Default: 10.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -158,6 +174,8 @@ def sync(
         role=role,
         q=q,
         sort=sort,
+        page=page,
+        pagelen=pagelen,
     ).parsed
 
 
@@ -169,6 +187,8 @@ async def asyncio_detailed(
     role: GetRepositoriesWorkspaceRepoSlugForksRole | Unset = UNSET,
     q: str | Unset = UNSET,
     sort: str | Unset = UNSET,
+    page: int | Unset = 1,
+    pagelen: int | Unset = 10,
 ) -> Response[ParsedPayload]:
     """List repository forks
 
@@ -181,6 +201,8 @@ async def asyncio_detailed(
         role (GetRepositoriesWorkspaceRepoSlugForksRole | Unset):
         q (str | Unset):
         sort (str | Unset):
+        page (int | Unset):  Default: 1.
+        pagelen (int | Unset):  Default: 10.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -196,6 +218,8 @@ async def asyncio_detailed(
         role=role,
         q=q,
         sort=sort,
+        page=page,
+        pagelen=pagelen,
     )
 
     response = await client.get_async_httpx_client().request(**kwargs)
@@ -211,6 +235,8 @@ async def asyncio(
     role: GetRepositoriesWorkspaceRepoSlugForksRole | Unset = UNSET,
     q: str | Unset = UNSET,
     sort: str | Unset = UNSET,
+    page: int | Unset = 1,
+    pagelen: int | Unset = 10,
 ) -> ParsedPayload | None:
     """List repository forks
 
@@ -223,6 +249,8 @@ async def asyncio(
         role (GetRepositoriesWorkspaceRepoSlugForksRole | Unset):
         q (str | Unset):
         sort (str | Unset):
+        page (int | Unset):  Default: 1.
+        pagelen (int | Unset):  Default: 10.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -240,5 +268,7 @@ async def asyncio(
             role=role,
             q=q,
             sort=sort,
+            page=page,
+            pagelen=pagelen,
         )
     ).parsed

@@ -21,6 +21,8 @@ def _get_kwargs(
     *,
     sort: str | Unset = UNSET,
     administrator: bool | Unset = UNSET,
+    page: int | Unset = 1,
+    pagelen: int | Unset = 10,
 ) -> dict[str, Any]:
 
     params: dict[str, Any] = {}
@@ -28,6 +30,10 @@ def _get_kwargs(
     params["sort"] = sort
 
     params["administrator"] = administrator
+
+    params["page"] = page
+
+    params["pagelen"] = pagelen
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
@@ -80,6 +86,8 @@ def sync_detailed(
     client: AuthenticatedClient,
     sort: str | Unset = UNSET,
     administrator: bool | Unset = UNSET,
+    page: int | Unset = 1,
+    pagelen: int | Unset = 10,
 ) -> Response[ParsedPayload]:
     r"""List workspaces for the current user
 
@@ -95,6 +103,8 @@ def sync_detailed(
     Args:
         sort (str | Unset):
         administrator (bool | Unset):
+        page (int | Unset):  Default: 1.
+        pagelen (int | Unset):  Default: 10.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -107,6 +117,8 @@ def sync_detailed(
     kwargs = _get_kwargs(
         sort=sort,
         administrator=administrator,
+        page=page,
+        pagelen=pagelen,
     )
 
     response = client.get_httpx_client().request(
@@ -121,6 +133,8 @@ def sync(
     client: AuthenticatedClient,
     sort: str | Unset = UNSET,
     administrator: bool | Unset = UNSET,
+    page: int | Unset = 1,
+    pagelen: int | Unset = 10,
 ) -> ParsedPayload | None:
     r"""List workspaces for the current user
 
@@ -136,6 +150,8 @@ def sync(
     Args:
         sort (str | Unset):
         administrator (bool | Unset):
+        page (int | Unset):  Default: 1.
+        pagelen (int | Unset):  Default: 10.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -149,6 +165,8 @@ def sync(
         client=client,
         sort=sort,
         administrator=administrator,
+        page=page,
+        pagelen=pagelen,
     ).parsed
 
 
@@ -157,6 +175,8 @@ async def asyncio_detailed(
     client: AuthenticatedClient,
     sort: str | Unset = UNSET,
     administrator: bool | Unset = UNSET,
+    page: int | Unset = 1,
+    pagelen: int | Unset = 10,
 ) -> Response[ParsedPayload]:
     r"""List workspaces for the current user
 
@@ -172,6 +192,8 @@ async def asyncio_detailed(
     Args:
         sort (str | Unset):
         administrator (bool | Unset):
+        page (int | Unset):  Default: 1.
+        pagelen (int | Unset):  Default: 10.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -184,6 +206,8 @@ async def asyncio_detailed(
     kwargs = _get_kwargs(
         sort=sort,
         administrator=administrator,
+        page=page,
+        pagelen=pagelen,
     )
 
     response = await client.get_async_httpx_client().request(**kwargs)
@@ -196,6 +220,8 @@ async def asyncio(
     client: AuthenticatedClient,
     sort: str | Unset = UNSET,
     administrator: bool | Unset = UNSET,
+    page: int | Unset = 1,
+    pagelen: int | Unset = 10,
 ) -> ParsedPayload | None:
     r"""List workspaces for the current user
 
@@ -211,6 +237,8 @@ async def asyncio(
     Args:
         sort (str | Unset):
         administrator (bool | Unset):
+        page (int | Unset):  Default: 1.
+        pagelen (int | Unset):  Default: 10.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -225,5 +253,7 @@ async def asyncio(
             client=client,
             sort=sort,
             administrator=administrator,
+            page=page,
+            pagelen=pagelen,
         )
     ).parsed

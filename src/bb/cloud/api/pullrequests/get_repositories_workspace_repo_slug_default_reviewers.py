@@ -8,7 +8,7 @@ from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.error import Error
 from ...models.paginated_accounts import PaginatedAccounts
-from ...types import Response
+from ...types import UNSET, Response, Unset
 
 __all__ = [
     "sync_detailed",
@@ -21,7 +21,18 @@ __all__ = [
 def _get_kwargs(
     workspace: str,
     repo_slug: str,
+    *,
+    page: int | Unset = 1,
+    pagelen: int | Unset = 10,
 ) -> dict[str, Any]:
+
+    params: dict[str, Any] = {}
+
+    params["page"] = page
+
+    params["pagelen"] = pagelen
+
+    params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
     _kwargs: dict[str, Any] = {
         "method": "get",
@@ -29,6 +40,7 @@ def _get_kwargs(
             workspace=quote(str(workspace), safe=""),
             repo_slug=quote(str(repo_slug), safe=""),
         ),
+        "params": params,
     }
 
     return _kwargs
@@ -69,6 +81,8 @@ def sync_detailed(
     repo_slug: str,
     *,
     client: AuthenticatedClient,
+    page: int | Unset = 1,
+    pagelen: int | Unset = 10,
 ) -> Response[ParsedPayload]:
     """List default reviewers
 
@@ -83,6 +97,8 @@ def sync_detailed(
     Args:
         workspace (str):
         repo_slug (str):
+        page (int | Unset):  Default: 1.
+        pagelen (int | Unset):  Default: 10.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -95,6 +111,8 @@ def sync_detailed(
     kwargs = _get_kwargs(
         workspace=workspace,
         repo_slug=repo_slug,
+        page=page,
+        pagelen=pagelen,
     )
 
     response = client.get_httpx_client().request(
@@ -109,6 +127,8 @@ def sync(
     repo_slug: str,
     *,
     client: AuthenticatedClient,
+    page: int | Unset = 1,
+    pagelen: int | Unset = 10,
 ) -> ParsedPayload | None:
     """List default reviewers
 
@@ -123,6 +143,8 @@ def sync(
     Args:
         workspace (str):
         repo_slug (str):
+        page (int | Unset):  Default: 1.
+        pagelen (int | Unset):  Default: 10.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -136,6 +158,8 @@ def sync(
         workspace=workspace,
         repo_slug=repo_slug,
         client=client,
+        page=page,
+        pagelen=pagelen,
     ).parsed
 
 
@@ -144,6 +168,8 @@ async def asyncio_detailed(
     repo_slug: str,
     *,
     client: AuthenticatedClient,
+    page: int | Unset = 1,
+    pagelen: int | Unset = 10,
 ) -> Response[ParsedPayload]:
     """List default reviewers
 
@@ -158,6 +184,8 @@ async def asyncio_detailed(
     Args:
         workspace (str):
         repo_slug (str):
+        page (int | Unset):  Default: 1.
+        pagelen (int | Unset):  Default: 10.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -170,6 +198,8 @@ async def asyncio_detailed(
     kwargs = _get_kwargs(
         workspace=workspace,
         repo_slug=repo_slug,
+        page=page,
+        pagelen=pagelen,
     )
 
     response = await client.get_async_httpx_client().request(**kwargs)
@@ -182,6 +212,8 @@ async def asyncio(
     repo_slug: str,
     *,
     client: AuthenticatedClient,
+    page: int | Unset = 1,
+    pagelen: int | Unset = 10,
 ) -> ParsedPayload | None:
     """List default reviewers
 
@@ -196,6 +228,8 @@ async def asyncio(
     Args:
         workspace (str):
         repo_slug (str):
+        page (int | Unset):  Default: 1.
+        pagelen (int | Unset):  Default: 10.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -210,5 +244,7 @@ async def asyncio(
             workspace=workspace,
             repo_slug=repo_slug,
             client=client,
+            page=page,
+            pagelen=pagelen,
         )
     ).parsed

@@ -26,6 +26,8 @@ def _get_kwargs(
     selected_user: str,
     *,
     state: GetWorkspacesWorkspacePullrequestsSelectedUserState | Unset = UNSET,
+    page: int | Unset = 1,
+    pagelen: int | Unset = 10,
 ) -> dict[str, Any]:
 
     params: dict[str, Any] = {}
@@ -35,6 +37,10 @@ def _get_kwargs(
         json_state = state.value
 
     params["state"] = json_state
+
+    params["page"] = page
+
+    params["pagelen"] = pagelen
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
@@ -86,6 +92,8 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     state: GetWorkspacesWorkspacePullrequestsSelectedUserState | Unset = UNSET,
+    page: int | Unset = 1,
+    pagelen: int | Unset = 10,
 ) -> Response[ParsedPayload]:
     """List workspace pull requests for a user
 
@@ -103,6 +111,8 @@ def sync_detailed(
         workspace (str):
         selected_user (str):
         state (GetWorkspacesWorkspacePullrequestsSelectedUserState | Unset):
+        page (int | Unset):  Default: 1.
+        pagelen (int | Unset):  Default: 10.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -116,6 +126,8 @@ def sync_detailed(
         workspace=workspace,
         selected_user=selected_user,
         state=state,
+        page=page,
+        pagelen=pagelen,
     )
 
     response = client.get_httpx_client().request(
@@ -131,6 +143,8 @@ def sync(
     *,
     client: AuthenticatedClient,
     state: GetWorkspacesWorkspacePullrequestsSelectedUserState | Unset = UNSET,
+    page: int | Unset = 1,
+    pagelen: int | Unset = 10,
 ) -> ParsedPayload | None:
     """List workspace pull requests for a user
 
@@ -148,6 +162,8 @@ def sync(
         workspace (str):
         selected_user (str):
         state (GetWorkspacesWorkspacePullrequestsSelectedUserState | Unset):
+        page (int | Unset):  Default: 1.
+        pagelen (int | Unset):  Default: 10.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -162,6 +178,8 @@ def sync(
         selected_user=selected_user,
         client=client,
         state=state,
+        page=page,
+        pagelen=pagelen,
     ).parsed
 
 
@@ -171,6 +189,8 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
     state: GetWorkspacesWorkspacePullrequestsSelectedUserState | Unset = UNSET,
+    page: int | Unset = 1,
+    pagelen: int | Unset = 10,
 ) -> Response[ParsedPayload]:
     """List workspace pull requests for a user
 
@@ -188,6 +208,8 @@ async def asyncio_detailed(
         workspace (str):
         selected_user (str):
         state (GetWorkspacesWorkspacePullrequestsSelectedUserState | Unset):
+        page (int | Unset):  Default: 1.
+        pagelen (int | Unset):  Default: 10.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -201,6 +223,8 @@ async def asyncio_detailed(
         workspace=workspace,
         selected_user=selected_user,
         state=state,
+        page=page,
+        pagelen=pagelen,
     )
 
     response = await client.get_async_httpx_client().request(**kwargs)
@@ -214,6 +238,8 @@ async def asyncio(
     *,
     client: AuthenticatedClient,
     state: GetWorkspacesWorkspacePullrequestsSelectedUserState | Unset = UNSET,
+    page: int | Unset = 1,
+    pagelen: int | Unset = 10,
 ) -> ParsedPayload | None:
     """List workspace pull requests for a user
 
@@ -231,6 +257,8 @@ async def asyncio(
         workspace (str):
         selected_user (str):
         state (GetWorkspacesWorkspacePullrequestsSelectedUserState | Unset):
+        page (int | Unset):  Default: 1.
+        pagelen (int | Unset):  Default: 10.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -246,5 +274,7 @@ async def asyncio(
             selected_user=selected_user,
             client=client,
             state=state,
+            page=page,
+            pagelen=pagelen,
         )
     ).parsed
