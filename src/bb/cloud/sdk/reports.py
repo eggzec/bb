@@ -15,6 +15,7 @@ from bb.cloud.api.reports import (
 from bb.cloud.api.reports import (
     get_annotation as _get_annotation,
 )
+from bb.cloud.models.error import Error
 from bb.cloud.models.report import Report
 from bb.cloud.models.report_annotation import ReportAnnotation
 from bb.cloud.sdk._auth_validation import AuthMethod, require_auth
@@ -43,7 +44,7 @@ async def list(
     commit: str,
     *,
     pagelen: int = 25,
-) -> list[Report]:
+) -> list[Report] | Error:
     """List all reports for a commit.
 
     Args:
@@ -76,22 +77,23 @@ async def list(
         `GET /2.0/repositories/{workspace}/{repo_slug}/commit/{commit}/reports
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-reports/#api-repositories-workspace-repo-slug-commit-commit-reports-get>`_
     """
-    return [
-        r
-        async for r in async_paginate(
-            get_reports_for_commit.asyncio,
-            workspace,
-            repo_slug,
-            commit,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-        if isinstance(r, Report)
-    ]
+    result = await async_paginate(
+        get_reports_for_commit.asyncio,
+        workspace,
+        repo_slug,
+        commit,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [item for item in result if isinstance(item, Report)]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def get(client: BBClient, workspace: str, repo_slug: str, commit: str, report_id: str) -> Report | None:
+async def get(client: BBClient, workspace: str, repo_slug: str, commit: str, report_id: str) -> Report | Error | None:
     """Retrieve a single report by ID.
 
     Args:
@@ -125,7 +127,9 @@ async def get(client: BBClient, workspace: str, repo_slug: str, commit: str, rep
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-reports/#api-repositories-workspace-repo-slug-commit-commit-reports-reportid-get>`_
     """
     result = await get_report.asyncio(workspace, repo_slug, commit, report_id, client=client.auth)
-    return result if isinstance(result, Report) else None
+    if isinstance(result, (Report, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -137,7 +141,7 @@ async def create_or_update(
     report_id: str,
     *,
     body: Report | Unset = UNSET,
-) -> Report | None:
+) -> Report | Error | None:
     """Create or update a report for a commit.
 
     Args:
@@ -180,7 +184,9 @@ async def create_or_update(
     result = await create_or_update_report.asyncio(
         workspace, repo_slug, commit, report_id, client=client.auth, body=body
     )
-    return result if isinstance(result, Report) else None
+    if isinstance(result, (Report, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -229,7 +235,7 @@ async def annotations(
     report_id: str,
     *,
     pagelen: int = 25,
-) -> list[ReportAnnotation]:
+) -> list[ReportAnnotation] | Error:
     """List all annotations for a report.
 
     Args:
@@ -263,19 +269,20 @@ async def annotations(
         `GET /2.0/repositories/{workspace}/{repo_slug}/commit/{commit}/reports/{reportId}/annotations
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-reports/#api-repositories-workspace-repo-slug-commit-commit-reports-reportid-annotations-get>`_
     """
-    return [
-        a
-        async for a in async_paginate(
-            get_annotations_for_report.asyncio,
-            workspace,
-            repo_slug,
-            commit,
-            report_id,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-        if isinstance(a, ReportAnnotation)
-    ]
+    result = await async_paginate(
+        get_annotations_for_report.asyncio,
+        workspace,
+        repo_slug,
+        commit,
+        report_id,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [item for item in result if isinstance(item, ReportAnnotation)]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -286,7 +293,7 @@ async def get_annotation(
     commit: str,
     report_id: str,
     annotation_id: str,
-) -> ReportAnnotation | None:
+) -> ReportAnnotation | Error | None:
     """Retrieve a single annotation by ID.
 
     Args:
@@ -326,7 +333,9 @@ async def get_annotation(
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-reports/#api-repositories-workspace-repo-slug-commit-commit-reports-reportid-annotations-annotationid-get>`_
     """
     result = await _get_annotation.asyncio(workspace, repo_slug, commit, report_id, annotation_id, client=client.auth)
-    return result if isinstance(result, ReportAnnotation) else None
+    if isinstance(result, (ReportAnnotation, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -339,7 +348,7 @@ async def create_annotation(
     annotation_id: str,
     *,
     body: ReportAnnotation | Unset = UNSET,
-) -> ReportAnnotation | None:
+) -> ReportAnnotation | Error | None:
     """Create or update an annotation on a report.
 
     Args:
@@ -385,7 +394,9 @@ async def create_annotation(
     result = await create_or_update_annotation.asyncio(
         workspace, repo_slug, commit, report_id, annotation_id, client=client.auth, body=body
     )
-    return result if isinstance(result, ReportAnnotation) else None
+    if isinstance(result, (ReportAnnotation, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -397,7 +408,7 @@ async def bulk_annotations(
     report_id: str,
     *,
     body: Unset = UNSET,
-) -> list[ReportAnnotation]:
+) -> list[ReportAnnotation] | Error:
     """Bulk create or update annotations for a report.
 
     Args:

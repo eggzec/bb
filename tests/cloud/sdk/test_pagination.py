@@ -1,4 +1,4 @@
-"""Tests for bb.cloud.sdk.pagination helpers."""
+"""Tests for bb.cloud.sdk._pagination helpers."""
 
 from __future__ import annotations
 
@@ -6,146 +6,156 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bb.cloud.sdk._pagination import async_paginate, paginate
+from bb.cloud.models.error import Error
+from bb.cloud.sdk._pagination import (
+    aiter_pages,
+    async_paginate,
+    iter_pages,
+    paginate,
+)
 from bb.cloud.types import UNSET
 
+
+def _page(values, next_=UNSET):
+    p = MagicMock()
+    p.values = values
+    p.next_ = next_
+    return p
+
+
 # ---------------------------------------------------------------------------
-# paginate (sync)
+# paginate (sync, collect → list | Error)
 # ---------------------------------------------------------------------------
 
 
-def test_paginate_single_page_yields_all_items():
-    page = MagicMock()
-    page.values = [1, 2, 3]
-    page.next_ = UNSET
-    result = list(paginate(MagicMock(return_value=page)))
-    assert result == [1, 2, 3]
+def test_paginate_single_page_collects_all_items():
+    fn = MagicMock(return_value=_page([1, 2, 3]))
+    assert paginate(fn) == [1, 2, 3]
 
 
-def test_paginate_multi_page_yields_all_items():
-    page1 = MagicMock()
-    page1.values = [1, 2]
-    page1.next_ = "https://api.bitbucket.org/2.0/next"
-    page2 = MagicMock()
-    page2.values = [3]
-    page2.next_ = UNSET
-    fn = MagicMock(side_effect=[page1, page2])
-    result = list(paginate(fn))
-    assert result == [1, 2, 3]
+def test_paginate_multi_page_collects_all_items():
+    fn = MagicMock(side_effect=[_page([1, 2], "https://next"), _page([3])])
+    assert paginate(fn) == [1, 2, 3]
     assert fn.call_count == 2
 
 
 def test_paginate_empty_values_stops_immediately():
-    page = MagicMock()
-    page.values = []
-    fn = MagicMock(return_value=page)
-    result = list(paginate(fn))
-    assert result == []
+    fn = MagicMock(return_value=_page([]))
+    assert paginate(fn) == []
     assert fn.call_count == 1
 
 
 def test_paginate_none_result_stops_immediately():
     fn = MagicMock(return_value=None)
-    result = list(paginate(fn))
-    assert result == []
+    assert paginate(fn) == []
 
 
 def test_paginate_respects_pagelen():
-    page = MagicMock()
-    page.values = ["x"]
-    page.next_ = UNSET
-    fn = MagicMock(return_value=page)
-    list(paginate(fn, pagelen=10))
+    fn = MagicMock(return_value=_page(["x"]))
+    paginate(fn, pagelen=10)
     fn.assert_called_once_with(page=1, pagelen=10)
 
 
-@pytest.mark.parametrize(
-    "n_pages",
-    [
-        pytest.param(2, id="2-pages"),
-        pytest.param(3, id="3-pages"),
-    ],
-)
+def test_paginate_returns_error_on_first_error_response():
+    err = Error(type_="error")
+    fn = MagicMock(side_effect=[_page([1], "https://next"), err])
+    assert paginate(fn) is err
+
+
+@pytest.mark.parametrize("n_pages", [2, 3])
 def test_paginate_page_number_increments(n_pages):
-    pages = []
-    for i in range(n_pages):
-        p = MagicMock()
-        p.values = [i]
-        p.next_ = "https://next" if i < n_pages - 1 else UNSET
-        pages.append(p)
+    pages = [_page([i], "https://next" if i < n_pages - 1 else UNSET) for i in range(n_pages)]
     fn = MagicMock(side_effect=pages)
-    list(paginate(fn))
-    for expected_page, call in enumerate(fn.call_args_list, start=1):
-        assert call.kwargs.get("page") == expected_page or call.args == () or True
-        # page is passed as kwarg
-        assert fn.call_args_list[expected_page - 1].kwargs["page"] == expected_page
+    paginate(fn)
+    for expected, call in enumerate(fn.call_args_list, start=1):
+        assert call.kwargs["page"] == expected
+
+
+def test_paginate_forwards_positional_and_keyword_args():
+    fn = MagicMock(return_value=_page(["x"]))
+    paginate(fn, "ws", "repo", q="foo")
+    fn.assert_called_once_with("ws", "repo", page=1, pagelen=25, q="foo")
 
 
 # ---------------------------------------------------------------------------
-# async_paginate
+# async_paginate (async, collect → list | Error)
 # ---------------------------------------------------------------------------
 
 
 async def test_async_paginate_single_page():
-    page = MagicMock()
-    page.values = ["a", "b"]
-    page.next_ = UNSET
-    fn = AsyncMock(return_value=page)
-    result = [item async for item in async_paginate(fn)]
-    assert result == ["a", "b"]
+    fn = AsyncMock(return_value=_page(["a", "b"]))
+    assert await async_paginate(fn) == ["a", "b"]
 
 
 async def test_async_paginate_multi_page():
-    page1 = MagicMock()
-    page1.values = ["x"]
-    page1.next_ = "https://next"
-    page2 = MagicMock()
-    page2.values = ["y", "z"]
-    page2.next_ = UNSET
-    fn = AsyncMock(side_effect=[page1, page2])
-    result = [item async for item in async_paginate(fn)]
-    assert result == ["x", "y", "z"]
+    fn = AsyncMock(side_effect=[_page(["x"], "https://next"), _page(["y", "z"])])
+    assert await async_paginate(fn) == ["x", "y", "z"]
     assert fn.await_count == 2
 
 
 async def test_async_paginate_empty():
-    page = MagicMock()
-    page.values = []
-    fn = AsyncMock(return_value=page)
-    result = [item async for item in async_paginate(fn)]
-    assert result == []
+    fn = AsyncMock(return_value=_page([]))
+    assert await async_paginate(fn) == []
 
 
 async def test_async_paginate_none_result_stops():
     fn = AsyncMock(return_value=None)
-    result = [item async for item in async_paginate(fn)]
-    assert result == []
+    assert await async_paginate(fn) == []
 
 
 async def test_async_paginate_respects_pagelen():
-    page = MagicMock()
-    page.values = ["a"]
-    page.next_ = UNSET
-    fn = AsyncMock(return_value=page)
-    [item async for item in async_paginate(fn, pagelen=5)]
+    fn = AsyncMock(return_value=_page(["a"]))
+    await async_paginate(fn, pagelen=5)
     fn.assert_awaited_once_with(page=1, pagelen=5)
 
 
-@pytest.mark.parametrize(
-    "n_pages",
-    [
-        pytest.param(2, id="2-pages"),
-        pytest.param(3, id="3-pages"),
-    ],
-)
+async def test_async_paginate_returns_error_on_error_response():
+    err = Error(type_="error")
+    fn = AsyncMock(return_value=err)
+    assert await async_paginate(fn) is err
+
+
+@pytest.mark.parametrize("n_pages", [2, 3])
 async def test_async_paginate_page_number_increments(n_pages):
-    pages = []
-    for i in range(n_pages):
-        p = MagicMock()
-        p.values = [i]
-        p.next_ = "https://next" if i < n_pages - 1 else UNSET
-        pages.append(p)
+    pages = [_page([i], "https://next" if i < n_pages - 1 else UNSET) for i in range(n_pages)]
     fn = AsyncMock(side_effect=pages)
-    [item async for item in async_paginate(fn)]
-    for expected_page, call in enumerate(fn.await_args_list, start=1):
-        assert call.kwargs["page"] == expected_page
+    await async_paginate(fn)
+    for expected, call in enumerate(fn.await_args_list, start=1):
+        assert call.kwargs["page"] == expected
+
+
+# ---------------------------------------------------------------------------
+# iter_pages (sync, lazy generator)
+# ---------------------------------------------------------------------------
+
+
+def test_iter_pages_yields_items_across_pages():
+    fn = MagicMock(side_effect=[_page([1, 2], "next"), _page([3])])
+    assert list(iter_pages(fn)) == [1, 2, 3]
+
+
+def test_iter_pages_stops_on_error():
+    err = Error(type_="error")
+    fn = MagicMock(side_effect=[_page([1], "next"), err])
+    assert list(iter_pages(fn)) == [1]
+
+
+def test_iter_pages_stops_on_none():
+    fn = MagicMock(return_value=None)
+    assert list(iter_pages(fn)) == []
+
+
+# ---------------------------------------------------------------------------
+# aiter_pages (async, lazy generator)
+# ---------------------------------------------------------------------------
+
+
+async def test_aiter_pages_yields_items_across_pages():
+    fn = AsyncMock(side_effect=[_page(["a"], "next"), _page(["b", "c"])])
+    assert [item async for item in aiter_pages(fn)] == ["a", "b", "c"]
+
+
+async def test_aiter_pages_stops_on_error():
+    err = Error(type_="error")
+    fn = AsyncMock(side_effect=[_page(["a"], "next"), err])
+    assert [item async for item in aiter_pages(fn)] == ["a"]

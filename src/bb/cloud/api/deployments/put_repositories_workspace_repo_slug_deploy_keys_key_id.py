@@ -42,11 +42,15 @@ type ParseResult = Any | DeployKey | Error | None
 
 def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> ParseResult:
     if response.status_code == 200:
+        if "application/json" not in response.headers.get("content-type", ""):
+            return None
         response_200 = DeployKey.from_dict(response.json())
 
         return response_200
 
     if response.status_code == 400:
+        if "application/json" not in response.headers.get("content-type", ""):
+            return None
         response_400 = Error.from_dict(response.json())
 
         return response_400
@@ -56,6 +60,8 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
         return response_403
 
     if response.status_code == 404:
+        if "application/json" not in response.headers.get("content-type", ""):
+            return None
         response_404 = Error.from_dict(response.json())
 
         return response_404

@@ -6,9 +6,16 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
+from bb.cloud.models.error import Error
+from bb.cloud.models.error_error import ErrorError
 from bb.cloud.models.workspace import Workspace
 from bb.cloud.sdk import workspaces
 from bb.cloud.sdk._errors import AuthenticationError
+
+
+def _make_error(msg: str = "not found") -> Error:
+    return Error(type_="error", error=ErrorError(message=msg))
+
 
 _API = "bb.cloud.api.workspaces"
 
@@ -108,6 +115,14 @@ async def test_my_permission_returns_permission(mock_client):
     with patch(f"{_API}.get_user_workspaces_workspace_permission.asyncio", new=AsyncMock(return_value=perm)):
         result = await workspaces.my_permission(mock_client, "ws")
     assert result is perm
+
+
+async def test_get_propagates_error(mock_client):
+    err = _make_error("workspace not found")
+    with patch(f"{_API}.get_workspaces_workspace.asyncio", new=AsyncMock(return_value=err)):
+        result = await workspaces.get(mock_client, "myws")
+    assert result is err
+    assert isinstance(result, Error)
 
 
 async def test_list_raises_on_bad_auth(bad_auth_client):

@@ -6,6 +6,7 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
+from ...models.error import Error
 from ...models.report_annotation import ReportAnnotation
 from ...types import Response
 
@@ -48,12 +49,14 @@ def _get_kwargs(
     return _kwargs
 
 
-type ParsedPayload = list[ReportAnnotation]
-type ParseResult = list[ReportAnnotation] | None
+type ParsedPayload = Error | list[ReportAnnotation]
+type ParseResult = Error | list[ReportAnnotation] | None
 
 
 def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> ParseResult:
     if response.status_code == 200:
+        if "application/json" not in response.headers.get("content-type", ""):
+            return None
         response_200 = []
         _response_200 = response.json()
         for response_200_item_data in _response_200:
@@ -62,6 +65,13 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
             response_200.append(response_200_item)
 
         return response_200
+
+    if response.status_code == 403:
+        if "application/json" not in response.headers.get("content-type", ""):
+            return None
+        response_403 = Error.from_dict(response.json())
+
+        return response_403
 
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
@@ -150,7 +160,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[list[ReportAnnotation]]
+        Response[Error | list[ReportAnnotation]]
      """
 
     kwargs = _get_kwargs(
@@ -240,7 +250,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        list[ReportAnnotation]
+        Error | list[ReportAnnotation]
      """
 
     return sync_detailed(
@@ -325,7 +335,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[list[ReportAnnotation]]
+        Response[Error | list[ReportAnnotation]]
      """
 
     kwargs = _get_kwargs(
@@ -413,7 +423,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        list[ReportAnnotation]
+        Error | list[ReportAnnotation]
      """
 
     return (

@@ -66,6 +66,7 @@ from bb.cloud.api.pipelines import (
 from bb.cloud.api.pipelines import (
     update_workspace_runner as _update_workspace_runner_api,
 )
+from bb.cloud.models.error import Error
 from bb.cloud.models.pipeline import Pipeline
 from bb.cloud.models.pipeline_known_host import PipelineKnownHost
 from bb.cloud.models.pipeline_schedule import PipelineSchedule
@@ -141,7 +142,7 @@ async def list(
     repo_slug: str,
     *,
     pagelen: int = 10,
-) -> list[Pipeline]:
+) -> list[Pipeline] | Error:
     """Return all pipelines for a repository across all pages.
 
     Paginates automatically, collecting every page into a single list. Only
@@ -175,21 +176,22 @@ async def list(
         `GET /2.0/repositories/{workspace}/{repo_slug}/pipelines
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pipelines/#api-repositories-workspace-repo-slug-pipelines-get>`_
     """
-    return [
-        p
-        async for p in async_paginate(
-            get_pipelines_for_repository.asyncio,
-            workspace,
-            repo_slug,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-        if isinstance(p, Pipeline)
-    ]
+    result = await async_paginate(
+        get_pipelines_for_repository.asyncio,
+        workspace,
+        repo_slug,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [item for item in result if isinstance(item, Pipeline)]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def get(client: BBClient, workspace: str, repo_slug: str, pipeline_uuid: str) -> Pipeline | None:
+async def get(client: BBClient, workspace: str, repo_slug: str, pipeline_uuid: str) -> Pipeline | Error | None:
     """Return a single pipeline by UUID.
 
     Args:
@@ -223,7 +225,9 @@ async def get(client: BBClient, workspace: str, repo_slug: str, pipeline_uuid: s
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pipelines/#api-repositories-workspace-repo-slug-pipelines-pipeline-uuid-get>`_
     """
     result = await get_pipeline_for_repository.asyncio(workspace, repo_slug, pipeline_uuid, client=client.auth)
-    return result if isinstance(result, Pipeline) else None
+    if isinstance(result, (Pipeline, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -233,7 +237,7 @@ async def run(
     repo_slug: str,
     *,
     body: Pipeline,
-) -> Pipeline | None:
+) -> Pipeline | Error | None:
     """Trigger a new pipeline run and return the created pipeline.
 
     Args:
@@ -269,7 +273,9 @@ async def run(
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pipelines/#api-repositories-workspace-repo-slug-pipelines-post>`_
     """
     result = await create_pipeline_for_repository.asyncio(workspace, repo_slug, client=client.auth, body=body)
-    return result if isinstance(result, Pipeline) else None
+    if isinstance(result, (Pipeline, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -320,7 +326,7 @@ async def steps(
     pipeline_uuid: str,
     *,
     pagelen: int = 25,
-) -> list[Any]:
+) -> list[Any] | Error:
     """Return all steps for a pipeline across all pages.
 
     Paginates automatically, collecting every page into a single list.
@@ -357,17 +363,19 @@ async def steps(
         `GET /2.0/repositories/{workspace}/{repo_slug}/pipelines/{pipeline_uuid}/steps
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pipelines/#api-repositories-workspace-repo-slug-pipelines-pipeline-uuid-steps-get>`_
     """
-    return [
-        s
-        async for s in async_paginate(
-            get_pipeline_steps_for_repository.asyncio,
-            workspace,
-            repo_slug,
-            pipeline_uuid,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-    ]
+    result = await async_paginate(
+        get_pipeline_steps_for_repository.asyncio,
+        workspace,
+        repo_slug,
+        pipeline_uuid,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [x for x in result]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -425,7 +433,7 @@ async def step_log(
     repo_slug: str,
     pipeline_uuid: str,
     step_uuid: str,
-) -> str | None:
+) -> str | Error | None:
     """Return the log output for a pipeline step.
 
     Args:
@@ -553,7 +561,7 @@ async def variables(
     repo_slug: str,
     *,
     pagelen: int = 25,
-) -> list[PipelineVariable]:
+) -> list[PipelineVariable] | Error:
     """Return all pipeline variables for a repository across all pages.
 
     Paginates automatically, collecting every page into a single list. Only
@@ -589,21 +597,24 @@ async def variables(
         `GET /2.0/repositories/{workspace}/{repo_slug}/pipelines/config/variables
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pipelines/#api-repositories-workspace-repo-slug-pipelines-config-variables-get>`_
     """
-    return [
-        v
-        async for v in async_paginate(
-            get_repository_pipeline_variables.asyncio,
-            workspace,
-            repo_slug,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-        if isinstance(v, PipelineVariable)
-    ]
+    result = await async_paginate(
+        get_repository_pipeline_variables.asyncio,
+        workspace,
+        repo_slug,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [item for item in result if isinstance(item, PipelineVariable)]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def get_variable(client: BBClient, workspace: str, repo_slug: str, variable_uuid: str) -> PipelineVariable | None:
+async def get_variable(
+    client: BBClient, workspace: str, repo_slug: str, variable_uuid: str
+) -> PipelineVariable | Error | None:
     """Return a single pipeline variable for a repository by UUID.
 
     Args:
@@ -638,7 +649,9 @@ async def get_variable(client: BBClient, workspace: str, repo_slug: str, variabl
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pipelines/#api-repositories-workspace-repo-slug-pipelines-config-variables-variable-uuid-get>`_
     """
     result = await get_repository_pipeline_variable.asyncio(workspace, repo_slug, variable_uuid, client=client.auth)
-    return result if isinstance(result, PipelineVariable) else None
+    if isinstance(result, (PipelineVariable, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -648,7 +661,7 @@ async def create_variable(
     repo_slug: str,
     *,
     body: PipelineVariable | Unset = UNSET,
-) -> PipelineVariable | None:
+) -> PipelineVariable | Error | None:
     """Create a pipeline variable for a repository.
 
     Args:
@@ -685,7 +698,9 @@ async def create_variable(
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pipelines/#api-repositories-workspace-repo-slug-pipelines-config-variables-post>`_
     """
     result = await create_repository_pipeline_variable.asyncio(workspace, repo_slug, client=client.auth, body=body)
-    return result if isinstance(result, PipelineVariable) else None
+    if isinstance(result, (PipelineVariable, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -696,7 +711,7 @@ async def update_variable(
     variable_uuid: str,
     *,
     body: PipelineVariable | Unset = UNSET,
-) -> PipelineVariable | None:
+) -> PipelineVariable | Error | None:
     """Update a pipeline variable for a repository.
 
     Args:
@@ -737,7 +752,9 @@ async def update_variable(
     result = await update_repository_pipeline_variable.asyncio(
         workspace, repo_slug, variable_uuid, client=client.auth, body=body
     )
-    return result if isinstance(result, PipelineVariable) else None
+    if isinstance(result, (PipelineVariable, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -787,7 +804,7 @@ async def schedules(
     repo_slug: str,
     *,
     pagelen: int = 25,
-) -> list[PipelineSchedule]:
+) -> list[PipelineSchedule] | Error:
     """Return all pipeline schedules for a repository across all pages.
 
     Paginates automatically, collecting every page into a single list. Only
@@ -823,21 +840,24 @@ async def schedules(
         `GET /2.0/repositories/{workspace}/{repo_slug}/pipelines/config/schedules
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pipelines/#api-repositories-workspace-repo-slug-pipelines-config-schedules-get>`_
     """
-    return [
-        s
-        async for s in async_paginate(
-            get_repository_pipeline_schedules.asyncio,
-            workspace,
-            repo_slug,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-        if isinstance(s, PipelineSchedule)
-    ]
+    result = await async_paginate(
+        get_repository_pipeline_schedules.asyncio,
+        workspace,
+        repo_slug,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [item for item in result if isinstance(item, PipelineSchedule)]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def get_schedule(client: BBClient, workspace: str, repo_slug: str, schedule_uuid: str) -> PipelineSchedule | None:
+async def get_schedule(
+    client: BBClient, workspace: str, repo_slug: str, schedule_uuid: str
+) -> PipelineSchedule | Error | None:
     """Return a single pipeline schedule by UUID.
 
     Args:
@@ -872,7 +892,9 @@ async def get_schedule(client: BBClient, workspace: str, repo_slug: str, schedul
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pipelines/#api-repositories-workspace-repo-slug-pipelines-config-schedules-schedule-uuid-get>`_
     """
     result = await get_repository_pipeline_schedule.asyncio(workspace, repo_slug, schedule_uuid, client=client.auth)
-    return result if isinstance(result, PipelineSchedule) else None
+    if isinstance(result, (PipelineSchedule, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -882,7 +904,7 @@ async def create_schedule(
     repo_slug: str,
     *,
     body: PipelineSchedule | Unset = UNSET,
-) -> PipelineSchedule | None:
+) -> PipelineSchedule | Error | None:
     """Create a pipeline schedule for a repository.
 
     Args:
@@ -921,7 +943,9 @@ async def create_schedule(
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pipelines/#api-repositories-workspace-repo-slug-pipelines-config-schedules-post>`_
     """
     result = await create_repository_pipeline_schedule.asyncio(workspace, repo_slug, client=client.auth, body=body)
-    return result if isinstance(result, PipelineSchedule) else None
+    if isinstance(result, (PipelineSchedule, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -932,7 +956,7 @@ async def update_schedule(
     schedule_uuid: str,
     *,
     body: PipelineSchedule | Unset = UNSET,
-) -> PipelineSchedule | None:
+) -> PipelineSchedule | Error | None:
     """Update a pipeline schedule for a repository.
 
     Args:
@@ -971,7 +995,9 @@ async def update_schedule(
     result = await update_repository_pipeline_schedule.asyncio(
         workspace, repo_slug, schedule_uuid, client=client.auth, body=body
     )
-    return result if isinstance(result, PipelineSchedule) else None
+    if isinstance(result, (PipelineSchedule, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -1021,7 +1047,7 @@ async def known_hosts(
     repo_slug: str,
     *,
     pagelen: int = 25,
-) -> list[PipelineKnownHost]:
+) -> list[PipelineKnownHost] | Error:
     """Return all known hosts for the repository's pipeline SSH configuration.
 
     Paginates automatically, collecting every page into a single list. Only
@@ -1057,23 +1083,24 @@ async def known_hosts(
         `GET /2.0/repositories/{workspace}/{repo_slug}/pipelines/config/ssh/known_hosts
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pipelines/#api-repositories-workspace-repo-slug-pipelines-config-ssh-known-hosts-get>`_
     """
-    return [
-        h
-        async for h in async_paginate(
-            get_repository_pipeline_known_hosts.asyncio,
-            workspace,
-            repo_slug,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-        if isinstance(h, PipelineKnownHost)
-    ]
+    result = await async_paginate(
+        get_repository_pipeline_known_hosts.asyncio,
+        workspace,
+        repo_slug,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [item for item in result if isinstance(item, PipelineKnownHost)]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
 async def get_known_host(
     client: BBClient, workspace: str, repo_slug: str, known_host_uuid: str
-) -> PipelineKnownHost | None:
+) -> PipelineKnownHost | Error | None:
     """Return a single known host by UUID.
 
     Args:
@@ -1108,7 +1135,9 @@ async def get_known_host(
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pipelines/#api-repositories-workspace-repo-slug-pipelines-config-ssh-known-hosts-known-host-uuid-get>`_
     """
     result = await get_repository_pipeline_known_host.asyncio(workspace, repo_slug, known_host_uuid, client=client.auth)
-    return result if isinstance(result, PipelineKnownHost) else None
+    if isinstance(result, (PipelineKnownHost, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -1118,7 +1147,7 @@ async def create_known_host(
     repo_slug: str,
     *,
     body: PipelineKnownHost | Unset = UNSET,
-) -> PipelineKnownHost | None:
+) -> PipelineKnownHost | Error | None:
     """Add a known host to the repository's pipeline SSH configuration.
 
     Args:
@@ -1155,7 +1184,9 @@ async def create_known_host(
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pipelines/#api-repositories-workspace-repo-slug-pipelines-config-ssh-known-hosts-post>`_
     """
     result = await create_repository_pipeline_known_host.asyncio(workspace, repo_slug, client=client.auth, body=body)
-    return result if isinstance(result, PipelineKnownHost) else None
+    if isinstance(result, (PipelineKnownHost, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -1166,7 +1197,7 @@ async def update_known_host(
     known_host_uuid: str,
     *,
     body: PipelineKnownHost | Unset = UNSET,
-) -> PipelineKnownHost | None:
+) -> PipelineKnownHost | Error | None:
     """Update a known host in the repository's pipeline SSH configuration.
 
     Args:
@@ -1205,7 +1236,9 @@ async def update_known_host(
     result = await update_repository_pipeline_known_host.asyncio(
         workspace, repo_slug, known_host_uuid, client=client.auth, body=body
     )
-    return result if isinstance(result, PipelineKnownHost) else None
+    if isinstance(result, (PipelineKnownHost, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -1249,7 +1282,7 @@ async def delete_known_host(client: BBClient, workspace: str, repo_slug: str, kn
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def ssh_key_pair(client: BBClient, workspace: str, repo_slug: str) -> PipelineSshKeyPair | None:
+async def ssh_key_pair(client: BBClient, workspace: str, repo_slug: str) -> PipelineSshKeyPair | Error | None:
     """Return the SSH key pair for the repository's pipeline configuration.
 
     Args:
@@ -1282,7 +1315,9 @@ async def ssh_key_pair(client: BBClient, workspace: str, repo_slug: str) -> Pipe
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pipelines/#api-repositories-workspace-repo-slug-pipelines-config-ssh-key-pair-get>`_
     """
     result = await get_repository_pipeline_ssh_key_pair.asyncio(workspace, repo_slug, client=client.auth)
-    return result if isinstance(result, PipelineSshKeyPair) else None
+    if isinstance(result, (PipelineSshKeyPair, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -1292,7 +1327,7 @@ async def update_ssh_key_pair(
     repo_slug: str,
     *,
     body: PipelineSshKeyPair | Unset = UNSET,
-) -> PipelineSshKeyPair | None:
+) -> PipelineSshKeyPair | Error | None:
     """Create or update the SSH key pair for the repository's pipeline configuration.
 
     If no key pair exists, a new one is created. If one already exists, it is
@@ -1332,7 +1367,9 @@ async def update_ssh_key_pair(
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pipelines/#api-repositories-workspace-repo-slug-pipelines-config-ssh-key-pair-put>`_
     """
     result = await update_repository_pipeline_key_pair.asyncio(workspace, repo_slug, client=client.auth, body=body)
-    return result if isinstance(result, PipelineSshKeyPair) else None
+    if isinstance(result, (PipelineSshKeyPair, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -1380,7 +1417,7 @@ async def caches(
     repo_slug: str,
     *,
     pagelen: int = 25,
-) -> list[Any]:
+) -> list[Any] | Error:
     """Return all pipeline caches for a repository across all pages.
 
     Paginates automatically, collecting every page into a single list.
@@ -1415,16 +1452,18 @@ async def caches(
         `GET /2.0/repositories/{workspace}/{repo_slug}/pipelines/config/caches
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pipelines/#api-repositories-workspace-repo-slug-pipelines-config-caches-get>`_
     """
-    return [
-        c
-        async for c in async_paginate(
-            get_repository_pipeline_caches.asyncio,
-            workspace,
-            repo_slug,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-    ]
+    result = await async_paginate(
+        get_repository_pipeline_caches.asyncio,
+        workspace,
+        repo_slug,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [x for x in result]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -1552,7 +1591,7 @@ async def workspace_variables(
     workspace: str,
     *,
     pagelen: int = 25,
-) -> list[PipelineVariable]:
+) -> list[PipelineVariable] | Error:
     """Return all pipeline variables for a workspace across all pages.
 
     Paginates automatically, collecting every page into a single list. Only
@@ -1585,20 +1624,23 @@ async def workspace_variables(
         `GET /2.0/workspaces/{workspace}/pipelines-config/variables
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pipelines/#api-workspaces-workspace-pipelines-config-variables-get>`_
     """
-    return [
-        v
-        async for v in async_paginate(
-            get_pipeline_variables_for_workspace.asyncio,
-            workspace,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-        if isinstance(v, PipelineVariable)
-    ]
+    result = await async_paginate(
+        get_pipeline_variables_for_workspace.asyncio,
+        workspace,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [item for item in result if isinstance(item, PipelineVariable)]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def get_workspace_variable(client: BBClient, workspace: str, variable_uuid: str) -> PipelineVariable | None:
+async def get_workspace_variable(
+    client: BBClient, workspace: str, variable_uuid: str
+) -> PipelineVariable | Error | None:
     """Return a single workspace pipeline variable by UUID.
 
     Args:
@@ -1631,7 +1673,9 @@ async def get_workspace_variable(client: BBClient, workspace: str, variable_uuid
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pipelines/#api-workspaces-workspace-pipelines-config-variables-variable-uuid-get>`_
     """
     result = await get_pipeline_variable_for_workspace.asyncio(workspace, variable_uuid, client=client.auth)
-    return result if isinstance(result, PipelineVariable) else None
+    if isinstance(result, (PipelineVariable, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -1640,7 +1684,7 @@ async def create_workspace_variable(
     workspace: str,
     *,
     body: PipelineVariable | Unset = UNSET,
-) -> PipelineVariable | None:
+) -> PipelineVariable | Error | None:
     """Create a pipeline variable for a workspace.
 
     Args:
@@ -1676,7 +1720,9 @@ async def create_workspace_variable(
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pipelines/#api-workspaces-workspace-pipelines-config-variables-post>`_
     """
     result = await create_pipeline_variable_for_workspace.asyncio(workspace, client=client.auth, body=body)
-    return result if isinstance(result, PipelineVariable) else None
+    if isinstance(result, (PipelineVariable, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -1686,7 +1732,7 @@ async def update_workspace_variable(
     variable_uuid: str,
     *,
     body: PipelineVariable | Unset = UNSET,
-) -> PipelineVariable | None:
+) -> PipelineVariable | Error | None:
     """Update a workspace pipeline variable.
 
     Args:
@@ -1725,7 +1771,9 @@ async def update_workspace_variable(
     result = await update_pipeline_variable_for_workspace.asyncio(
         workspace, variable_uuid, client=client.auth, body=body
     )
-    return result if isinstance(result, PipelineVariable) else None
+    if isinstance(result, (PipelineVariable, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)

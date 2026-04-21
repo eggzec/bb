@@ -93,7 +93,6 @@ from .get_pipelines_for_repository_status import GetPipelinesForRepositoryStatus
 from .get_pipelines_for_repository_target_ref_type import GetPipelinesForRepositoryTargetRefType
 from .get_pipelines_for_repository_target_selector_type import GetPipelinesForRepositoryTargetSelectorType
 from .get_pipelines_for_repository_trigger_type import GetPipelinesForRepositoryTriggerType
-from .get_repositories_role import GetRepositoriesRole
 from .get_repositories_workspace_repo_slug_forks_role import GetRepositoriesWorkspaceRepoSlugForksRole
 from .get_repositories_workspace_repo_slug_pullrequests_state import GetRepositoriesWorkspaceRepoSlugPullrequestsState
 from .get_repositories_workspace_repo_slug_src_commit_path_format import (
@@ -484,7 +483,6 @@ __all__ = (
     "GetPipelinesForRepositoryTargetRefType",
     "GetPipelinesForRepositoryTargetSelectorType",
     "GetPipelinesForRepositoryTriggerType",
-    "GetRepositoriesRole",
     "GetRepositoriesWorkspaceRepoSlugForksRole",
     "GetRepositoriesWorkspaceRepoSlugPullrequestsState",
     "GetRepositoriesWorkspaceRepoSlugSrcCommitPathFormat",

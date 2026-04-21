@@ -14,6 +14,7 @@ from bb.cloud.api.addon import (
     put_addon,
     put_addon_linkers_linker_key_values,
 )
+from bb.cloud.models.error import Error
 from bb.cloud.sdk._auth_validation import AuthMethod, require_auth
 from bb.cloud.sdk._client import BBClient
 from bb.cloud.types import UNSET, Unset
@@ -64,7 +65,7 @@ async def delete(client: BBClient) -> None:
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def update(client: BBClient, *, body: Unset = UNSET) -> Any | None:
+async def update(client: BBClient, *, body: Unset = UNSET) -> Any | Error | None:
     """Update the addon descriptor.
 
     Args:
@@ -96,7 +97,7 @@ async def update(client: BBClient, *, body: Unset = UNSET) -> Any | None:
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def linkers(client: BBClient) -> Any | None:
+async def linkers(client: BBClient) -> Any | Error | None:
     """List all addon linkers.
 
     Args:
@@ -127,7 +128,7 @@ async def linkers(client: BBClient) -> Any | None:
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def get_linker(client: BBClient, linker_key: str) -> Any | None:
+async def get_linker(client: BBClient, linker_key: str) -> Any | Error | None:
     """Fetch a specific addon linker.
 
     Args:
@@ -159,7 +160,7 @@ async def get_linker(client: BBClient, linker_key: str) -> Any | None:
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def linker_values(client: BBClient, linker_key: str) -> Any | None:
+async def linker_values(client: BBClient, linker_key: str) -> Any | Error | None:
     """List all values for an addon linker.
 
     Args:
@@ -191,7 +192,7 @@ async def linker_values(client: BBClient, linker_key: str) -> Any | None:
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def get_linker_value(client: BBClient, linker_key: str, value_id: str) -> Any | None:
+async def get_linker_value(client: BBClient, linker_key: str, value_id: str) -> Any | Error | None:
     """Fetch a specific value for an addon linker.
 
     Args:
@@ -224,7 +225,7 @@ async def get_linker_value(client: BBClient, linker_key: str, value_id: str) -> 
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def create_linker_value(client: BBClient, linker_key: str, *, body: Unset = UNSET) -> Any | None:
+async def create_linker_value(client: BBClient, linker_key: str, *, body: Unset = UNSET) -> Any | Error | None:
     """Create a new value for an addon linker.
 
     Args:
@@ -257,7 +258,7 @@ async def create_linker_value(client: BBClient, linker_key: str, *, body: Unset 
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def set_linker_values(client: BBClient, linker_key: str, *, body: Unset = UNSET) -> Any | None:
+async def set_linker_values(client: BBClient, linker_key: str, *, body: Unset = UNSET) -> Any | Error | None:
     """Set (replace) all values for an addon linker.
 
     Args:

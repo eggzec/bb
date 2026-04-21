@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 
 from bb.cloud.models.application_property import ApplicationProperty
+from bb.cloud.models.error import Error
 from bb.cloud.sdk import properties as _async
 from bb.cloud.sdk._client import BBClient
 from bb.cloud.types import UNSET, Unset
@@ -29,7 +30,7 @@ def repo_get(
     repo_slug: str,
     app_key: str,
     property_name: str,
-) -> ApplicationProperty | None:
+) -> ApplicationProperty | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.properties.repo_get`."""
     return asyncio.run(_async.repo_get(client, workspace, repo_slug, app_key, property_name))
 
@@ -65,7 +66,7 @@ def commit_get(
     commit: str,
     app_key: str,
     property_name: str,
-) -> ApplicationProperty | None:
+) -> ApplicationProperty | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.properties.commit_get`."""
     return asyncio.run(_async.commit_get(client, workspace, repo_slug, commit, app_key, property_name))
 
@@ -103,7 +104,7 @@ def pr_get(
     pull_request_id: int,
     app_key: str,
     property_name: str,
-) -> ApplicationProperty | None:
+) -> ApplicationProperty | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.properties.pr_get`."""
     return asyncio.run(_async.pr_get(client, workspace, repo_slug, pull_request_id, app_key, property_name))
 
@@ -140,7 +141,7 @@ def user_get(
     username: str,
     app_key: str,
     property_name: str,
-) -> ApplicationProperty | None:
+) -> ApplicationProperty | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.properties.user_get`."""
     return asyncio.run(_async.user_get(client, workspace, username, app_key, property_name))
 

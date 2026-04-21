@@ -6,7 +6,6 @@ from bb.cloud.api.repositories import (
     delete_repositories_workspace_repo_slug,
     delete_repositories_workspace_repo_slug_permissions_config_groups_group_slug,
     delete_repositories_workspace_repo_slug_permissions_config_users_selected_user_id,
-    get_repositories,
     get_repositories_workspace,
     get_repositories_workspace_repo_slug,
     get_repositories_workspace_repo_slug_forks,
@@ -25,6 +24,7 @@ from bb.cloud.api.repositories import (
     put_repositories_workspace_repo_slug_permissions_config_groups_group_slug,
     put_repositories_workspace_repo_slug_permissions_config_users_selected_user_id,
 )
+from bb.cloud.models.error import Error
 from bb.cloud.models.repository import Repository
 from bb.cloud.sdk._auth_validation import AuthMethod, require_auth
 from bb.cloud.sdk._client import BBClient
@@ -33,7 +33,6 @@ from bb.cloud.types import UNSET, Unset
 
 __all__ = [
     "list",
-    "list_all",
     "get",
     "create",
     "update",
@@ -64,7 +63,7 @@ async def list(
     q: str | Unset = UNSET,
     sort: str | Unset = UNSET,
     pagelen: int = 25,
-) -> list[Repository]:
+) -> list[Repository] | Error:
     """List all repositories in a workspace across all pages.
 
     Args:
@@ -75,7 +74,7 @@ async def list(
         pagelen: Number of results per page. Defaults to ``25``.
 
     Returns:
-        All repositories in the workspace across all pages.
+        All repositories in the workspace across all pages, or an :class:`~bb.cloud.models.error.Error` on failure.
 
     Raises:
         :exc:`~bb.cloud.sdk._errors.AuthenticationError`: If ``client`` uses an unrecognised or unsupported auth method.
@@ -95,79 +94,21 @@ async def list(
         `GET /2.0/repositories/{workspace}
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-repositories/#api-repositories-workspace-get>`_
     """
-    return [
-        r
-        async for r in async_paginate(
-            get_repositories_workspace.asyncio,
-            workspace,
-            client=client.auth,
-            q=q,
-            sort=sort,
-            pagelen=pagelen,
-        )
-        if isinstance(r, Repository)
-    ]
+    result = await async_paginate(
+        get_repositories_workspace.asyncio,
+        workspace,
+        client=client.auth,
+        q=q,
+        sort=sort,
+        pagelen=pagelen,
+    )
+    if isinstance(result, Error):
+        return result
+    return [r for r in result if isinstance(r, Repository)]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def list_all(
-    client: BBClient,
-    *,
-    after: str | Unset = UNSET,
-    role: str | Unset = UNSET,
-    q: str | Unset = UNSET,
-    sort: str | Unset = UNSET,
-    pagelen: int = 25,
-) -> list[Repository]:
-    """List public repositories across all of Bitbucket Cloud.
-
-    Args:
-        client: Authenticated :class:`~bb.cloud.sdk._client.BBClient` instance.
-        after: Filter repositories created after the given date string.
-        role: Filters repositories by the authenticated user's role. E.g. ``owner``,
-            ``member``, ``contributor``.
-        q: Query string to filter results. See Bitbucket filtering docs.
-        sort: Field to sort results by, prefix with ``-`` for descending.
-        pagelen: Number of results per page. Defaults to ``25``.
-
-    Returns:
-        All matching repositories across all pages.
-
-    Raises:
-        :exc:`~bb.cloud.sdk._errors.AuthenticationError`: If ``client`` uses an unrecognised or unsupported auth method.
-        :exc:`~bb.cloud.errors.UnexpectedStatus`: If the API returns an unexpected HTTP status.
-        :exc:`httpx.HTTPError`: On network-level failures.
-
-    Example:
-        ```python
-        from bb.cloud import BBClient
-        from bb.cloud.sdk import repos
-
-        client = BBClient.from_env()
-        result = await repos.list_all(client, role="owner")
-        ```
-
-    References:
-        `GET /2.0/repositories
-        <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-repositories/#api-repositories-get>`_
-    """
-    return [
-        r
-        async for r in async_paginate(
-            get_repositories.asyncio,
-            client=client.auth,
-            after=after,
-            role=role,
-            q=q,
-            sort=sort,
-            pagelen=pagelen,
-        )
-        if isinstance(r, Repository)
-    ]
-
-
-@require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def get(client: BBClient, workspace: str, repo_slug: str) -> Repository | None:
+async def get(client: BBClient, workspace: str, repo_slug: str) -> Repository | Error | None:
     """Fetch a single repository by slug.
 
     Args:
@@ -176,7 +117,7 @@ async def get(client: BBClient, workspace: str, repo_slug: str) -> Repository | 
         repo_slug: Repository slug or UUID.
 
     Returns:
-        The :class:`~bb.cloud.models.repository.Repository` object, or ``None`` if not found.
+        The :class:`~bb.cloud.models.repository.Repository` object, an :class:`~bb.cloud.models.error.Error` on API error, or ``None`` if the response is empty.
 
     Raises:
         :exc:`~bb.cloud.sdk._errors.AuthenticationError`: If ``client`` uses an unrecognised or unsupported auth method.
@@ -197,7 +138,9 @@ async def get(client: BBClient, workspace: str, repo_slug: str) -> Repository | 
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-repositories/#api-repositories-workspace-repo-slug-get>`_
     """
     result = await get_repositories_workspace_repo_slug.asyncio(workspace, repo_slug, client=client.auth)
-    return result if isinstance(result, Repository) else None
+    if isinstance(result, (Repository, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -207,7 +150,7 @@ async def create(
     repo_slug: str,
     *,
     body: Repository | Unset = UNSET,
-) -> Repository | None:
+) -> Repository | Error | None:
     """Create a new repository.
 
     Args:
@@ -217,7 +160,7 @@ async def create(
         body: Repository configuration. Use :class:`~bb.cloud.models.repository.Repository`.
 
     Returns:
-        The created :class:`~bb.cloud.models.repository.Repository`, or ``None`` on error.
+        The created :class:`~bb.cloud.models.repository.Repository`, an :class:`~bb.cloud.models.error.Error` on API error, or ``None`` if the response is empty.
 
     Raises:
         :exc:`~bb.cloud.sdk._errors.AuthenticationError`: If ``client`` uses an unrecognised or unsupported auth method.
@@ -244,7 +187,9 @@ async def create(
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-repositories/#api-repositories-workspace-repo-slug-post>`_
     """
     result = await post_repositories_workspace_repo_slug.asyncio(workspace, repo_slug, client=client.auth, body=body)
-    return result if isinstance(result, Repository) else None
+    if isinstance(result, (Repository, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -254,7 +199,7 @@ async def update(
     repo_slug: str,
     *,
     body: Repository | Unset = UNSET,
-) -> Repository | None:
+) -> Repository | Error | None:
     """Update an existing repository.
 
     Args:
@@ -264,7 +209,7 @@ async def update(
         body: Fields to update. Use :class:`~bb.cloud.models.repository.Repository`.
 
     Returns:
-        The updated :class:`~bb.cloud.models.repository.Repository`, or ``None`` on error.
+        The updated :class:`~bb.cloud.models.repository.Repository`, an :class:`~bb.cloud.models.error.Error` on API error, or ``None`` if the response is empty.
 
     Raises:
         :exc:`~bb.cloud.sdk._errors.AuthenticationError`: If ``client`` uses an unrecognised or unsupported auth method.
@@ -291,7 +236,9 @@ async def update(
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-repositories/#api-repositories-workspace-repo-slug-put>`_
     """
     result = await put_repositories_workspace_repo_slug.asyncio(workspace, repo_slug, client=client.auth, body=body)
-    return result if isinstance(result, Repository) else None
+    if isinstance(result, (Repository, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -334,7 +281,7 @@ async def fork(
     repo_slug: str,
     *,
     body: Repository | Unset = UNSET,
-) -> Repository | None:
+) -> Repository | Error | None:
     """Fork a repository.
 
     Args:
@@ -344,7 +291,7 @@ async def fork(
         body: Fork configuration. Use :class:`~bb.cloud.models.repository.Repository`.
 
     Returns:
-        The forked :class:`~bb.cloud.models.repository.Repository`, or ``None`` on error.
+        The forked :class:`~bb.cloud.models.repository.Repository`, an :class:`~bb.cloud.models.error.Error` on API error, or ``None`` if the response is empty.
 
     Raises:
         :exc:`~bb.cloud.sdk._errors.AuthenticationError`: If ``client`` uses an unrecognised or unsupported auth method.
@@ -367,11 +314,13 @@ async def fork(
     result = await post_repositories_workspace_repo_slug_forks.asyncio(
         workspace, repo_slug, client=client.auth, body=body
     )
-    return result if isinstance(result, Repository) else None
+    if isinstance(result, (Repository, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def forks(client: BBClient, workspace: str, repo_slug: str) -> list[Repository]:
+async def forks(client: BBClient, workspace: str, repo_slug: str) -> list[Repository] | Error:
     """List all forks of a repository.
 
     Args:
@@ -380,7 +329,7 @@ async def forks(client: BBClient, workspace: str, repo_slug: str) -> list[Reposi
         repo_slug: Repository slug or UUID.
 
     Returns:
-        All forks of the repository across all pages.
+        All forks of the repository across all pages, or an :class:`~bb.cloud.models.error.Error` on failure.
 
     Raises:
         :exc:`~bb.cloud.sdk._errors.AuthenticationError`: If ``client`` uses an unrecognised or unsupported auth method.
@@ -400,20 +349,19 @@ async def forks(client: BBClient, workspace: str, repo_slug: str) -> list[Reposi
         `GET /2.0/repositories/{workspace}/{repo_slug}/forks
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-repositories/#api-repositories-workspace-repo-slug-forks-get>`_
     """
-    return [
-        r
-        async for r in async_paginate(
-            get_repositories_workspace_repo_slug_forks.asyncio,
-            workspace,
-            repo_slug,
-            client=client.auth,
-        )
-        if isinstance(r, Repository)
-    ]
+    result = await async_paginate(
+        get_repositories_workspace_repo_slug_forks.asyncio,
+        workspace,
+        repo_slug,
+        client=client.auth,
+    )
+    if isinstance(result, Error):
+        return result
+    return [r for r in result if isinstance(r, Repository)]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def watchers(client: BBClient, workspace: str, repo_slug: str) -> list[Repository]:
+async def watchers(client: BBClient, workspace: str, repo_slug: str) -> list[Repository] | Error:
     """List all accounts watching a repository.
 
     Args:
@@ -422,7 +370,7 @@ async def watchers(client: BBClient, workspace: str, repo_slug: str) -> list[Rep
         repo_slug: Repository slug or UUID.
 
     Returns:
-        All accounts watching the repository across all pages.
+        All accounts watching the repository across all pages, or an :class:`~bb.cloud.models.error.Error` on failure.
 
     Raises:
         :exc:`~bb.cloud.sdk._errors.AuthenticationError`: If ``client`` uses an unrecognised or unsupported auth method.
@@ -442,16 +390,15 @@ async def watchers(client: BBClient, workspace: str, repo_slug: str) -> list[Rep
         `GET /2.0/repositories/{workspace}/{repo_slug}/watchers
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-repositories/#api-repositories-workspace-repo-slug-watchers-get>`_
     """
-    return [
-        r
-        async for r in async_paginate(
-            get_repositories_workspace_repo_slug_watchers.asyncio,
-            workspace,
-            repo_slug,
-            client=client.auth,
-        )
-        if isinstance(r, Repository)
-    ]
+    result = await async_paginate(
+        get_repositories_workspace_repo_slug_watchers.asyncio,
+        workspace,
+        repo_slug,
+        client=client.auth,
+    )
+    if isinstance(result, Error):
+        return result
+    return [r for r in result if isinstance(r, Repository)]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -530,7 +477,9 @@ async def update_override_settings(
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def group_permissions(client: BBClient, workspace: str, repo_slug: str, *, pagelen: int = 25) -> list[Any]:
+async def group_permissions(
+    client: BBClient, workspace: str, repo_slug: str, *, pagelen: int = 25
+) -> list[Any] | Error:
     """List all group permission configurations for a repository.
 
     Args:
@@ -540,7 +489,7 @@ async def group_permissions(client: BBClient, workspace: str, repo_slug: str, *,
         pagelen: Number of results per page. Defaults to ``25``.
 
     Returns:
-        All group permission entries across all pages.
+        All group permission entries across all pages, or an :class:`~bb.cloud.models.error.Error` on failure.
 
     Raises:
         :exc:`~bb.cloud.sdk._errors.AuthenticationError`: If ``client`` uses an unrecognised or unsupported auth method.
@@ -560,16 +509,16 @@ async def group_permissions(client: BBClient, workspace: str, repo_slug: str, *,
         `GET /2.0/repositories/{workspace}/{repo_slug}/permissions-config/groups
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-repositories/#api-repositories-workspace-repo-slug-permissions-config-groups-get>`_
     """
-    return [
-        p
-        async for p in async_paginate(
-            get_repositories_workspace_repo_slug_permissions_config_groups.asyncio,
-            workspace,
-            repo_slug,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-    ]
+    result = await async_paginate(
+        get_repositories_workspace_repo_slug_permissions_config_groups.asyncio,
+        workspace,
+        repo_slug,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+    if isinstance(result, Error):
+        return result
+    return [x for x in result]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -690,7 +639,7 @@ async def delete_group_permission(client: BBClient, workspace: str, repo_slug: s
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def user_permissions(client: BBClient, workspace: str, repo_slug: str, *, pagelen: int = 25) -> list[Any]:
+async def user_permissions(client: BBClient, workspace: str, repo_slug: str, *, pagelen: int = 25) -> list[Any] | Error:
     """List all user permission configurations for a repository.
 
     Args:
@@ -700,7 +649,7 @@ async def user_permissions(client: BBClient, workspace: str, repo_slug: str, *, 
         pagelen: Number of results per page. Defaults to ``25``.
 
     Returns:
-        All user permission entries across all pages.
+        All user permission entries across all pages, or an :class:`~bb.cloud.models.error.Error` on failure.
 
     Raises:
         :exc:`~bb.cloud.sdk._errors.AuthenticationError`: If ``client`` uses an unrecognised or unsupported auth method.
@@ -720,16 +669,16 @@ async def user_permissions(client: BBClient, workspace: str, repo_slug: str, *, 
         `GET /2.0/repositories/{workspace}/{repo_slug}/permissions-config/users
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-repositories/#api-repositories-workspace-repo-slug-permissions-config-users-get>`_
     """
-    return [
-        p
-        async for p in async_paginate(
-            get_repositories_workspace_repo_slug_permissions_config_users.asyncio,
-            workspace,
-            repo_slug,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-    ]
+    result = await async_paginate(
+        get_repositories_workspace_repo_slug_permissions_config_users.asyncio,
+        workspace,
+        repo_slug,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+    if isinstance(result, Error):
+        return result
+    return [x for x in result]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -856,7 +805,7 @@ async def delete_user_permission(client: BBClient, workspace: str, repo_slug: st
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def my_permissions(client: BBClient, *, pagelen: int = 25) -> list[Any]:
+async def my_permissions(client: BBClient, *, pagelen: int = 25) -> list[Any] | Error:
     """List the current user's permissions across all accessible repositories.
 
     Args:
@@ -864,7 +813,7 @@ async def my_permissions(client: BBClient, *, pagelen: int = 25) -> list[Any]:
         pagelen: Number of results per page. Defaults to ``25``.
 
     Returns:
-        All repository permission entries for the current user across all pages.
+        All repository permission entries for the current user across all pages, or an :class:`~bb.cloud.models.error.Error` on failure.
 
     Raises:
         :exc:`~bb.cloud.sdk._errors.AuthenticationError`: If ``client`` uses an unrecognised or unsupported auth method.
@@ -884,18 +833,18 @@ async def my_permissions(client: BBClient, *, pagelen: int = 25) -> list[Any]:
         `GET /2.0/user/permissions/repositories
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-repositories/#api-user-permissions-repositories-get>`_
     """
-    return [
-        p
-        async for p in async_paginate(
-            get_user_permissions_repositories.asyncio,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-    ]
+    result = await async_paginate(
+        get_user_permissions_repositories.asyncio,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+    if isinstance(result, Error):
+        return result
+    return [x for x in result]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def workspace_user_permissions(client: BBClient, workspace: str, *, pagelen: int = 25) -> list[Any]:
+async def workspace_user_permissions(client: BBClient, workspace: str, *, pagelen: int = 25) -> list[Any] | Error:
     """List the current user's repository permissions within a workspace.
 
     Args:
@@ -904,7 +853,7 @@ async def workspace_user_permissions(client: BBClient, workspace: str, *, pagele
         pagelen: Number of results per page. Defaults to ``25``.
 
     Returns:
-        All repository permission entries for the current user in the workspace across all pages.
+        All repository permission entries for the current user in the workspace across all pages, or an :class:`~bb.cloud.models.error.Error` on failure.
 
     Raises:
         :exc:`~bb.cloud.sdk._errors.AuthenticationError`: If ``client`` uses an unrecognised or unsupported auth method.
@@ -924,12 +873,12 @@ async def workspace_user_permissions(client: BBClient, workspace: str, *, pagele
         `GET /2.0/user/workspaces/{workspace}/permissions/repositories
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-repositories/#api-user-workspaces-workspace-permissions-repositories-get>`_
     """
-    return [
-        p
-        async for p in async_paginate(
-            get_user_workspaces_workspace_permissions_repositories.asyncio,
-            workspace,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-    ]
+    result = await async_paginate(
+        get_user_workspaces_workspace_permissions_repositories.asyncio,
+        workspace,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+    if isinstance(result, Error):
+        return result
+    return [x for x in result]

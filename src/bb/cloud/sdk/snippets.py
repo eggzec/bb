@@ -29,6 +29,7 @@ from bb.cloud.api.snippets import (
     put_snippets_workspace_encoded_id_node_id,
     put_snippets_workspace_encoded_id_watch,
 )
+from bb.cloud.models.error import Error
 from bb.cloud.models.snippet import Snippet
 from bb.cloud.models.snippet_comment import SnippetComment
 from bb.cloud.models.snippet_commit import SnippetCommit
@@ -72,7 +73,7 @@ async def list(
     workspace: str,
     *,
     pagelen: int = 25,
-) -> list[Snippet]:
+) -> list[Snippet] | Error:
     """Return all snippets in a workspace across all pages.
 
     Args:
@@ -101,20 +102,21 @@ async def list(
         `GET /2.0/snippets/{workspace}
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-snippets/#api-snippets-workspace-get>`_
     """
-    return [
-        s
-        async for s in async_paginate(
-            get_snippets_workspace.asyncio,
-            workspace,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-        if isinstance(s, Snippet)
-    ]
+    result = await async_paginate(
+        get_snippets_workspace.asyncio,
+        workspace,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [item for item in result if isinstance(item, Snippet)]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def get(client: BBClient, workspace: str, encoded_id: str) -> Snippet | None:
+async def get(client: BBClient, workspace: str, encoded_id: str) -> Snippet | Error | None:
     """Return a single snippet by encoded ID, or ``None`` if not found.
 
     Args:
@@ -145,7 +147,9 @@ async def get(client: BBClient, workspace: str, encoded_id: str) -> Snippet | No
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-snippets/#api-snippets-workspace-encoded-id-get>`_
     """
     result = await get_snippets_workspace_encoded_id.asyncio(workspace, encoded_id, client=client.auth)
-    return result if isinstance(result, Snippet) else None
+    if isinstance(result, (Snippet, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -154,7 +158,7 @@ async def create(
     workspace: str,
     *,
     body: Snippet | Unset = UNSET,
-) -> Snippet | None:
+) -> Snippet | Error | None:
     """Create a snippet in a workspace and return the created object.
 
     Args:
@@ -188,7 +192,9 @@ async def create(
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-snippets/#api-snippets-workspace-post>`_
     """
     result = await post_snippets_workspace.asyncio(workspace, client=client.auth, body=body)
-    return result if isinstance(result, Snippet) else None
+    if isinstance(result, (Snippet, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -198,7 +204,7 @@ async def update(
     encoded_id: str,
     *,
     body: Snippet | Unset = UNSET,
-) -> Snippet | None:
+) -> Snippet | Error | None:
     """Update a snippet and return the updated object.
 
     Args:
@@ -234,7 +240,9 @@ async def update(
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-snippets/#api-snippets-workspace-encoded-id-put>`_
     """
     result = await put_snippets_workspace_encoded_id.asyncio(workspace, encoded_id, client=client.auth, body=body)
-    return result if isinstance(result, Snippet) else None
+    if isinstance(result, (Snippet, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -271,7 +279,9 @@ async def delete(client: BBClient, workspace: str, encoded_id: str) -> None:
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def comments(client: BBClient, workspace: str, encoded_id: str, *, pagelen: int = 25) -> list[SnippetComment]:
+async def comments(
+    client: BBClient, workspace: str, encoded_id: str, *, pagelen: int = 25
+) -> list[SnippetComment] | Error:
     """Return all comments on a snippet across all pages.
 
     Args:
@@ -302,17 +312,18 @@ async def comments(client: BBClient, workspace: str, encoded_id: str, *, pagelen
         `GET /2.0/snippets/{workspace}/{encoded_id}/comments
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-snippets/#api-snippets-workspace-encoded-id-comments-get>`_
     """
-    return [
-        c
-        async for c in async_paginate(
-            get_snippets_workspace_encoded_id_comments.asyncio,
-            workspace,
-            encoded_id,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-        if isinstance(c, SnippetComment)
-    ]
+    result = await async_paginate(
+        get_snippets_workspace_encoded_id_comments.asyncio,
+        workspace,
+        encoded_id,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [item for item in result if isinstance(item, SnippetComment)]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -322,7 +333,7 @@ async def add_comment(
     encoded_id: str,
     *,
     body: SnippetComment | Unset = UNSET,
-) -> SnippetComment | None:
+) -> SnippetComment | Error | None:
     """Add a comment to a snippet and return the created comment.
 
     Args:
@@ -360,11 +371,15 @@ async def add_comment(
     result = await post_snippets_workspace_encoded_id_comments.asyncio(
         workspace, encoded_id, client=client.auth, body=body
     )
-    return result if isinstance(result, SnippetComment) else None
+    if isinstance(result, (SnippetComment, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def commits(client: BBClient, workspace: str, encoded_id: str, *, pagelen: int = 25) -> list[SnippetCommit]:
+async def commits(
+    client: BBClient, workspace: str, encoded_id: str, *, pagelen: int = 25
+) -> list[SnippetCommit] | Error:
     """Return all commits for a snippet across all pages.
 
     Args:
@@ -395,17 +410,18 @@ async def commits(client: BBClient, workspace: str, encoded_id: str, *, pagelen:
         `GET /2.0/snippets/{workspace}/{encoded_id}/commits
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-snippets/#api-snippets-workspace-encoded-id-commits-get>`_
     """
-    return [
-        c
-        async for c in async_paginate(
-            get_snippets_workspace_encoded_id_commits.asyncio,
-            workspace,
-            encoded_id,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-        if isinstance(c, SnippetCommit)
-    ]
+    result = await async_paginate(
+        get_snippets_workspace_encoded_id_commits.asyncio,
+        workspace,
+        encoded_id,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [item for item in result if isinstance(item, SnippetCommit)]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -475,7 +491,7 @@ async def unwatch(client: BBClient, workspace: str, encoded_id: str) -> None:
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def watchers(client: BBClient, workspace: str, encoded_id: str, *, pagelen: int = 25) -> list[Any]:
+async def watchers(client: BBClient, workspace: str, encoded_id: str, *, pagelen: int = 25) -> list[Any] | Error:
     """Return all accounts watching a snippet across all pages.
 
     Args:
@@ -505,20 +521,22 @@ async def watchers(client: BBClient, workspace: str, encoded_id: str, *, pagelen
         `GET /2.0/snippets/{workspace}/{encoded_id}/watchers
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-snippets/#api-snippets-workspace-encoded-id-watchers-get>`_
     """
-    return [
-        w
-        async for w in async_paginate(
-            get_snippets_workspace_encoded_id_watchers.asyncio,
-            workspace,
-            encoded_id,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-    ]
+    result = await async_paginate(
+        get_snippets_workspace_encoded_id_watchers.asyncio,
+        workspace,
+        encoded_id,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [x for x in result]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def get_file(client: BBClient, workspace: str, encoded_id: str, path: str) -> str | None:
+async def get_file(client: BBClient, workspace: str, encoded_id: str, path: str) -> str | Error | None:
     """Return the contents of a file within a snippet.
 
     Args:
@@ -554,7 +572,7 @@ async def get_file(client: BBClient, workspace: str, encoded_id: str, path: str)
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def list_all(client: BBClient, *, pagelen: int = 25) -> list[Snippet]:
+async def list_all(client: BBClient, *, pagelen: int = 25) -> list[Snippet] | Error:
     """Return all public snippets across Bitbucket Cloud.
 
     Args:
@@ -582,19 +600,20 @@ async def list_all(client: BBClient, *, pagelen: int = 25) -> list[Snippet]:
         `GET /2.0/snippets
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-snippets/#api-snippets-get>`_
     """
-    return [
-        s
-        async for s in async_paginate(
-            get_snippets.asyncio,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-        if isinstance(s, Snippet)
-    ]
+    result = await async_paginate(
+        get_snippets.asyncio,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [item for item in result if isinstance(item, Snippet)]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def create_default(client: BBClient, *, body: Snippet | Unset = UNSET) -> Snippet | None:
+async def create_default(client: BBClient, *, body: Snippet | Unset = UNSET) -> Snippet | Error | None:
     """Create a snippet under the authenticated user's default workspace.
 
     Args:
@@ -625,11 +644,15 @@ async def create_default(client: BBClient, *, body: Snippet | Unset = UNSET) -> 
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-snippets/#api-snippets-post>`_
     """
     result = await post_snippets.asyncio(client=client.auth, body=body)
-    return result if isinstance(result, Snippet) else None
+    if isinstance(result, (Snippet, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def get_comment(client: BBClient, workspace: str, encoded_id: str, comment_id: int) -> SnippetComment | None:
+async def get_comment(
+    client: BBClient, workspace: str, encoded_id: str, comment_id: int
+) -> SnippetComment | Error | None:
     """Return a single comment on a snippet, or ``None`` if not found.
 
     Args:
@@ -665,7 +688,9 @@ async def get_comment(client: BBClient, workspace: str, encoded_id: str, comment
     result = await get_snippets_workspace_encoded_id_comments_comment_id.asyncio(
         workspace, encoded_id, comment_id, client=client.auth
     )
-    return result if isinstance(result, SnippetComment) else None
+    if isinstance(result, (SnippetComment, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -676,7 +701,7 @@ async def update_comment(
     comment_id: int,
     *,
     body: SnippetComment | Unset = UNSET,
-) -> SnippetComment | None:
+) -> SnippetComment | Error | None:
     """Update a comment on a snippet.
 
     Args:
@@ -715,7 +740,9 @@ async def update_comment(
     result = await put_snippets_workspace_encoded_id_comments_comment_id.asyncio(
         workspace, encoded_id, comment_id, client=client.auth, body=body
     )
-    return result if isinstance(result, SnippetComment) else None
+    if isinstance(result, (SnippetComment, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -757,7 +784,7 @@ async def delete_comment(client: BBClient, workspace: str, encoded_id: str, comm
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def watching(client: BBClient, workspace: str, encoded_id: str) -> Any | None:
+async def watching(client: BBClient, workspace: str, encoded_id: str) -> Any | Error | None:
     """Return the current user's watch status for a snippet.
 
     Args:
@@ -791,7 +818,7 @@ async def watching(client: BBClient, workspace: str, encoded_id: str) -> Any | N
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def get_commit(client: BBClient, workspace: str, encoded_id: str, revision: str) -> SnippetCommit | None:
+async def get_commit(client: BBClient, workspace: str, encoded_id: str, revision: str) -> SnippetCommit | Error | None:
     """Return a single commit in a snippet's history, or ``None`` if not found.
 
     Args:
@@ -827,11 +854,13 @@ async def get_commit(client: BBClient, workspace: str, encoded_id: str, revision
     result = await get_snippets_workspace_encoded_id_commits_revision.asyncio(
         workspace, encoded_id, revision, client=client.auth
     )
-    return result if isinstance(result, SnippetCommit) else None
+    if isinstance(result, (SnippetCommit, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def get_node(client: BBClient, workspace: str, encoded_id: str, node_id: str) -> Any | None:
+async def get_node(client: BBClient, workspace: str, encoded_id: str, node_id: str) -> Any | Error | None:
     """Return a snippet at a specific node (commit) in its history.
 
     Args:
@@ -875,7 +904,7 @@ async def update_node(
     node_id: str,
     *,
     body: Snippet | Unset = UNSET,
-) -> Any | None:
+) -> Any | Error | None:
     """Update a snippet at a specific node.
 
     Args:
@@ -953,7 +982,9 @@ async def delete_node(client: BBClient, workspace: str, encoded_id: str, node_id
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def get_node_file(client: BBClient, workspace: str, encoded_id: str, node_id: str, path: str) -> Any | None:
+async def get_node_file(
+    client: BBClient, workspace: str, encoded_id: str, node_id: str, path: str
+) -> Any | Error | None:
     """Return a file from a snippet at a specific node.
 
     Args:
@@ -992,7 +1023,7 @@ async def get_node_file(client: BBClient, workspace: str, encoded_id: str, node_
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def diff(client: BBClient, workspace: str, encoded_id: str, revision: str) -> str | None:
+async def diff(client: BBClient, workspace: str, encoded_id: str, revision: str) -> str | Error | None:
     """Return the diff for a snippet at a specific revision.
 
     Args:
@@ -1030,7 +1061,7 @@ async def diff(client: BBClient, workspace: str, encoded_id: str, revision: str)
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def patch(client: BBClient, workspace: str, encoded_id: str, revision: str) -> str | None:
+async def patch(client: BBClient, workspace: str, encoded_id: str, revision: str) -> str | Error | None:
     """Return the patch for a snippet at a specific revision.
 
     Args:

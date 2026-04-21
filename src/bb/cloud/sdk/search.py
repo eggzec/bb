@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from bb.cloud.api.search import search_account, search_team, search_workspace
+from bb.cloud.models.error import Error
 from bb.cloud.models.search_code_search_result import SearchCodeSearchResult
 from bb.cloud.sdk._auth_validation import AuthMethod, require_auth
 from bb.cloud.sdk._client import BBClient
@@ -18,7 +19,7 @@ async def code(
     query: str,
     search_query: str | Unset = UNSET,
     pagelen: int = 10,
-) -> list[SearchCodeSearchResult]:
+) -> list[SearchCodeSearchResult] | Error:
     """Search for code in a workspace.
 
     Args:
@@ -52,17 +53,18 @@ async def code(
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-search/>`_
     """
     effective_query = search_query if not isinstance(search_query, type(UNSET)) else query
-    return [
-        r
-        async for r in async_paginate(
-            search_workspace.asyncio,
-            workspace,
-            client=client.auth,
-            search_query=effective_query,
-            pagelen=pagelen,
-        )
-        if isinstance(r, SearchCodeSearchResult)
-    ]
+    result = await async_paginate(
+        search_workspace.asyncio,
+        workspace,
+        client=client.auth,
+        search_query=effective_query,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [item for item in result if isinstance(item, SearchCodeSearchResult)]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -72,7 +74,7 @@ async def account(
     *,
     search_query: str,
     pagelen: int = 10,
-) -> list[SearchCodeSearchResult]:
+) -> list[SearchCodeSearchResult] | Error:
     """Search for code in a user account.
 
     Warning:
@@ -109,17 +111,18 @@ async def account(
         `GET /2.0/users/{selected_user}/search/code
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-search/>`_
     """
-    return [
-        r
-        async for r in async_paginate(
-            search_account.asyncio,
-            selected_user,
-            client=client.auth,
-            search_query=search_query,
-            pagelen=pagelen,
-        )
-        if isinstance(r, SearchCodeSearchResult)
-    ]
+    result = await async_paginate(
+        search_account.asyncio,
+        selected_user,
+        client=client.auth,
+        search_query=search_query,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [item for item in result if isinstance(item, SearchCodeSearchResult)]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -129,7 +132,7 @@ async def team(
     *,
     search_query: str,
     pagelen: int = 10,
-) -> list[SearchCodeSearchResult]:
+) -> list[SearchCodeSearchResult] | Error:
     """Search for code in a team.
 
     Warning:
@@ -166,14 +169,15 @@ async def team(
         `GET /2.0/teams/{username}/search/code
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-search/>`_
     """
-    return [
-        r
-        async for r in async_paginate(
-            search_team.asyncio,
-            username,
-            client=client.auth,
-            search_query=search_query,
-            pagelen=pagelen,
-        )
-        if isinstance(r, SearchCodeSearchResult)
-    ]
+    result = await async_paginate(
+        search_team.asyncio,
+        username,
+        client=client.auth,
+        search_query=search_query,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [item for item in result if isinstance(item, SearchCodeSearchResult)]

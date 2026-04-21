@@ -9,7 +9,6 @@ import pytest
 from bb.cloud.models.account import Account
 from bb.cloud.models.gpg_account_key import GPGAccountKey as GpgAccountKey
 from bb.cloud.models.ssh_account_key import SshAccountKey
-from bb.cloud.models.user import User
 from bb.cloud.sdk import users
 from bb.cloud.sdk._errors import AuthenticationError
 
@@ -19,10 +18,10 @@ _GPG = "bb.cloud.api.gpg"
 
 
 async def test_me_returns_user(mock_client):
-    user = MagicMock(spec=User)
-    with patch(f"{_USERS}.get_user.asyncio", new=AsyncMock(return_value=user)):
+    account = MagicMock(spec=Account)
+    with patch(f"{_USERS}.get_user.asyncio", new=AsyncMock(return_value=account)):
         result = await users.me(mock_client)
-    assert result is user
+    assert result is account
 
 
 async def test_me_returns_none(mock_client):

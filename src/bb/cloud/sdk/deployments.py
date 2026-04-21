@@ -25,6 +25,7 @@ from bb.cloud.api.pipelines import (
 from bb.cloud.models.deploy_key import DeployKey
 from bb.cloud.models.deployment import Deployment
 from bb.cloud.models.deployment_environment import DeploymentEnvironment
+from bb.cloud.models.error import Error
 from bb.cloud.sdk._auth_validation import AuthMethod, require_auth
 from bb.cloud.sdk._client import BBClient
 from bb.cloud.sdk._pagination import async_paginate
@@ -57,7 +58,7 @@ async def list(
     repo_slug: str,
     *,
     pagelen: int = 25,
-) -> list[Deployment]:
+) -> list[Deployment] | Error:
     """Return all deployments for a repository.
 
     Args:
@@ -87,21 +88,22 @@ async def list(
         `GET /2.0/repositories/{workspace}/{repo_slug}/deployments
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-deployments/#api-repositories-workspace-repo-slug-deployments-get>`_
     """
-    return [
-        d
-        async for d in async_paginate(
-            get_deployments_for_repository.asyncio,
-            workspace,
-            repo_slug,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-        if isinstance(d, Deployment)
-    ]
+    result = await async_paginate(
+        get_deployments_for_repository.asyncio,
+        workspace,
+        repo_slug,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [item for item in result if isinstance(item, Deployment)]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def get(client: BBClient, workspace: str, repo_slug: str, deployment_uuid: str) -> Deployment | None:
+async def get(client: BBClient, workspace: str, repo_slug: str, deployment_uuid: str) -> Deployment | Error | None:
     """Return a single deployment by UUID.
 
     Args:
@@ -135,7 +137,9 @@ async def get(client: BBClient, workspace: str, repo_slug: str, deployment_uuid:
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-deployments/#api-repositories-workspace-repo-slug-deployments-deployment-uuid-get>`_
     """
     result = await get_deployment_for_repository.asyncio(workspace, repo_slug, deployment_uuid, client=client.auth)
-    return result if isinstance(result, Deployment) else None
+    if isinstance(result, (Deployment, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -145,7 +149,7 @@ async def envs(
     repo_slug: str,
     *,
     pagelen: int = 25,
-) -> list[DeploymentEnvironment]:
+) -> list[DeploymentEnvironment] | Error:
     """Return all deployment environments for a repository.
 
     Args:
@@ -175,23 +179,24 @@ async def envs(
         `GET /2.0/repositories/{workspace}/{repo_slug}/environments
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-deployments/#api-repositories-workspace-repo-slug-environments-get>`_
     """
-    return [
-        e
-        async for e in async_paginate(
-            get_environments_for_repository.asyncio,
-            workspace,
-            repo_slug,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-        if isinstance(e, DeploymentEnvironment)
-    ]
+    result = await async_paginate(
+        get_environments_for_repository.asyncio,
+        workspace,
+        repo_slug,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [item for item in result if isinstance(item, DeploymentEnvironment)]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
 async def get_env(
     client: BBClient, workspace: str, repo_slug: str, environment_uuid: str
-) -> DeploymentEnvironment | None:
+) -> DeploymentEnvironment | Error | None:
     """Return a single deployment environment by UUID.
 
     Args:
@@ -226,7 +231,9 @@ async def get_env(
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-deployments/#api-repositories-workspace-repo-slug-environments-environment-uuid-get>`_
     """
     result = await get_environment_for_repository.asyncio(workspace, repo_slug, environment_uuid, client=client.auth)
-    return result if isinstance(result, DeploymentEnvironment) else None
+    if isinstance(result, (DeploymentEnvironment, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -236,7 +243,7 @@ async def create_env(
     repo_slug: str,
     *,
     body: DeploymentEnvironment | Unset = UNSET,
-) -> DeploymentEnvironment | None:
+) -> DeploymentEnvironment | Error | None:
     """Create a deployment environment for a repository.
 
     Args:
@@ -272,7 +279,9 @@ async def create_env(
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-deployments/#api-repositories-workspace-repo-slug-environments-post>`_
     """
     result = await create_environment.asyncio(workspace, repo_slug, client=client.auth, body=body)
-    return result if isinstance(result, DeploymentEnvironment) else None
+    if isinstance(result, (DeploymentEnvironment, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -283,7 +292,7 @@ async def update_env(
     environment_uuid: str,
     *,
     body: DeploymentEnvironment | Unset = UNSET,
-) -> DeploymentEnvironment | None:
+) -> DeploymentEnvironment | Error | None:
     """Update a deployment environment.
 
     Args:
@@ -323,7 +332,9 @@ async def update_env(
     result = await update_environment_for_repository.asyncio(
         workspace, repo_slug, environment_uuid, client=client.auth, body=body
     )
-    return result if isinstance(result, DeploymentEnvironment) else None
+    if isinstance(result, (DeploymentEnvironment, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -370,7 +381,7 @@ async def deploy_keys(
     repo_slug: str,
     *,
     pagelen: int = 25,
-) -> list[Any]:
+) -> list[Any] | Error:
     """Return all deploy keys for a repository.
 
     Args:
@@ -400,17 +411,18 @@ async def deploy_keys(
         `GET /2.0/repositories/{workspace}/{repo_slug}/deploy-keys
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-deployments/#api-repositories-workspace-repo-slug-deploy-keys-get>`_
     """
-    return [
-        k
-        async for k in async_paginate(
-            get_repositories_workspace_repo_slug_deploy_keys.asyncio,
-            workspace,
-            repo_slug,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-        if isinstance(k, DeployKey)
-    ]
+    result = await async_paginate(
+        get_repositories_workspace_repo_slug_deploy_keys.asyncio,
+        workspace,
+        repo_slug,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [item for item in result if isinstance(item, DeployKey)]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -449,7 +461,9 @@ async def get_deploy_key(client: BBClient, workspace: str, repo_slug: str, key_i
     result = await get_repositories_workspace_repo_slug_deploy_keys_key_id.asyncio(
         workspace, repo_slug, key_id, client=client.auth
     )
-    return result if isinstance(result, DeployKey) else None
+    if isinstance(result, (DeployKey, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -495,7 +509,9 @@ async def create_deploy_key(
     result = await post_repositories_workspace_repo_slug_deploy_keys.asyncio(
         workspace, repo_slug, client=client.auth, body=body
     )
-    return result if isinstance(result, DeployKey) else None
+    if isinstance(result, (DeployKey, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -543,7 +559,9 @@ async def update_deploy_key(
     result = await put_repositories_workspace_repo_slug_deploy_keys_key_id.asyncio(
         workspace, repo_slug, key_id, client=client.auth, body=body
     )
-    return result if isinstance(result, DeployKey) else None
+    if isinstance(result, (DeployKey, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -595,7 +613,7 @@ async def env_variables(
     environment_uuid: str,
     *,
     pagelen: int = 25,
-) -> list[Any]:
+) -> list[Any] | Error:
     """Return all variables for a deployment environment.
 
     Args:
@@ -629,17 +647,19 @@ async def env_variables(
         `GET /2.0/repositories/{workspace}/{repo_slug}/deployments_config/environments/{environment_uuid}/variables
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pipelines/#api-repositories-workspace-repo-slug-deployments-config-environments-environment-uuid-variables-get>`_
     """
-    return [
-        v
-        async for v in async_paginate(
-            get_deployment_variables.asyncio,
-            workspace,
-            repo_slug,
-            environment_uuid,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-    ]
+    result = await async_paginate(
+        get_deployment_variables.asyncio,
+        workspace,
+        repo_slug,
+        environment_uuid,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [x for x in result]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)

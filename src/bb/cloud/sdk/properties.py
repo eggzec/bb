@@ -15,6 +15,7 @@ from bb.cloud.api.properties import (
     update_user_hosted_property_value,
 )
 from bb.cloud.models.application_property import ApplicationProperty
+from bb.cloud.models.error import Error
 from bb.cloud.sdk._auth_validation import AuthMethod, require_auth
 from bb.cloud.sdk._client import BBClient
 from bb.cloud.types import UNSET, Unset
@@ -42,7 +43,7 @@ async def repo_get(
     repo_slug: str,
     app_key: str,
     property_name: str,
-) -> ApplicationProperty | None:
+) -> ApplicationProperty | Error | None:
     """Retrieve a custom property value set on a repository.
 
     Args:
@@ -79,7 +80,9 @@ async def repo_get(
     result = await get_repository_hosted_property_value.asyncio(
         workspace, repo_slug, app_key, property_name, client=client.auth
     )
-    return result if isinstance(result, ApplicationProperty) else None
+    if isinstance(result, (ApplicationProperty, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -189,7 +192,7 @@ async def commit_get(
     commit: str,
     app_key: str,
     property_name: str,
-) -> ApplicationProperty | None:
+) -> ApplicationProperty | Error | None:
     """Retrieve a custom property value set on a commit.
 
     Args:
@@ -232,7 +235,9 @@ async def commit_get(
     result = await get_commit_hosted_property_value.asyncio(
         workspace, repo_slug, commit, app_key, property_name, client=client.auth
     )
-    return result if isinstance(result, ApplicationProperty) else None
+    if isinstance(result, (ApplicationProperty, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -352,7 +357,7 @@ async def pr_get(
     pull_request_id: int,
     app_key: str,
     property_name: str,
-) -> ApplicationProperty | None:
+) -> ApplicationProperty | Error | None:
     """Retrieve a custom property value set on a pull request.
 
     Args:
@@ -395,7 +400,9 @@ async def pr_get(
     result = await get_pull_request_hosted_property_value.asyncio(
         workspace, repo_slug, pull_request_id, app_key, property_name, client=client.auth
     )
-    return result if isinstance(result, ApplicationProperty) else None
+    if isinstance(result, (ApplicationProperty, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -514,7 +521,7 @@ async def user_get(
     username: str,
     app_key: str,
     property_name: str,
-) -> ApplicationProperty | None:
+) -> ApplicationProperty | Error | None:
     """Retrieve a custom property value set on a user.
 
     Args:
@@ -555,7 +562,9 @@ async def user_get(
     result = await retrieve_user_hosted_property_value.asyncio(
         workspace, username, app_key, property_name, client=client.auth
     )
-    return result if isinstance(result, ApplicationProperty) else None
+    if isinstance(result, (ApplicationProperty, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)

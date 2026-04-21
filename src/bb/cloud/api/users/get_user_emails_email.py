@@ -35,6 +35,8 @@ type ParseResult = Error
 
 
 def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> ParseResult:
+    if "application/json" not in response.headers.get("content-type", ""):
+        return None
     response_default = Error.from_dict(response.json())
 
     return response_default

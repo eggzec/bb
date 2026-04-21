@@ -37,6 +37,10 @@ dev = [
 asyncio_mode = "auto"
 testpaths = ["tests"]
 pythonpath = ["."]
+markers = [
+    "live: integration test that hits the real Bitbucket Cloud API (needs BB_EMAIL/BB_TOKEN/BB_WORKSPACE)",
+    "writes: live test that creates/deletes resources; requires workspace write permission",
+]
 
 [tool.ruff]
 line-length = 120

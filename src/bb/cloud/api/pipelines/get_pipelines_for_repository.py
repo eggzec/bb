@@ -117,6 +117,8 @@ type ParseResult = PaginatedPipelines | None
 
 def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> ParseResult:
     if response.status_code == 200:
+        if "application/json" not in response.headers.get("content-type", ""):
+            return None
         response_200 = PaginatedPipelines.from_dict(response.json())
 
         return response_200

@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 
 from bb.cloud.models.branch import Branch
+from bb.cloud.models.error import Error
 from bb.cloud.models.tag import Tag
 from bb.cloud.sdk import branches as _async
 from bb.cloud.sdk._client import BBClient
@@ -28,12 +29,12 @@ def list(
     q: str | Unset = UNSET,
     sort: str | Unset = UNSET,
     pagelen: int = 25,
-) -> list[Branch]:
+) -> list[Branch] | Error:
     """Sync version of :func:`~bb.cloud.sdk.branches.list`."""
     return asyncio.run(_async.list(client, workspace, repo_slug, q=q, sort=sort, pagelen=pagelen))
 
 
-def get(client: BBClient, workspace: str, repo_slug: str, name: str) -> Branch | None:
+def get(client: BBClient, workspace: str, repo_slug: str, name: str) -> Branch | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.branches.get`."""
     return asyncio.run(_async.get(client, workspace, repo_slug, name))
 
@@ -45,7 +46,7 @@ def create(
     *,
     name: str,
     target_hash: str,
-) -> Branch | None:
+) -> Branch | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.branches.create`."""
     return asyncio.run(_async.create(client, workspace, repo_slug, name=name, target_hash=target_hash))
 
@@ -63,12 +64,12 @@ def tags(
     q: str | Unset = UNSET,
     sort: str | Unset = UNSET,
     pagelen: int = 25,
-) -> list[Tag]:
+) -> list[Tag] | Error:
     """Sync version of :func:`~bb.cloud.sdk.branches.tags`."""
     return asyncio.run(_async.tags(client, workspace, repo_slug, q=q, sort=sort, pagelen=pagelen))
 
 
-def get_tag(client: BBClient, workspace: str, repo_slug: str, name: str) -> Tag | None:
+def get_tag(client: BBClient, workspace: str, repo_slug: str, name: str) -> Tag | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.branches.get_tag`."""
     return asyncio.run(_async.get_tag(client, workspace, repo_slug, name))
 
@@ -79,7 +80,7 @@ def create_tag(
     repo_slug: str,
     *,
     body: Tag | Unset = UNSET,
-) -> Tag | None:
+) -> Tag | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.branches.create_tag`."""
     return asyncio.run(_async.create_tag(client, workspace, repo_slug, body=body))
 

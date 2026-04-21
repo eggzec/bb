@@ -13,6 +13,7 @@ from bb.cloud.api.webhooks import (
     put_repositories_workspace_repo_slug_hooks_uid,
     put_workspaces_workspace_hooks_uid,
 )
+from bb.cloud.models.error import Error
 from bb.cloud.models.get_hook_events_subject_type_subject_type import GetHookEventsSubjectTypeSubjectType
 from bb.cloud.models.hook_event import HookEvent
 from bb.cloud.models.webhook_subscription import WebhookSubscription
@@ -46,7 +47,7 @@ async def list_repo(
     repo_slug: str,
     *,
     pagelen: int = 25,
-) -> list[WebhookSubscription]:
+) -> list[WebhookSubscription] | Error:
     """Return all webhook subscriptions for a repository.
 
     Args:
@@ -76,21 +77,22 @@ async def list_repo(
         `GET /2.0/repositories/{workspace}/{repo_slug}/hooks
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-repositories/#api-repositories-workspace-repo-slug-hooks-get>`_
     """
-    return [
-        w
-        async for w in async_paginate(
-            get_repositories_workspace_repo_slug_hooks.asyncio,
-            workspace,
-            repo_slug,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-        if isinstance(w, WebhookSubscription)
-    ]
+    result = await async_paginate(
+        get_repositories_workspace_repo_slug_hooks.asyncio,
+        workspace,
+        repo_slug,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [item for item in result if isinstance(item, WebhookSubscription)]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def get_repo(client: BBClient, workspace: str, repo_slug: str, uid: str) -> WebhookSubscription | None:
+async def get_repo(client: BBClient, workspace: str, repo_slug: str, uid: str) -> WebhookSubscription | Error | None:
     """Return a single repository webhook by UID, or ``None`` if not found.
 
     Args:
@@ -121,7 +123,9 @@ async def get_repo(client: BBClient, workspace: str, repo_slug: str, uid: str) -
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-repositories/#api-repositories-workspace-repo-slug-hooks-uid-get>`_
     """
     result = await get_repositories_workspace_repo_slug_hooks_uid.asyncio(workspace, repo_slug, uid, client=client.auth)
-    return result if isinstance(result, WebhookSubscription) else None
+    if isinstance(result, (WebhookSubscription, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -131,7 +135,7 @@ async def create_repo(
     repo_slug: str,
     *,
     body: WebhookSubscription | Unset = UNSET,
-) -> WebhookSubscription | None:
+) -> WebhookSubscription | Error | None:
     """Create a webhook subscription for a repository.
 
     Args:
@@ -165,7 +169,9 @@ async def create_repo(
     result = await post_repositories_workspace_repo_slug_hooks.asyncio(
         workspace, repo_slug, client=client.auth, body=body
     )
-    return result if isinstance(result, WebhookSubscription) else None
+    if isinstance(result, (WebhookSubscription, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -176,7 +182,7 @@ async def update_repo(
     uid: str,
     *,
     body: WebhookSubscription | Unset = UNSET,
-) -> WebhookSubscription | None:
+) -> WebhookSubscription | Error | None:
     """Update a repository webhook subscription.
 
     Args:
@@ -211,7 +217,9 @@ async def update_repo(
     result = await put_repositories_workspace_repo_slug_hooks_uid.asyncio(
         workspace, repo_slug, uid, client=client.auth, body=body
     )
-    return result if isinstance(result, WebhookSubscription) else None
+    if isinstance(result, (WebhookSubscription, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -254,7 +262,7 @@ async def list_workspace(
     workspace: str,
     *,
     pagelen: int = 25,
-) -> list[WebhookSubscription]:
+) -> list[WebhookSubscription] | Error:
     """Return all webhook subscriptions for a workspace.
 
     Args:
@@ -283,20 +291,21 @@ async def list_workspace(
         `GET /2.0/workspaces/{workspace}/hooks
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-workspaces/#api-workspaces-workspace-hooks-get>`_
     """
-    return [
-        w
-        async for w in async_paginate(
-            get_workspaces_workspace_hooks.asyncio,
-            workspace,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-        if isinstance(w, WebhookSubscription)
-    ]
+    result = await async_paginate(
+        get_workspaces_workspace_hooks.asyncio,
+        workspace,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [item for item in result if isinstance(item, WebhookSubscription)]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def get_workspace(client: BBClient, workspace: str, uid: str) -> WebhookSubscription | None:
+async def get_workspace(client: BBClient, workspace: str, uid: str) -> WebhookSubscription | Error | None:
     """Return a single workspace webhook by UID, or ``None`` if not found.
 
     Args:
@@ -326,7 +335,9 @@ async def get_workspace(client: BBClient, workspace: str, uid: str) -> WebhookSu
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-workspaces/#api-workspaces-workspace-hooks-uid-get>`_
     """
     result = await get_workspaces_workspace_hooks_uid.asyncio(workspace, uid, client=client.auth)
-    return result if isinstance(result, WebhookSubscription) else None
+    if isinstance(result, (WebhookSubscription, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -335,7 +346,7 @@ async def create_workspace(
     workspace: str,
     *,
     body: WebhookSubscription | Unset = UNSET,
-) -> WebhookSubscription | None:
+) -> WebhookSubscription | Error | None:
     """Create a webhook subscription for a workspace.
 
     Args:
@@ -366,7 +377,9 @@ async def create_workspace(
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-workspaces/#api-workspaces-workspace-hooks-post>`_
     """
     result = await post_workspaces_workspace_hooks.asyncio(workspace, client=client.auth, body=body)
-    return result if isinstance(result, WebhookSubscription) else None
+    if isinstance(result, (WebhookSubscription, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -376,7 +389,7 @@ async def update_workspace(
     uid: str,
     *,
     body: WebhookSubscription | Unset = UNSET,
-) -> WebhookSubscription | None:
+) -> WebhookSubscription | Error | None:
     """Update a workspace webhook subscription.
 
     Args:
@@ -408,7 +421,9 @@ async def update_workspace(
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-workspaces/#api-workspaces-workspace-hooks-uid-put>`_
     """
     result = await put_workspaces_workspace_hooks_uid.asyncio(workspace, uid, client=client.auth, body=body)
-    return result if isinstance(result, WebhookSubscription) else None
+    if isinstance(result, (WebhookSubscription, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -448,7 +463,7 @@ async def delete_workspace(client: BBClient, workspace: str, uid: str) -> None:
 async def events(
     client: BBClient,
     subject_type: GetHookEventsSubjectTypeSubjectType,
-) -> list[HookEvent]:
+) -> list[HookEvent] | Error:
     """Return all event types available for a given webhook subject type.
 
     Args:
@@ -477,11 +492,13 @@ async def events(
         `GET /2.0/hook_events/{subject_type}
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-webhooks/#api-hook-events-subject-type-get>`_
     """
-    return [
-        e
-        async for e in async_paginate(
-            get_hook_events_subject_type.asyncio,
-            subject_type,
-            client=client.auth,
-        )
-    ]
+    result = await async_paginate(
+        get_hook_events_subject_type.asyncio,
+        subject_type,
+        client=client.auth,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return list(result)

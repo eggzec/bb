@@ -19,6 +19,7 @@ from bb.cloud.api.projects import (
     put_workspaces_workspace_projects_project_key_permissions_config_users_selected_user_id,
 )
 from bb.cloud.api.workspaces import get_workspaces_workspace_projects
+from bb.cloud.models.error import Error
 from bb.cloud.models.project import Project
 from bb.cloud.sdk._auth_validation import AuthMethod, require_auth
 from bb.cloud.sdk._client import BBClient
@@ -45,7 +46,7 @@ __all__ = [
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def list(client: BBClient, workspace: str, *, pagelen: int = 25) -> list[Project]:
+async def list(client: BBClient, workspace: str, *, pagelen: int = 25) -> list[Project] | Error:
     """List all projects in a workspace.
 
     Args:
@@ -74,20 +75,21 @@ async def list(client: BBClient, workspace: str, *, pagelen: int = 25) -> list[P
         `GET /2.0/workspaces/{workspace}/projects
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-projects/#api-workspaces-workspace-projects-get>`_
     """
-    return [
-        p
-        async for p in async_paginate(
-            get_workspaces_workspace_projects.asyncio,
-            workspace,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-        if isinstance(p, Project)
-    ]
+    result = await async_paginate(
+        get_workspaces_workspace_projects.asyncio,
+        workspace,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [item for item in result if isinstance(item, Project)]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def get(client: BBClient, workspace: str, project_key: str) -> Project | None:
+async def get(client: BBClient, workspace: str, project_key: str) -> Project | Error | None:
     """Fetch a single project by key.
 
     Args:
@@ -117,7 +119,9 @@ async def get(client: BBClient, workspace: str, project_key: str) -> Project | N
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-projects/#api-workspaces-workspace-projects-project-key-get>`_
     """
     result = await get_workspaces_workspace_projects_project_key.asyncio(workspace, project_key, client=client.auth)
-    return result if isinstance(result, Project) else None
+    if isinstance(result, (Project, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -126,7 +130,7 @@ async def create(
     workspace: str,
     *,
     body: Project | Unset = UNSET,
-) -> Project | None:
+) -> Project | Error | None:
     """Create a new project in a workspace.
 
     Args:
@@ -161,7 +165,9 @@ async def create(
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-projects/#api-workspaces-workspace-projects-post>`_
     """
     result = await post_workspaces_workspace_projects.asyncio(workspace, client=client.auth, body=body)
-    return result if isinstance(result, Project) else None
+    if isinstance(result, (Project, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -171,7 +177,7 @@ async def update(
     project_key: str,
     *,
     body: Project | Unset = UNSET,
-) -> Project | None:
+) -> Project | Error | None:
     """Update an existing project.
 
     Args:
@@ -210,7 +216,9 @@ async def update(
     result = await put_workspaces_workspace_projects_project_key.asyncio(
         workspace, project_key, client=client.auth, body=body
     )
-    return result if isinstance(result, Project) else None
+    if isinstance(result, (Project, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -247,7 +255,9 @@ async def delete(client: BBClient, workspace: str, project_key: str) -> None:
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def default_reviewers(client: BBClient, workspace: str, project_key: str, *, pagelen: int = 25) -> list[Any]:
+async def default_reviewers(
+    client: BBClient, workspace: str, project_key: str, *, pagelen: int = 25
+) -> list[Any] | Error:
     """List all default reviewers for a project.
 
     Args:
@@ -279,20 +289,24 @@ async def default_reviewers(client: BBClient, workspace: str, project_key: str, 
         `GET /2.0/workspaces/{workspace}/projects/{project_key}/default-reviewers
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-projects/#api-workspaces-workspace-projects-project-key-default-reviewers-get>`_
     """
-    return [
-        r
-        async for r in async_paginate(
-            get_workspaces_workspace_projects_project_key_default_reviewers.asyncio,
-            workspace,
-            project_key,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-    ]
+    result = await async_paginate(
+        get_workspaces_workspace_projects_project_key_default_reviewers.asyncio,
+        workspace,
+        project_key,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [x for x in result]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def get_default_reviewer(client: BBClient, workspace: str, project_key: str, selected_user: str) -> Any | None:
+async def get_default_reviewer(
+    client: BBClient, workspace: str, project_key: str, selected_user: str
+) -> Any | Error | None:
     """Fetch a specific default reviewer for a project.
 
     Args:
@@ -409,7 +423,9 @@ async def remove_default_reviewer(client: BBClient, workspace: str, project_key:
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def group_permissions(client: BBClient, workspace: str, project_key: str, *, pagelen: int = 25) -> list[Any]:
+async def group_permissions(
+    client: BBClient, workspace: str, project_key: str, *, pagelen: int = 25
+) -> list[Any] | Error:
     """List all group permission configurations for a project.
 
     Args:
@@ -441,16 +457,18 @@ async def group_permissions(client: BBClient, workspace: str, project_key: str, 
         `GET /2.0/workspaces/{workspace}/projects/{project_key}/permissions-config/groups
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-projects/#api-workspaces-workspace-projects-project-key-permissions-config-groups-get>`_
     """
-    return [
-        p
-        async for p in async_paginate(
-            get_workspaces_workspace_projects_project_key_permissions_config_groups.asyncio,
-            workspace,
-            project_key,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-    ]
+    result = await async_paginate(
+        get_workspaces_workspace_projects_project_key_permissions_config_groups.asyncio,
+        workspace,
+        project_key,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [x for x in result]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -461,7 +479,7 @@ async def update_group_permission(
     group_slug: str,
     *,
     body: Unset = UNSET,
-) -> Any | None:
+) -> Any | Error | None:
     """Update a group's permission on a project.
 
     Args:
@@ -538,7 +556,9 @@ async def delete_group_permission(client: BBClient, workspace: str, project_key:
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def user_permissions(client: BBClient, workspace: str, project_key: str, *, pagelen: int = 25) -> list[Any]:
+async def user_permissions(
+    client: BBClient, workspace: str, project_key: str, *, pagelen: int = 25
+) -> list[Any] | Error:
     """List all user permission configurations for a project.
 
     Args:
@@ -570,16 +590,18 @@ async def user_permissions(client: BBClient, workspace: str, project_key: str, *
         `GET /2.0/workspaces/{workspace}/projects/{project_key}/permissions-config/users
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-projects/#api-workspaces-workspace-projects-project-key-permissions-config-users-get>`_
     """
-    return [
-        p
-        async for p in async_paginate(
-            get_workspaces_workspace_projects_project_key_permissions_config_users.asyncio,
-            workspace,
-            project_key,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-    ]
+    result = await async_paginate(
+        get_workspaces_workspace_projects_project_key_permissions_config_users.asyncio,
+        workspace,
+        project_key,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [x for x in result]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -590,7 +612,7 @@ async def update_user_permission(
     selected_user_id: str,
     *,
     body: Unset = UNSET,
-) -> Any | None:
+) -> Any | Error | None:
     """Update a user's permission on a project.
 
     Args:

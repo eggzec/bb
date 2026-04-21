@@ -8,6 +8,7 @@ from bb.cloud.api.branch_restrictions import (
     put_repositories_workspace_repo_slug_branch_restrictions_id,
 )
 from bb.cloud.models.branchrestriction import Branchrestriction
+from bb.cloud.models.error import Error
 from bb.cloud.sdk._auth_validation import AuthMethod, require_auth
 from bb.cloud.sdk._client import BBClient
 from bb.cloud.sdk._pagination import async_paginate
@@ -23,7 +24,7 @@ async def list(
     repo_slug: str,
     *,
     pagelen: int = 25,
-) -> list[Branchrestriction]:
+) -> list[Branchrestriction] | Error:
     """List all branch restrictions for a repository.
 
     Args:
@@ -53,21 +54,22 @@ async def list(
         `GET /2.0/repositories/{workspace}/{repo_slug}/branch-restrictions
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-branch-restrictions/#api-repositories-workspace-repo-slug-branch-restrictions-get>`_
     """
-    return [
-        r
-        async for r in async_paginate(
-            get_repositories_workspace_repo_slug_branch_restrictions.asyncio,
-            workspace,
-            repo_slug,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-        if isinstance(r, Branchrestriction)
-    ]
+    result = await async_paginate(
+        get_repositories_workspace_repo_slug_branch_restrictions.asyncio,
+        workspace,
+        repo_slug,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [item for item in result if isinstance(item, Branchrestriction)]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def get(client: BBClient, workspace: str, repo_slug: str, id: int) -> Branchrestriction | None:
+async def get(client: BBClient, workspace: str, repo_slug: str, id: int) -> Branchrestriction | Error | None:
     """Retrieve a single branch restriction by ID.
 
     Args:
@@ -100,7 +102,9 @@ async def get(client: BBClient, workspace: str, repo_slug: str, id: int) -> Bran
     result = await get_repositories_workspace_repo_slug_branch_restrictions_id.asyncio(
         workspace, repo_slug, id, client=client.auth
     )
-    return result if isinstance(result, Branchrestriction) else None
+    if isinstance(result, (Branchrestriction, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -110,7 +114,7 @@ async def create(
     repo_slug: str,
     *,
     body: Branchrestriction | Unset = UNSET,
-) -> Branchrestriction | None:
+) -> Branchrestriction | Error | None:
     """Create a branch restriction on a repository.
 
     Args:
@@ -146,7 +150,9 @@ async def create(
     result = await post_repositories_workspace_repo_slug_branch_restrictions.asyncio(
         workspace, repo_slug, client=client.auth, body=body
     )
-    return result if isinstance(result, Branchrestriction) else None
+    if isinstance(result, (Branchrestriction, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -157,7 +163,7 @@ async def update(
     id: int,
     *,
     body: Branchrestriction | Unset = UNSET,
-) -> Branchrestriction | None:
+) -> Branchrestriction | Error | None:
     """Update a branch restriction on a repository.
 
     Args:
@@ -194,7 +200,9 @@ async def update(
     result = await put_repositories_workspace_repo_slug_branch_restrictions_id.asyncio(
         workspace, repo_slug, id, client=client.auth, body=body
     )
-    return result if isinstance(result, Branchrestriction) else None
+    if isinstance(result, (Branchrestriction, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)

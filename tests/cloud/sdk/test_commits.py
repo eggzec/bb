@@ -8,9 +8,16 @@ import pytest
 
 from bb.cloud.models.base_commit import BaseCommit
 from bb.cloud.models.commit import Commit
+from bb.cloud.models.error import Error
+from bb.cloud.models.error_error import ErrorError
 from bb.cloud.models.pullrequest import Pullrequest
 from bb.cloud.sdk import commits
 from bb.cloud.sdk._errors import AuthenticationError
+
+
+def _make_error(msg: str = "not found") -> Error:
+    return Error(type_="error", error=ErrorError(message=msg))
+
 
 _COMMITS = "bb.cloud.api.commits"
 _PRS = "bb.cloud.api.pullrequests"
@@ -56,6 +63,16 @@ async def test_prs_returns_list(mock_client, make_page):
     with patch(f"{_PRS}.get_pullrequests_for_commit.asyncio", new=AsyncMock(return_value=make_page([item]))):
         result = await commits.prs(mock_client, "ws", "slug", "abc123")
     assert result == [item]
+
+
+async def test_get_propagates_error(mock_client):
+    err = _make_error("commit not found")
+    with patch(
+        f"{_COMMITS}.get_repositories_workspace_repo_slug_commit_commit.asyncio", new=AsyncMock(return_value=err)
+    ):
+        result = await commits.get(mock_client, "ws", "slug", "abc123")
+    assert result is err
+    assert isinstance(result, Error)
 
 
 async def test_list_raises_on_bad_auth(bad_auth_client):

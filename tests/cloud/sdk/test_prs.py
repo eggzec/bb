@@ -6,6 +6,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
+from bb.cloud.models.error import Error
+from bb.cloud.models.error_error import ErrorError
 from bb.cloud.models.participant import Participant
 from bb.cloud.models.pullrequest import Pullrequest
 from bb.cloud.models.pullrequest_comment import PullrequestComment as PullRequestComment
@@ -13,6 +15,10 @@ from bb.cloud.sdk import prs
 from bb.cloud.sdk._errors import AuthenticationError
 
 _API = "bb.cloud.api.pullrequests"
+
+
+def _make_error(msg: str = "not found") -> Error:
+    return Error(type_="error", error=ErrorError(message=msg))
 
 
 async def test_list_returns_prs(mock_client, make_page):
@@ -165,6 +171,24 @@ async def test_default_reviewers_returns_list(mock_client, make_page):
     ):
         result = await prs.default_reviewers(mock_client, "ws", "slug")
     assert result == [item]
+
+
+async def test_get_propagates_error(mock_client):
+    err = _make_error("pr not found")
+    with patch(
+        f"{_API}.get_repositories_workspace_repo_slug_pullrequests_pull_request_id.asyncio",
+        new=AsyncMock(return_value=err),
+    ):
+        result = await prs.get(mock_client, "ws", "slug", 1)
+    assert result is err
+    assert isinstance(result, Error)
+
+
+async def test_create_propagates_error(mock_client):
+    err = _make_error("invalid pull request")
+    with patch(f"{_API}.post_repositories_workspace_repo_slug_pullrequests.asyncio", new=AsyncMock(return_value=err)):
+        result = await prs.create(mock_client, "ws", "slug")
+    assert result is err
 
 
 async def test_list_raises_on_bad_auth(bad_auth_client):

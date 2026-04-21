@@ -51,21 +51,29 @@ type ParseResult = Error | PullrequestCommentTask | None
 
 def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> ParseResult:
     if response.status_code == 201:
+        if "application/json" not in response.headers.get("content-type", ""):
+            return None
         response_201 = PullrequestCommentTask.from_dict(response.json())
 
         return response_201
 
     if response.status_code == 400:
+        if "application/json" not in response.headers.get("content-type", ""):
+            return None
         response_400 = Error.from_dict(response.json())
 
         return response_400
 
     if response.status_code == 403:
+        if "application/json" not in response.headers.get("content-type", ""):
+            return None
         response_403 = Error.from_dict(response.json())
 
         return response_403
 
     if response.status_code == 404:
+        if "application/json" not in response.headers.get("content-type", ""):
+            return None
         response_404 = Error.from_dict(response.json())
 
         return response_404

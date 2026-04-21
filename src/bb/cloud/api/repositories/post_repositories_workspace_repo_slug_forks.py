@@ -6,6 +6,7 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
+from ...models.error import Error
 from ...models.repository import Repository
 from ...types import UNSET, Response, Unset
 
@@ -42,15 +43,24 @@ def _get_kwargs(
     return _kwargs
 
 
-type ParsedPayload = Repository
-type ParseResult = Repository | None
+type ParsedPayload = Error | Repository
+type ParseResult = Error | Repository | None
 
 
 def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> ParseResult:
     if response.status_code == 201:
+        if "application/json" not in response.headers.get("content-type", ""):
+            return None
         response_201 = Repository.from_dict(response.json())
 
         return response_201
+
+    if response.status_code == 403:
+        if "application/json" not in response.headers.get("content-type", ""):
+            return None
+        response_403 = Error.from_dict(response.json())
+
+        return response_403
 
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
@@ -144,7 +154,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Repository]
+        Response[Error | Repository]
      """
 
     kwargs = _get_kwargs(
@@ -237,7 +247,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Repository
+        Error | Repository
      """
 
     return sync_detailed(
@@ -325,7 +335,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Repository]
+        Response[Error | Repository]
      """
 
     kwargs = _get_kwargs(
@@ -416,7 +426,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Repository
+        Error | Repository
      """
 
     return (

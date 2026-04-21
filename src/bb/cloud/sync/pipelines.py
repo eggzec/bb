@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 from typing import Any
 
+from bb.cloud.models.error import Error
 from bb.cloud.models.pipeline import Pipeline
 from bb.cloud.models.pipeline_known_host import PipelineKnownHost
 from bb.cloud.models.pipeline_schedule import PipelineSchedule
@@ -76,7 +77,7 @@ def list(
     repo_slug: str,
     *,
     pagelen: int = 10,
-) -> list[Pipeline]:
+) -> list[Pipeline] | Error:
     """Sync version of :func:`~bb.cloud.sdk.pipelines.list`."""
     return asyncio.run(_async.list(client, workspace, repo_slug, pagelen=pagelen))
 
@@ -86,7 +87,7 @@ def get(
     workspace: str,
     repo_slug: str,
     pipeline_uuid: str,
-) -> Pipeline | None:
+) -> Pipeline | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.pipelines.get`."""
     return asyncio.run(_async.get(client, workspace, repo_slug, pipeline_uuid))
 
@@ -97,7 +98,7 @@ def run(
     repo_slug: str,
     *,
     body: Pipeline,
-) -> Pipeline | None:
+) -> Pipeline | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.pipelines.run`."""
     return asyncio.run(_async.run(client, workspace, repo_slug, body=body))
 
@@ -119,7 +120,7 @@ def steps(
     pipeline_uuid: str,
     *,
     pagelen: int = 25,
-) -> list[Any]:
+) -> list[Any] | Error:
     """Sync version of :func:`~bb.cloud.sdk.pipelines.steps`."""
     return asyncio.run(_async.steps(client, workspace, repo_slug, pipeline_uuid, pagelen=pagelen))
 
@@ -141,7 +142,7 @@ def step_log(
     repo_slug: str,
     pipeline_uuid: str,
     step_uuid: str,
-) -> str | None:
+) -> str | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.pipelines.step_log`."""
     return asyncio.run(_async.step_log(client, workspace, repo_slug, pipeline_uuid, step_uuid))
 
@@ -172,7 +173,7 @@ def variables(
     repo_slug: str,
     *,
     pagelen: int = 25,
-) -> list[PipelineVariable]:
+) -> list[PipelineVariable] | Error:
     """Sync version of :func:`~bb.cloud.sdk.pipelines.variables`."""
     return asyncio.run(_async.variables(client, workspace, repo_slug, pagelen=pagelen))
 
@@ -182,7 +183,7 @@ def get_variable(
     workspace: str,
     repo_slug: str,
     variable_uuid: str,
-) -> PipelineVariable | None:
+) -> PipelineVariable | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.pipelines.get_variable`."""
     return asyncio.run(_async.get_variable(client, workspace, repo_slug, variable_uuid))
 
@@ -193,7 +194,7 @@ def create_variable(
     repo_slug: str,
     *,
     body: PipelineVariable | Unset = UNSET,
-) -> PipelineVariable | None:
+) -> PipelineVariable | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.pipelines.create_variable`."""
     return asyncio.run(_async.create_variable(client, workspace, repo_slug, body=body))
 
@@ -205,7 +206,7 @@ def update_variable(
     variable_uuid: str,
     *,
     body: PipelineVariable | Unset = UNSET,
-) -> PipelineVariable | None:
+) -> PipelineVariable | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.pipelines.update_variable`."""
     return asyncio.run(_async.update_variable(client, workspace, repo_slug, variable_uuid, body=body))
 
@@ -226,7 +227,7 @@ def schedules(
     repo_slug: str,
     *,
     pagelen: int = 25,
-) -> list[PipelineSchedule]:
+) -> list[PipelineSchedule] | Error:
     """Sync version of :func:`~bb.cloud.sdk.pipelines.schedules`."""
     return asyncio.run(_async.schedules(client, workspace, repo_slug, pagelen=pagelen))
 
@@ -236,7 +237,7 @@ def get_schedule(
     workspace: str,
     repo_slug: str,
     schedule_uuid: str,
-) -> PipelineSchedule | None:
+) -> PipelineSchedule | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.pipelines.get_schedule`."""
     return asyncio.run(_async.get_schedule(client, workspace, repo_slug, schedule_uuid))
 
@@ -247,7 +248,7 @@ def create_schedule(
     repo_slug: str,
     *,
     body: PipelineSchedule | Unset = UNSET,
-) -> PipelineSchedule | None:
+) -> PipelineSchedule | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.pipelines.create_schedule`."""
     return asyncio.run(_async.create_schedule(client, workspace, repo_slug, body=body))
 
@@ -259,7 +260,7 @@ def update_schedule(
     schedule_uuid: str,
     *,
     body: PipelineSchedule | Unset = UNSET,
-) -> PipelineSchedule | None:
+) -> PipelineSchedule | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.pipelines.update_schedule`."""
     return asyncio.run(_async.update_schedule(client, workspace, repo_slug, schedule_uuid, body=body))
 
@@ -280,7 +281,7 @@ def known_hosts(
     repo_slug: str,
     *,
     pagelen: int = 25,
-) -> list[PipelineKnownHost]:
+) -> list[PipelineKnownHost] | Error:
     """Sync version of :func:`~bb.cloud.sdk.pipelines.known_hosts`."""
     return asyncio.run(_async.known_hosts(client, workspace, repo_slug, pagelen=pagelen))
 
@@ -290,7 +291,7 @@ def get_known_host(
     workspace: str,
     repo_slug: str,
     known_host_uuid: str,
-) -> PipelineKnownHost | None:
+) -> PipelineKnownHost | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.pipelines.get_known_host`."""
     return asyncio.run(_async.get_known_host(client, workspace, repo_slug, known_host_uuid))
 
@@ -301,7 +302,7 @@ def create_known_host(
     repo_slug: str,
     *,
     body: PipelineKnownHost | Unset = UNSET,
-) -> PipelineKnownHost | None:
+) -> PipelineKnownHost | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.pipelines.create_known_host`."""
     return asyncio.run(_async.create_known_host(client, workspace, repo_slug, body=body))
 
@@ -313,7 +314,7 @@ def update_known_host(
     known_host_uuid: str,
     *,
     body: PipelineKnownHost | Unset = UNSET,
-) -> PipelineKnownHost | None:
+) -> PipelineKnownHost | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.pipelines.update_known_host`."""
     return asyncio.run(_async.update_known_host(client, workspace, repo_slug, known_host_uuid, body=body))
 
@@ -332,7 +333,7 @@ def ssh_key_pair(
     client: BBClient,
     workspace: str,
     repo_slug: str,
-) -> PipelineSshKeyPair | None:
+) -> PipelineSshKeyPair | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.pipelines.ssh_key_pair`."""
     return asyncio.run(_async.ssh_key_pair(client, workspace, repo_slug))
 
@@ -343,7 +344,7 @@ def update_ssh_key_pair(
     repo_slug: str,
     *,
     body: PipelineSshKeyPair | Unset = UNSET,
-) -> PipelineSshKeyPair | None:
+) -> PipelineSshKeyPair | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.pipelines.update_ssh_key_pair`."""
     return asyncio.run(_async.update_ssh_key_pair(client, workspace, repo_slug, body=body))
 
@@ -363,7 +364,7 @@ def caches(
     repo_slug: str,
     *,
     pagelen: int = 25,
-) -> list[Any]:
+) -> list[Any] | Error:
     """Sync version of :func:`~bb.cloud.sdk.pipelines.caches`."""
     return asyncio.run(_async.caches(client, workspace, repo_slug, pagelen=pagelen))
 
@@ -401,7 +402,7 @@ def workspace_variables(
     workspace: str,
     *,
     pagelen: int = 25,
-) -> list[PipelineVariable]:
+) -> list[PipelineVariable] | Error:
     """Sync version of :func:`~bb.cloud.sdk.pipelines.workspace_variables`."""
     return asyncio.run(_async.workspace_variables(client, workspace, pagelen=pagelen))
 
@@ -410,7 +411,7 @@ def get_workspace_variable(
     client: BBClient,
     workspace: str,
     variable_uuid: str,
-) -> PipelineVariable | None:
+) -> PipelineVariable | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.pipelines.get_workspace_variable`."""
     return asyncio.run(_async.get_workspace_variable(client, workspace, variable_uuid))
 
@@ -420,7 +421,7 @@ def create_workspace_variable(
     workspace: str,
     *,
     body: PipelineVariable | Unset = UNSET,
-) -> PipelineVariable | None:
+) -> PipelineVariable | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.pipelines.create_workspace_variable`."""
     return asyncio.run(_async.create_workspace_variable(client, workspace, body=body))
 
@@ -431,7 +432,7 @@ def update_workspace_variable(
     variable_uuid: str,
     *,
     body: PipelineVariable | Unset = UNSET,
-) -> PipelineVariable | None:
+) -> PipelineVariable | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.pipelines.update_workspace_variable`."""
     return asyncio.run(_async.update_workspace_variable(client, workspace, variable_uuid, body=body))
 

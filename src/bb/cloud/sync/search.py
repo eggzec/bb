@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 
+from bb.cloud.models.error import Error
 from bb.cloud.models.search_code_search_result import SearchCodeSearchResult
 from bb.cloud.sdk import search as _async
 from bb.cloud.sdk._client import BBClient
@@ -17,7 +18,7 @@ def code(
     query: str,
     search_query: str | Unset = UNSET,
     pagelen: int = 10,
-) -> list[SearchCodeSearchResult]:
+) -> list[SearchCodeSearchResult] | Error:
     """Sync version of :func:`~bb.cloud.sdk.search.code`."""
     return asyncio.run(_async.code(client, workspace, query=query, search_query=search_query, pagelen=pagelen))
 
@@ -28,7 +29,7 @@ def account(
     *,
     search_query: str,
     pagelen: int = 10,
-) -> list[SearchCodeSearchResult]:
+) -> list[SearchCodeSearchResult] | Error:
     """Sync version of :func:`~bb.cloud.sdk.search.account`.
 
     Warning:
@@ -43,7 +44,7 @@ def team(
     *,
     search_query: str,
     pagelen: int = 10,
-) -> list[SearchCodeSearchResult]:
+) -> list[SearchCodeSearchResult] | Error:
     """Sync version of :func:`~bb.cloud.sdk.search.team`.
 
     Warning:

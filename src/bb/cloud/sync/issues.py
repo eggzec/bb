@@ -4,6 +4,7 @@ import asyncio
 from typing import Any
 
 from bb.cloud.models.component import Component
+from bb.cloud.models.error import Error
 from bb.cloud.models.issue import Issue
 from bb.cloud.models.issue_change import IssueChange
 from bb.cloud.models.issue_comment import IssueComment
@@ -58,12 +59,12 @@ def list(
     q: str | Unset = UNSET,
     sort: str | Unset = UNSET,
     pagelen: int = 25,
-) -> list[Issue]:
+) -> list[Issue] | Error:
     """Sync version of :func:`~bb.cloud.sdk.issues.list`."""
     return asyncio.run(_async.list(client, workspace, repo_slug, q=q, sort=sort, pagelen=pagelen))
 
 
-def get(client: BBClient, workspace: str, repo_slug: str, issue_id: int) -> Issue | None:
+def get(client: BBClient, workspace: str, repo_slug: str, issue_id: int) -> Issue | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.issues.get`."""
     return asyncio.run(_async.get(client, workspace, repo_slug, issue_id))
 
@@ -74,7 +75,7 @@ def create(
     repo_slug: str,
     *,
     body: Issue | Unset = UNSET,
-) -> Issue | None:
+) -> Issue | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.issues.create`."""
     return asyncio.run(_async.create(client, workspace, repo_slug, body=body))
 
@@ -86,7 +87,7 @@ def update(
     issue_id: int,
     *,
     body: Issue | Unset = UNSET,
-) -> Issue | None:
+) -> Issue | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.issues.update`."""
     return asyncio.run(_async.update(client, workspace, repo_slug, issue_id, body=body))
 
@@ -103,14 +104,14 @@ def comments(
     issue_id: int,
     *,
     pagelen: int = 25,
-) -> list[IssueComment]:
+) -> list[IssueComment] | Error:
     """Sync version of :func:`~bb.cloud.sdk.issues.comments`."""
     return asyncio.run(_async.comments(client, workspace, repo_slug, issue_id, pagelen=pagelen))
 
 
 def get_comment(
     client: BBClient, workspace: str, repo_slug: str, issue_id: int, comment_id: int
-) -> IssueComment | None:
+) -> IssueComment | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.issues.get_comment`."""
     return asyncio.run(_async.get_comment(client, workspace, repo_slug, issue_id, comment_id))
 
@@ -122,7 +123,7 @@ def add_comment(
     issue_id: int,
     *,
     body: IssueComment | Unset = UNSET,
-) -> IssueComment | None:
+) -> IssueComment | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.issues.add_comment`."""
     return asyncio.run(_async.add_comment(client, workspace, repo_slug, issue_id, body=body))
 
@@ -135,7 +136,7 @@ def update_comment(
     comment_id: int,
     *,
     body: IssueComment | Unset = UNSET,
-) -> IssueComment | None:
+) -> IssueComment | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.issues.update_comment`."""
     return asyncio.run(_async.update_comment(client, workspace, repo_slug, issue_id, comment_id, body=body))
 
@@ -152,12 +153,14 @@ def changes(
     issue_id: int,
     *,
     pagelen: int = 25,
-) -> list[IssueChange]:
+) -> list[IssueChange] | Error:
     """Sync version of :func:`~bb.cloud.sdk.issues.changes`."""
     return asyncio.run(_async.changes(client, workspace, repo_slug, issue_id, pagelen=pagelen))
 
 
-def get_change(client: BBClient, workspace: str, repo_slug: str, issue_id: int, change_id: int) -> IssueChange | None:
+def get_change(
+    client: BBClient, workspace: str, repo_slug: str, issue_id: int, change_id: int
+) -> IssueChange | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.issues.get_change`."""
     return asyncio.run(_async.get_change(client, workspace, repo_slug, issue_id, change_id))
 
@@ -169,7 +172,7 @@ def add_change(
     issue_id: int,
     *,
     body: IssueChange | Unset = UNSET,
-) -> IssueChange | None:
+) -> IssueChange | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.issues.add_change`."""
     return asyncio.run(_async.add_change(client, workspace, repo_slug, issue_id, body=body))
 
@@ -184,7 +187,7 @@ def unvote(client: BBClient, workspace: str, repo_slug: str, issue_id: int) -> N
     asyncio.run(_async.unvote(client, workspace, repo_slug, issue_id))
 
 
-def voted(client: BBClient, workspace: str, repo_slug: str, issue_id: int) -> Any | None:
+def voted(client: BBClient, workspace: str, repo_slug: str, issue_id: int) -> Any | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.issues.voted`."""
     return asyncio.run(_async.voted(client, workspace, repo_slug, issue_id))
 
@@ -199,47 +202,47 @@ def unwatch(client: BBClient, workspace: str, repo_slug: str, issue_id: int) -> 
     asyncio.run(_async.unwatch(client, workspace, repo_slug, issue_id))
 
 
-def watching(client: BBClient, workspace: str, repo_slug: str, issue_id: int) -> Any | None:
+def watching(client: BBClient, workspace: str, repo_slug: str, issue_id: int) -> Any | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.issues.watching`."""
     return asyncio.run(_async.watching(client, workspace, repo_slug, issue_id))
 
 
-def milestones(client: BBClient, workspace: str, repo_slug: str) -> list[Milestone]:
+def milestones(client: BBClient, workspace: str, repo_slug: str) -> list[Milestone] | Error:
     """Sync version of :func:`~bb.cloud.sdk.issues.milestones`."""
     return asyncio.run(_async.milestones(client, workspace, repo_slug))
 
 
-def get_milestone(client: BBClient, workspace: str, repo_slug: str, milestone_id: int) -> Milestone | None:
+def get_milestone(client: BBClient, workspace: str, repo_slug: str, milestone_id: int) -> Milestone | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.issues.get_milestone`."""
     return asyncio.run(_async.get_milestone(client, workspace, repo_slug, milestone_id))
 
 
-def versions(client: BBClient, workspace: str, repo_slug: str) -> list[Version]:
+def versions(client: BBClient, workspace: str, repo_slug: str) -> list[Version] | Error:
     """Sync version of :func:`~bb.cloud.sdk.issues.versions`."""
     return asyncio.run(_async.versions(client, workspace, repo_slug))
 
 
-def get_version(client: BBClient, workspace: str, repo_slug: str, version_id: int) -> Version | None:
+def get_version(client: BBClient, workspace: str, repo_slug: str, version_id: int) -> Version | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.issues.get_version`."""
     return asyncio.run(_async.get_version(client, workspace, repo_slug, version_id))
 
 
-def components(client: BBClient, workspace: str, repo_slug: str) -> list[Component]:
+def components(client: BBClient, workspace: str, repo_slug: str) -> list[Component] | Error:
     """Sync version of :func:`~bb.cloud.sdk.issues.components`."""
     return asyncio.run(_async.components(client, workspace, repo_slug))
 
 
-def get_component(client: BBClient, workspace: str, repo_slug: str, component_id: int) -> Component | None:
+def get_component(client: BBClient, workspace: str, repo_slug: str, component_id: int) -> Component | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.issues.get_component`."""
     return asyncio.run(_async.get_component(client, workspace, repo_slug, component_id))
 
 
-def attachments(client: BBClient, workspace: str, repo_slug: str, issue_id: int) -> Any | None:
+def attachments(client: BBClient, workspace: str, repo_slug: str, issue_id: int) -> Any | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.issues.attachments`."""
     return asyncio.run(_async.attachments(client, workspace, repo_slug, issue_id))
 
 
-def get_attachment(client: BBClient, workspace: str, repo_slug: str, issue_id: int, path: str) -> Any | None:
+def get_attachment(client: BBClient, workspace: str, repo_slug: str, issue_id: int, path: str) -> Any | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.issues.get_attachment`."""
     return asyncio.run(_async.get_attachment(client, workspace, repo_slug, issue_id, path))
 
@@ -272,12 +275,12 @@ def export(
     asyncio.run(_async.export(client, workspace, repo_slug, body=body))
 
 
-def export_status(client: BBClient, workspace: str, repo_slug: str, repo_name: str, task_id: str) -> Any | None:
+def export_status(client: BBClient, workspace: str, repo_slug: str, repo_name: str, task_id: str) -> Any | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.issues.export_status`."""
     return asyncio.run(_async.export_status(client, workspace, repo_slug, repo_name, task_id))
 
 
-def import_status(client: BBClient, workspace: str, repo_slug: str) -> Any | None:
+def import_status(client: BBClient, workspace: str, repo_slug: str) -> Any | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.issues.import_status`."""
     return asyncio.run(_async.import_status(client, workspace, repo_slug))
 

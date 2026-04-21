@@ -7,6 +7,7 @@ from bb.cloud.api.commit_statuses import (
     put_repositories_workspace_repo_slug_commit_commit_statuses_build_key,
 )
 from bb.cloud.models.commitstatus import Commitstatus
+from bb.cloud.models.error import Error
 from bb.cloud.sdk._auth_validation import AuthMethod, require_auth
 from bb.cloud.sdk._client import BBClient
 from bb.cloud.sdk._pagination import async_paginate
@@ -23,7 +24,7 @@ async def list(
     commit: str,
     *,
     pagelen: int = 25,
-) -> list[Commitstatus]:
+) -> list[Commitstatus] | Error:
     """List all commit statuses for a given commit.
 
     Args:
@@ -56,22 +57,23 @@ async def list(
         `GET /2.0/repositories/{workspace}/{repo_slug}/commit/{commit}/statuses
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-commit-statuses/#api-repositories-workspace-repo-slug-commit-commit-statuses-get>`_
     """
-    return [
-        s
-        async for s in async_paginate(
-            get_repositories_workspace_repo_slug_commit_commit_statuses.asyncio,
-            workspace,
-            repo_slug,
-            commit,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-        if isinstance(s, Commitstatus)
-    ]
+    result = await async_paginate(
+        get_repositories_workspace_repo_slug_commit_commit_statuses.asyncio,
+        workspace,
+        repo_slug,
+        commit,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [item for item in result if isinstance(item, Commitstatus)]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def get(client: BBClient, workspace: str, repo_slug: str, commit: str, key: str) -> Commitstatus | None:
+async def get(client: BBClient, workspace: str, repo_slug: str, commit: str, key: str) -> Commitstatus | Error | None:
     """Retrieve a single commit status by build key.
 
     Args:
@@ -107,7 +109,9 @@ async def get(client: BBClient, workspace: str, repo_slug: str, commit: str, key
     result = await get_repositories_workspace_repo_slug_commit_commit_statuses_build_key.asyncio(
         workspace, repo_slug, commit, key, client=client.auth
     )
-    return result if isinstance(result, Commitstatus) else None
+    if isinstance(result, (Commitstatus, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -118,7 +122,7 @@ async def create(
     commit: str,
     *,
     body: Commitstatus | Unset = UNSET,
-) -> Commitstatus | None:
+) -> Commitstatus | Error | None:
     """Create a commit status (build result) for a commit.
 
     Args:
@@ -155,7 +159,9 @@ async def create(
     result = await post_repositories_workspace_repo_slug_commit_commit_statuses_build.asyncio(
         workspace, repo_slug, commit, client=client.auth, body=body
     )
-    return result if isinstance(result, Commitstatus) else None
+    if isinstance(result, (Commitstatus, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -167,7 +173,7 @@ async def update(
     key: str,
     *,
     body: Commitstatus | Unset = UNSET,
-) -> Commitstatus | None:
+) -> Commitstatus | Error | None:
     """Update an existing commit status by build key.
 
     Args:
@@ -210,4 +216,6 @@ async def update(
     result = await put_repositories_workspace_repo_slug_commit_commit_statuses_build_key.asyncio(
         workspace, repo_slug, commit, key, client=client.auth, body=body
     )
-    return result if isinstance(result, Commitstatus) else None
+    if isinstance(result, (Commitstatus, Error)):
+        return result
+    return None

@@ -22,9 +22,9 @@ from bb.cloud.api.users import (
     get_users_selected_user,
 )
 from bb.cloud.models.account import Account
+from bb.cloud.models.error import Error
 from bb.cloud.models.gpg_account_key import GPGAccountKey as GpgAccountKey
 from bb.cloud.models.ssh_account_key import SshAccountKey
-from bb.cloud.models.user import User
 from bb.cloud.sdk._auth_validation import AuthMethod, require_auth
 from bb.cloud.sdk._client import BBClient
 from bb.cloud.sdk._pagination import async_paginate
@@ -48,14 +48,14 @@ __all__ = [
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def me(client: BBClient) -> User | None:
+async def me(client: BBClient) -> Account | Error | None:
     """Return the currently authenticated user.
 
     Args:
         client: Authenticated :class:`~bb.cloud.sdk._client.BBClient` instance.
 
     Returns:
-        :class:`~bb.cloud.models.user.User` for the authenticated account, or ``None`` on error.
+        :class:`~bb.cloud.models.account.Account` for the authenticated account, or ``None`` on error.
 
     Raises:
         :exc:`~bb.cloud.sdk._errors.AuthenticationError`: If ``client`` uses an unrecognised or unsupported auth method.
@@ -76,11 +76,13 @@ async def me(client: BBClient) -> User | None:
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-users/#api-user-get>`_
     """
     result = await get_user.asyncio(client=client.auth)
-    return result if isinstance(result, User) else None
+    if isinstance(result, (Account, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def get(client: BBClient, selected_user: str) -> Account | None:
+async def get(client: BBClient, selected_user: str) -> Account | Error | None:
     """Return a user by account ID or username, or ``None`` if not found.
 
     Args:
@@ -109,11 +111,13 @@ async def get(client: BBClient, selected_user: str) -> Account | None:
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-users/#api-users-selected-user-get>`_
     """
     result = await get_users_selected_user.asyncio(selected_user, client=client.auth)
-    return result if isinstance(result, Account) else None
+    if isinstance(result, (Account, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def emails(client: BBClient) -> list[Any]:
+async def emails(client: BBClient) -> list[Any] | Error:
     """Return all email addresses of the authenticated user.
 
     Args:
@@ -140,17 +144,19 @@ async def emails(client: BBClient) -> list[Any]:
         `GET /2.0/user/emails
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-users/#api-user-emails-get>`_
     """
-    return [
-        e
-        async for e in async_paginate(
-            get_user_emails.asyncio,
-            client=client.auth,
-        )
-    ]
+    result = await async_paginate(
+        get_user_emails.asyncio,
+        client=client.auth,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return list(result)
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def get_email(client: BBClient, email: str) -> object | None:
+async def get_email(client: BBClient, email: str) -> object | Error | None:
     """Return a specific email address of the authenticated user.
 
     Args:
@@ -182,7 +188,7 @@ async def get_email(client: BBClient, email: str) -> object | None:
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def ssh_keys(client: BBClient, selected_user: str, *, pagelen: int = 25) -> list[SshAccountKey]:
+async def ssh_keys(client: BBClient, selected_user: str, *, pagelen: int = 25) -> list[SshAccountKey] | Error:
     """Return all SSH keys for a user.
 
     Args:
@@ -211,20 +217,21 @@ async def ssh_keys(client: BBClient, selected_user: str, *, pagelen: int = 25) -
         `GET /2.0/users/{selected_user}/ssh-keys
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-ssh/#api-users-selected-user-ssh-keys-get>`_
     """
-    return [
-        k
-        async for k in async_paginate(
-            get_users_selected_user_ssh_keys.asyncio,
-            selected_user,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-        if isinstance(k, SshAccountKey)
-    ]
+    result = await async_paginate(
+        get_users_selected_user_ssh_keys.asyncio,
+        selected_user,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [item for item in result if isinstance(item, SshAccountKey)]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def get_ssh_key(client: BBClient, selected_user: str, key_id: int) -> SshAccountKey | None:
+async def get_ssh_key(client: BBClient, selected_user: str, key_id: int) -> SshAccountKey | Error | None:
     """Return a single SSH key by ID, or ``None`` if not found.
 
     Args:
@@ -254,7 +261,9 @@ async def get_ssh_key(client: BBClient, selected_user: str, key_id: int) -> SshA
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-ssh/#api-users-selected-user-ssh-keys-key-id-get>`_
     """
     result = await get_users_selected_user_ssh_keys_key_id.asyncio(selected_user, key_id, client=client.auth)
-    return result if isinstance(result, SshAccountKey) else None
+    if isinstance(result, (SshAccountKey, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -263,7 +272,7 @@ async def add_ssh_key(
     selected_user: str,
     *,
     body: SshAccountKey | Unset = UNSET,
-) -> SshAccountKey | None:
+) -> SshAccountKey | Error | None:
     """Add an SSH key to a user account.
 
     Args:
@@ -294,7 +303,9 @@ async def add_ssh_key(
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-ssh/#api-users-selected-user-ssh-keys-post>`_
     """
     result = await post_users_selected_user_ssh_keys.asyncio(selected_user, client=client.auth, body=body)
-    return result if isinstance(result, SshAccountKey) else None
+    if isinstance(result, (SshAccountKey, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -304,7 +315,7 @@ async def update_ssh_key(
     key_id: int,
     *,
     body: SshAccountKey | Unset = UNSET,
-) -> SshAccountKey | None:
+) -> SshAccountKey | Error | None:
     """Update an SSH key on a user account.
 
     Args:
@@ -336,7 +347,9 @@ async def update_ssh_key(
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-ssh/#api-users-selected-user-ssh-keys-key-id-put>`_
     """
     result = await put_users_selected_user_ssh_keys_key_id.asyncio(selected_user, key_id, client=client.auth, body=body)
-    return result if isinstance(result, SshAccountKey) else None
+    if isinstance(result, (SshAccountKey, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -373,7 +386,7 @@ async def delete_ssh_key(client: BBClient, selected_user: str, key_id: int) -> N
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def gpg_keys(client: BBClient, selected_user: str, *, pagelen: int = 25) -> list[GpgAccountKey]:
+async def gpg_keys(client: BBClient, selected_user: str, *, pagelen: int = 25) -> list[GpgAccountKey] | Error:
     """Return all GPG keys for a user.
 
     Args:
@@ -402,20 +415,21 @@ async def gpg_keys(client: BBClient, selected_user: str, *, pagelen: int = 25) -
         `GET /2.0/users/{selected_user}/gpg-keys
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-gpg/#api-users-selected-user-gpg-keys-get>`_
     """
-    return [
-        k
-        async for k in async_paginate(
-            get_users_selected_user_gpg_keys.asyncio,
-            selected_user,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-        if isinstance(k, GpgAccountKey)
-    ]
+    result = await async_paginate(
+        get_users_selected_user_gpg_keys.asyncio,
+        selected_user,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [item for item in result if isinstance(item, GpgAccountKey)]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def get_gpg_key(client: BBClient, selected_user: str, fingerprint: str) -> GpgAccountKey | None:
+async def get_gpg_key(client: BBClient, selected_user: str, fingerprint: str) -> GpgAccountKey | Error | None:
     """Return a single GPG key by fingerprint, or ``None`` if not found.
 
     Args:
@@ -445,7 +459,9 @@ async def get_gpg_key(client: BBClient, selected_user: str, fingerprint: str) ->
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-gpg/#api-users-selected-user-gpg-keys-fingerprint-get>`_
     """
     result = await get_users_selected_user_gpg_keys_fingerprint.asyncio(selected_user, fingerprint, client=client.auth)
-    return result if isinstance(result, GpgAccountKey) else None
+    if isinstance(result, (GpgAccountKey, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -454,7 +470,7 @@ async def add_gpg_key(
     selected_user: str,
     *,
     body: GpgAccountKey | Unset = UNSET,
-) -> GpgAccountKey | None:
+) -> GpgAccountKey | Error | None:
     """Add a GPG key to a user account.
 
     Args:
@@ -485,7 +501,9 @@ async def add_gpg_key(
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-gpg/#api-users-selected-user-gpg-keys-post>`_
     """
     result = await post_users_selected_user_gpg_keys.asyncio(selected_user, client=client.auth, body=body)
-    return result if isinstance(result, GpgAccountKey) else None
+    if isinstance(result, (GpgAccountKey, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)

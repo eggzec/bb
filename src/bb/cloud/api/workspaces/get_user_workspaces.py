@@ -52,16 +52,22 @@ type ParseResult = Error | PaginatedWorkspacePermissions | None
 
 def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> ParseResult:
     if response.status_code == 200:
+        if "application/json" not in response.headers.get("content-type", ""):
+            return None
         response_200 = PaginatedWorkspacePermissions.from_dict(response.json())
 
         return response_200
 
     if response.status_code == 400:
+        if "application/json" not in response.headers.get("content-type", ""):
+            return None
         response_400 = Error.from_dict(response.json())
 
         return response_400
 
     if response.status_code == 401:
+        if "application/json" not in response.headers.get("content-type", ""):
+            return None
         response_401 = Error.from_dict(response.json())
 
         return response_401

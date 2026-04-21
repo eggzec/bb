@@ -7,6 +7,7 @@ from bb.cloud.api.commits import (
 from bb.cloud.api.pullrequests import get_pullrequests_for_commit
 from bb.cloud.models.base_commit import BaseCommit
 from bb.cloud.models.commit import Commit
+from bb.cloud.models.error import Error
 from bb.cloud.models.pullrequest import Pullrequest
 from bb.cloud.sdk._auth_validation import AuthMethod, require_auth
 from bb.cloud.sdk._client import BBClient
@@ -22,7 +23,7 @@ async def list(
     repo_slug: str,
     *,
     pagelen: int = 25,
-) -> list[BaseCommit]:
+) -> list[BaseCommit] | Error:
     """List all commits for a repository across all pages.
 
     Args:
@@ -52,21 +53,22 @@ async def list(
         `GET /2.0/repositories/{workspace}/{repo_slug}/commits
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-commits/#api-repositories-workspace-repo-slug-commits-get>`_
     """
-    return [
-        c
-        async for c in async_paginate(
-            get_repositories_workspace_repo_slug_commits.asyncio,
-            workspace,
-            repo_slug,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-        if isinstance(c, BaseCommit)
-    ]
+    result = await async_paginate(
+        get_repositories_workspace_repo_slug_commits.asyncio,
+        workspace,
+        repo_slug,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [item for item in result if isinstance(item, BaseCommit)]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def get(client: BBClient, workspace: str, repo_slug: str, commit: str) -> Commit | None:
+async def get(client: BBClient, workspace: str, repo_slug: str, commit: str) -> Commit | Error | None:
     """Fetch a single commit by hash.
 
     Args:
@@ -101,7 +103,9 @@ async def get(client: BBClient, workspace: str, repo_slug: str, commit: str) -> 
     result = await get_repositories_workspace_repo_slug_commit_commit.asyncio(
         workspace, repo_slug, commit, client=client.auth
     )
-    return result if isinstance(result, Commit) else None
+    if isinstance(result, (Commit, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -112,7 +116,7 @@ async def prs(
     commit: str,
     *,
     pagelen: int = 25,
-) -> list[Pullrequest]:
+) -> list[Pullrequest] | Error:
     """List all pull requests that include a given commit across all pages.
 
     Args:
@@ -146,15 +150,16 @@ async def prs(
         `GET /2.0/repositories/{workspace}/{repo_slug}/commit/{commit}/pullrequests
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-commits/#api-repositories-workspace-repo-slug-commit-commit-pullrequests-get>`_
     """
-    return [
-        pr
-        async for pr in async_paginate(
-            get_pullrequests_for_commit.asyncio,
-            workspace,
-            repo_slug,
-            commit,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-        if isinstance(pr, Pullrequest)
-    ]
+    result = await async_paginate(
+        get_pullrequests_for_commit.asyncio,
+        workspace,
+        repo_slug,
+        commit,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [item for item in result if isinstance(item, Pullrequest)]

@@ -6,6 +6,7 @@ from typing import Any
 from bb.cloud.models.deploy_key import DeployKey
 from bb.cloud.models.deployment import Deployment
 from bb.cloud.models.deployment_environment import DeploymentEnvironment
+from bb.cloud.models.error import Error
 from bb.cloud.sdk import deployments as _async
 from bb.cloud.sdk._client import BBClient
 from bb.cloud.types import UNSET, Unset
@@ -36,12 +37,12 @@ def list(
     repo_slug: str,
     *,
     pagelen: int = 25,
-) -> list[Deployment]:
+) -> list[Deployment] | Error:
     """Sync version of :func:`~bb.cloud.sdk.deployments.list`."""
     return asyncio.run(_async.list(client, workspace, repo_slug, pagelen=pagelen))
 
 
-def get(client: BBClient, workspace: str, repo_slug: str, deployment_uuid: str) -> Deployment | None:
+def get(client: BBClient, workspace: str, repo_slug: str, deployment_uuid: str) -> Deployment | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.deployments.get`."""
     return asyncio.run(_async.get(client, workspace, repo_slug, deployment_uuid))
 
@@ -52,12 +53,14 @@ def envs(
     repo_slug: str,
     *,
     pagelen: int = 25,
-) -> list[DeploymentEnvironment]:
+) -> list[DeploymentEnvironment] | Error:
     """Sync version of :func:`~bb.cloud.sdk.deployments.envs`."""
     return asyncio.run(_async.envs(client, workspace, repo_slug, pagelen=pagelen))
 
 
-def get_env(client: BBClient, workspace: str, repo_slug: str, environment_uuid: str) -> DeploymentEnvironment | None:
+def get_env(
+    client: BBClient, workspace: str, repo_slug: str, environment_uuid: str
+) -> DeploymentEnvironment | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.deployments.get_env`."""
     return asyncio.run(_async.get_env(client, workspace, repo_slug, environment_uuid))
 
@@ -68,7 +71,7 @@ def create_env(
     repo_slug: str,
     *,
     body: DeploymentEnvironment | Unset = UNSET,
-) -> DeploymentEnvironment | None:
+) -> DeploymentEnvironment | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.deployments.create_env`."""
     return asyncio.run(_async.create_env(client, workspace, repo_slug, body=body))
 
@@ -80,7 +83,7 @@ def update_env(
     environment_uuid: str,
     *,
     body: DeploymentEnvironment | Unset = UNSET,
-) -> DeploymentEnvironment | None:
+) -> DeploymentEnvironment | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.deployments.update_env`."""
     return asyncio.run(_async.update_env(client, workspace, repo_slug, environment_uuid, body=body))
 
@@ -96,7 +99,7 @@ def deploy_keys(
     repo_slug: str,
     *,
     pagelen: int = 25,
-) -> list[Any]:
+) -> list[Any] | Error:
     """Sync version of :func:`~bb.cloud.sdk.deployments.deploy_keys`."""
     return asyncio.run(_async.deploy_keys(client, workspace, repo_slug, pagelen=pagelen))
 
@@ -141,7 +144,7 @@ def env_variables(
     environment_uuid: str,
     *,
     pagelen: int = 25,
-) -> list[Any]:
+) -> list[Any] | Error:
     """Sync version of :func:`~bb.cloud.sdk.deployments.env_variables`."""
     return asyncio.run(_async.env_variables(client, workspace, repo_slug, environment_uuid, pagelen=pagelen))
 

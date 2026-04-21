@@ -16,6 +16,7 @@ from bb.cloud.api.workspaces import (
     get_workspaces_workspace_pullrequests_selected_user,
     get_workspaces_workspace_settings_gpg_public_key,
 )
+from bb.cloud.models.error import Error
 from bb.cloud.models.workspace import Workspace
 from bb.cloud.sdk._auth_validation import AuthMethod, require_auth
 from bb.cloud.sdk._client import BBClient
@@ -42,7 +43,7 @@ async def list(
     client: BBClient,
     *,
     pagelen: int = 25,
-) -> list[Workspace]:
+) -> list[Workspace] | Error:
     """List all workspaces the authenticated user belongs to.
 
     Args:
@@ -70,19 +71,20 @@ async def list(
         `GET /2.0/workspaces
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-workspaces/#api-workspaces-get>`_
     """
-    return [
-        w
-        async for w in async_paginate(
-            get_workspaces.asyncio,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-        if isinstance(w, Workspace)
-    ]
+    result = await async_paginate(
+        get_workspaces.asyncio,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [item for item in result if isinstance(item, Workspace)]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def get(client: BBClient, workspace: str) -> Workspace | None:
+async def get(client: BBClient, workspace: str) -> Workspace | Error | None:
     """Fetch a single workspace by slug.
 
     Args:
@@ -111,11 +113,13 @@ async def get(client: BBClient, workspace: str) -> Workspace | None:
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-workspaces/#api-workspaces-workspace-get>`_
     """
     result = await get_workspaces_workspace.asyncio(workspace, client=client.auth)
-    return result if isinstance(result, Workspace) else None
+    if isinstance(result, (Workspace, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def members(client: BBClient, workspace: str, *, pagelen: int = 25) -> list[Any]:
+async def members(client: BBClient, workspace: str, *, pagelen: int = 25) -> list[Any] | Error:
     """List all members of a workspace.
 
     Args:
@@ -144,19 +148,21 @@ async def members(client: BBClient, workspace: str, *, pagelen: int = 25) -> lis
         `GET /2.0/workspaces/{workspace}/members
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-workspaces/#api-workspaces-workspace-members-get>`_
     """
-    return [
-        m
-        async for m in async_paginate(
-            get_workspaces_workspace_members.asyncio,
-            workspace,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-    ]
+    result = await async_paginate(
+        get_workspaces_workspace_members.asyncio,
+        workspace,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [x for x in result]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def get_member(client: BBClient, workspace: str, member: str) -> Any | None:
+async def get_member(client: BBClient, workspace: str, member: str) -> Any | Error | None:
     """Fetch a specific member of a workspace.
 
     Args:
@@ -189,7 +195,7 @@ async def get_member(client: BBClient, workspace: str, member: str) -> Any | Non
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def permissions(client: BBClient, workspace: str, *, pagelen: int = 25) -> list[Any]:
+async def permissions(client: BBClient, workspace: str, *, pagelen: int = 25) -> list[Any] | Error:
     """List all member permissions for a workspace.
 
     Args:
@@ -218,19 +224,21 @@ async def permissions(client: BBClient, workspace: str, *, pagelen: int = 25) ->
         `GET /2.0/workspaces/{workspace}/permissions
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-workspaces/#api-workspaces-workspace-permissions-get>`_
     """
-    return [
-        p
-        async for p in async_paginate(
-            get_workspaces_workspace_permissions.asyncio,
-            workspace,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-    ]
+    result = await async_paginate(
+        get_workspaces_workspace_permissions.asyncio,
+        workspace,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [x for x in result]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def repo_permissions(client: BBClient, workspace: str, *, pagelen: int = 25) -> list[Any]:
+async def repo_permissions(client: BBClient, workspace: str, *, pagelen: int = 25) -> list[Any] | Error:
     """List repository-level permissions for all members in a workspace.
 
     Args:
@@ -259,19 +267,21 @@ async def repo_permissions(client: BBClient, workspace: str, *, pagelen: int = 2
         `GET /2.0/workspaces/{workspace}/permissions/repositories
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-workspaces/#api-workspaces-workspace-permissions-repositories-get>`_
     """
-    return [
-        p
-        async for p in async_paginate(
-            get_workspaces_workspace_permissions_repositories.asyncio,
-            workspace,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-    ]
+    result = await async_paginate(
+        get_workspaces_workspace_permissions_repositories.asyncio,
+        workspace,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [x for x in result]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def get_repo_permission(client: BBClient, workspace: str, repo_slug: str) -> Any | None:
+async def get_repo_permission(client: BBClient, workspace: str, repo_slug: str) -> Any | Error | None:
     """Fetch the permission configuration for a specific repository within a workspace.
 
     Args:
@@ -308,7 +318,7 @@ async def get_repo_permission(client: BBClient, workspace: str, repo_slug: str) 
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def user_prs(client: BBClient, workspace: str, selected_user: str, *, pagelen: int = 25) -> list[Any]:
+async def user_prs(client: BBClient, workspace: str, selected_user: str, *, pagelen: int = 25) -> list[Any] | Error:
     """List pull requests authored by a specific user in a workspace.
 
     Args:
@@ -341,20 +351,22 @@ async def user_prs(client: BBClient, workspace: str, selected_user: str, *, page
         `GET /2.0/workspaces/{workspace}/pullrequests/{selected_user}
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-workspaces/#api-workspaces-workspace-pullrequests-selected-user-get>`_
     """
-    return [
-        pr
-        async for pr in async_paginate(
-            get_workspaces_workspace_pullrequests_selected_user.asyncio,
-            workspace,
-            selected_user,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-    ]
+    result = await async_paginate(
+        get_workspaces_workspace_pullrequests_selected_user.asyncio,
+        workspace,
+        selected_user,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [x for x in result]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def gpg_key(client: BBClient, workspace: str) -> Any | None:
+async def gpg_key(client: BBClient, workspace: str) -> Any | Error | None:
     """Fetch the GPG public key for a workspace.
 
     Args:
@@ -386,7 +398,7 @@ async def gpg_key(client: BBClient, workspace: str) -> Any | None:
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def mine(client: BBClient, *, pagelen: int = 25) -> list[Workspace]:
+async def mine(client: BBClient, *, pagelen: int = 25) -> list[Workspace] | Error:
     """List the authenticated user's workspaces via the /user endpoint.
 
     Args:
@@ -414,19 +426,20 @@ async def mine(client: BBClient, *, pagelen: int = 25) -> list[Workspace]:
         `GET /2.0/user/workspaces
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-workspaces/#api-user-workspaces-get>`_
     """
-    return [
-        w
-        async for w in async_paginate(
-            get_user_workspaces.asyncio,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-        if isinstance(w, Workspace)
-    ]
+    result = await async_paginate(
+        get_user_workspaces.asyncio,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [item for item in result if isinstance(item, Workspace)]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def my_permissions(client: BBClient, *, pagelen: int = 25) -> list[Any]:
+async def my_permissions(client: BBClient, *, pagelen: int = 25) -> list[Any] | Error:
     """List the current user's permissions across all workspaces.
 
     Args:
@@ -454,18 +467,20 @@ async def my_permissions(client: BBClient, *, pagelen: int = 25) -> list[Any]:
         `GET /2.0/user/permissions/workspaces
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-workspaces/#api-user-permissions-workspaces-get>`_
     """
-    return [
-        p
-        async for p in async_paginate(
-            get_user_permissions_workspaces.asyncio,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-    ]
+    result = await async_paginate(
+        get_user_permissions_workspaces.asyncio,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [x for x in result]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def my_permission(client: BBClient, workspace: str) -> Any | None:
+async def my_permission(client: BBClient, workspace: str) -> Any | Error | None:
     """Fetch the current user's permission in a specific workspace.
 
     Args:

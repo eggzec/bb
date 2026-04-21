@@ -6,9 +6,16 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
+from bb.cloud.models.error import Error
+from bb.cloud.models.error_error import ErrorError
 from bb.cloud.models.project import Project
 from bb.cloud.sdk import projects
 from bb.cloud.sdk._errors import AuthenticationError
+
+
+def _make_error(msg: str = "not found") -> Error:
+    return Error(type_="error", error=ErrorError(message=msg))
+
 
 _API = "bb.cloud.api.projects"
 _WS_API = "bb.cloud.api.workspaces"
@@ -88,6 +95,21 @@ async def test_user_permissions_returns_list(mock_client, make_page):
     ):
         result = await projects.user_permissions(mock_client, "ws", "PROJ")
     assert result == [item]
+
+
+async def test_get_propagates_error(mock_client):
+    err = _make_error("project not found")
+    with patch(f"{_API}.get_workspaces_workspace_projects_project_key.asyncio", new=AsyncMock(return_value=err)):
+        result = await projects.get(mock_client, "ws", "PROJ")
+    assert result is err
+    assert isinstance(result, Error)
+
+
+async def test_create_propagates_error(mock_client):
+    err = _make_error("duplicate project key")
+    with patch(f"{_API}.post_workspaces_workspace_projects.asyncio", new=AsyncMock(return_value=err)):
+        result = await projects.create(mock_client, "ws")
+    assert result is err
 
 
 async def test_list_raises_on_bad_auth(bad_auth_client):

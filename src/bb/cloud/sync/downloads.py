@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 from typing import Any
 
+from bb.cloud.models.error import Error
 from bb.cloud.sdk import downloads as _async
 from bb.cloud.sdk._client import BBClient
 from bb.cloud.types import UNSET, Unset
@@ -21,7 +22,7 @@ def list(
     repo_slug: str,
     *,
     pagelen: int = 25,
-) -> list[Any]:
+) -> list[Any] | Error:
     """Sync version of :func:`~bb.cloud.sdk.downloads.list`."""
     return asyncio.run(_async.list(client, workspace, repo_slug, pagelen=pagelen))
 

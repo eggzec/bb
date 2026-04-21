@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 from typing import Any
 
+from bb.cloud.models.error import Error
 from bb.cloud.models.project import Project
 from bb.cloud.sdk import projects as _async
 from bb.cloud.sdk._client import BBClient
@@ -27,12 +28,12 @@ __all__ = [
 ]
 
 
-def list(client: BBClient, workspace: str, *, pagelen: int = 25) -> list[Project]:
+def list(client: BBClient, workspace: str, *, pagelen: int = 25) -> list[Project] | Error:
     """Sync version of :func:`~bb.cloud.sdk.projects.list`."""
     return asyncio.run(_async.list(client, workspace, pagelen=pagelen))
 
 
-def get(client: BBClient, workspace: str, project_key: str) -> Project | None:
+def get(client: BBClient, workspace: str, project_key: str) -> Project | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.projects.get`."""
     return asyncio.run(_async.get(client, workspace, project_key))
 
@@ -42,7 +43,7 @@ def create(
     workspace: str,
     *,
     body: Project | Unset = UNSET,
-) -> Project | None:
+) -> Project | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.projects.create`."""
     return asyncio.run(_async.create(client, workspace, body=body))
 
@@ -53,7 +54,7 @@ def update(
     project_key: str,
     *,
     body: Project | Unset = UNSET,
-) -> Project | None:
+) -> Project | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.projects.update`."""
     return asyncio.run(_async.update(client, workspace, project_key, body=body))
 
@@ -63,12 +64,12 @@ def delete(client: BBClient, workspace: str, project_key: str) -> None:
     return asyncio.run(_async.delete(client, workspace, project_key))
 
 
-def default_reviewers(client: BBClient, workspace: str, project_key: str, *, pagelen: int = 25) -> list[Any]:
+def default_reviewers(client: BBClient, workspace: str, project_key: str, *, pagelen: int = 25) -> list[Any] | Error:
     """Sync version of :func:`~bb.cloud.sdk.projects.default_reviewers`."""
     return asyncio.run(_async.default_reviewers(client, workspace, project_key, pagelen=pagelen))
 
 
-def get_default_reviewer(client: BBClient, workspace: str, project_key: str, selected_user: str) -> Any | None:
+def get_default_reviewer(client: BBClient, workspace: str, project_key: str, selected_user: str) -> Any | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.projects.get_default_reviewer`."""
     return asyncio.run(_async.get_default_reviewer(client, workspace, project_key, selected_user))
 
@@ -83,7 +84,7 @@ def remove_default_reviewer(client: BBClient, workspace: str, project_key: str, 
     return asyncio.run(_async.remove_default_reviewer(client, workspace, project_key, selected_user))
 
 
-def group_permissions(client: BBClient, workspace: str, project_key: str, *, pagelen: int = 25) -> list[Any]:
+def group_permissions(client: BBClient, workspace: str, project_key: str, *, pagelen: int = 25) -> list[Any] | Error:
     """Sync version of :func:`~bb.cloud.sdk.projects.group_permissions`."""
     return asyncio.run(_async.group_permissions(client, workspace, project_key, pagelen=pagelen))
 
@@ -95,7 +96,7 @@ def update_group_permission(
     group_slug: str,
     *,
     body: Unset = UNSET,
-) -> Any | None:
+) -> Any | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.projects.update_group_permission`."""
     return asyncio.run(_async.update_group_permission(client, workspace, project_key, group_slug, body=body))
 
@@ -105,7 +106,7 @@ def delete_group_permission(client: BBClient, workspace: str, project_key: str, 
     return asyncio.run(_async.delete_group_permission(client, workspace, project_key, group_slug))
 
 
-def user_permissions(client: BBClient, workspace: str, project_key: str, *, pagelen: int = 25) -> list[Any]:
+def user_permissions(client: BBClient, workspace: str, project_key: str, *, pagelen: int = 25) -> list[Any] | Error:
     """Sync version of :func:`~bb.cloud.sdk.projects.user_permissions`."""
     return asyncio.run(_async.user_permissions(client, workspace, project_key, pagelen=pagelen))
 
@@ -117,7 +118,7 @@ def update_user_permission(
     selected_user_id: str,
     *,
     body: Unset = UNSET,
-) -> Any | None:
+) -> Any | Error | None:
     """Sync version of :func:`~bb.cloud.sdk.projects.update_user_permission`."""
     return asyncio.run(_async.update_user_permission(client, workspace, project_key, selected_user_id, body=body))
 

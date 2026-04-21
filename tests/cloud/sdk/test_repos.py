@@ -6,9 +6,16 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
+from bb.cloud.models.error import Error
+from bb.cloud.models.error_error import ErrorError
 from bb.cloud.models.repository import Repository
 from bb.cloud.sdk import repos
 from bb.cloud.sdk._errors import AuthenticationError
+
+
+def _make_error(msg: str = "not found") -> Error:
+    return Error(type_="error", error=ErrorError(message=msg))
+
 
 _API = "bb.cloud.api.repositories"
 
@@ -101,6 +108,21 @@ async def test_my_permissions_returns_list(mock_client, make_page):
     with patch(f"{_API}.get_user_permissions_repositories.asyncio", new=AsyncMock(return_value=make_page([item]))):
         result = await repos.my_permissions(mock_client)
     assert result == [item]
+
+
+async def test_get_propagates_error(mock_client):
+    err = _make_error("repository not found")
+    with patch(f"{_API}.get_repositories_workspace_repo_slug.asyncio", new=AsyncMock(return_value=err)):
+        result = await repos.get(mock_client, "ws", "slug")
+    assert result is err
+    assert isinstance(result, Error)
+
+
+async def test_create_propagates_error(mock_client):
+    err = _make_error("permission denied")
+    with patch(f"{_API}.post_repositories_workspace_repo_slug.asyncio", new=AsyncMock(return_value=err)):
+        result = await repos.create(mock_client, "ws", "slug")
+    assert result is err
 
 
 async def test_list_raises_on_bad_auth(bad_auth_client):

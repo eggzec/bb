@@ -40,6 +40,7 @@ from bb.cloud.api.pullrequests import (
     put_repositories_workspace_repo_slug_pullrequests_pull_request_id_comments_comment_id,
     put_repositories_workspace_repo_slug_pullrequests_pull_request_id_tasks_task_id,
 )
+from bb.cloud.models.error import Error
 from bb.cloud.models.get_repositories_workspace_repo_slug_pullrequests_state import (
     GetRepositoriesWorkspaceRepoSlugPullrequestsState,
 )
@@ -104,7 +105,7 @@ async def list(
     *,
     state: GetRepositoriesWorkspaceRepoSlugPullrequestsState | Unset = UNSET,
     pagelen: int = 25,
-) -> list[Pullrequest]:
+) -> list[Pullrequest] | Error:
     """List all pull requests for a repository across all pages.
 
     Args:
@@ -137,22 +138,23 @@ async def list(
         `GET /2.0/repositories/{workspace}/{repo_slug}/pullrequests
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pullrequests/#api-repositories-workspace-repo-slug-pullrequests-get>`_
     """
-    return [
-        pr
-        async for pr in async_paginate(
-            get_repositories_workspace_repo_slug_pullrequests.asyncio,
-            workspace,
-            repo_slug,
-            client=client.auth,
-            state=state,
-            pagelen=pagelen,
-        )
-        if isinstance(pr, Pullrequest)
-    ]
+    result = await async_paginate(
+        get_repositories_workspace_repo_slug_pullrequests.asyncio,
+        workspace,
+        repo_slug,
+        client=client.auth,
+        state=state,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [item for item in result if isinstance(item, Pullrequest)]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def get(client: BBClient, workspace: str, repo_slug: str, pull_request_id: int) -> Pullrequest | None:
+async def get(client: BBClient, workspace: str, repo_slug: str, pull_request_id: int) -> Pullrequest | Error | None:
     """Fetch a single pull request by ID.
 
     Args:
@@ -185,7 +187,9 @@ async def get(client: BBClient, workspace: str, repo_slug: str, pull_request_id:
     result = await get_repositories_workspace_repo_slug_pullrequests_pull_request_id.asyncio(
         workspace, repo_slug, pull_request_id, client=client.auth
     )
-    return result if isinstance(result, Pullrequest) else None
+    if isinstance(result, (Pullrequest, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -195,7 +199,7 @@ async def create(
     repo_slug: str,
     *,
     body: Pullrequest | Unset = UNSET,
-) -> Pullrequest | None:
+) -> Pullrequest | Error | None:
     """Create a new pull request.
 
     Args:
@@ -230,7 +234,9 @@ async def create(
     result = await post_repositories_workspace_repo_slug_pullrequests.asyncio(
         workspace, repo_slug, client=client.auth, body=body
     )
-    return result if isinstance(result, Pullrequest) else None
+    if isinstance(result, (Pullrequest, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -241,7 +247,7 @@ async def update(
     pull_request_id: int,
     *,
     body: Pullrequest | Unset = UNSET,
-) -> Pullrequest | None:
+) -> Pullrequest | Error | None:
     """Update an existing pull request.
 
     Args:
@@ -279,7 +285,9 @@ async def update(
     result = await put_repositories_workspace_repo_slug_pullrequests_pull_request_id.asyncio(
         workspace, repo_slug, pull_request_id, client=client.auth, body=body
     )
-    return result if isinstance(result, Pullrequest) else None
+    if isinstance(result, (Pullrequest, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -291,7 +299,7 @@ async def merge(
     *,
     body: PullRequestMergeParameters | Unset = UNSET,
     async_merge: bool | Unset = UNSET,
-) -> Pullrequest | None:
+) -> Pullrequest | Error | None:
     """Merge a pull request.
 
     Args:
@@ -334,11 +342,13 @@ async def merge(
         body=body,
         async_=async_merge,
     )
-    return result if isinstance(result, Pullrequest) else None
+    if isinstance(result, (Pullrequest, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def approve(client: BBClient, workspace: str, repo_slug: str, pull_request_id: int) -> Participant | None:
+async def approve(client: BBClient, workspace: str, repo_slug: str, pull_request_id: int) -> Participant | Error | None:
     """Approve a pull request.
 
     Args:
@@ -374,7 +384,9 @@ async def approve(client: BBClient, workspace: str, repo_slug: str, pull_request
     result = await post_repositories_workspace_repo_slug_pullrequests_pull_request_id_approve.asyncio(
         workspace, repo_slug, pull_request_id, client=client.auth
     )
-    return result if isinstance(result, Participant) else None
+    if isinstance(result, (Participant, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -414,7 +426,7 @@ async def unapprove(client: BBClient, workspace: str, repo_slug: str, pull_reque
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def decline(client: BBClient, workspace: str, repo_slug: str, pull_request_id: int) -> Pullrequest | None:
+async def decline(client: BBClient, workspace: str, repo_slug: str, pull_request_id: int) -> Pullrequest | Error | None:
     """Decline a pull request.
 
     Args:
@@ -450,11 +462,15 @@ async def decline(client: BBClient, workspace: str, repo_slug: str, pull_request
     result = await post_repositories_workspace_repo_slug_pullrequests_pull_request_id_decline.asyncio(
         workspace, repo_slug, pull_request_id, client=client.auth
     )
-    return result if isinstance(result, Pullrequest) else None
+    if isinstance(result, (Pullrequest, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def request_changes(client: BBClient, workspace: str, repo_slug: str, pull_request_id: int) -> Participant | None:
+async def request_changes(
+    client: BBClient, workspace: str, repo_slug: str, pull_request_id: int
+) -> Participant | Error | None:
     """Request changes on a pull request.
 
     Args:
@@ -490,7 +506,9 @@ async def request_changes(client: BBClient, workspace: str, repo_slug: str, pull
     result = await post_repositories_workspace_repo_slug_pullrequests_pull_request_id_request_changes.asyncio(
         workspace, repo_slug, pull_request_id, client=client.auth
     )
-    return result if isinstance(result, Participant) else None
+    if isinstance(result, (Participant, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -534,7 +552,7 @@ async def unrequest_changes(client: BBClient, workspace: str, repo_slug: str, pu
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
 async def comments(
     client: BBClient, workspace: str, repo_slug: str, pull_request_id: int, *, pagelen: int = 25
-) -> list[PullRequestComment]:
+) -> list[PullRequestComment] | Error:
     """List all comments on a pull request across all pages.
 
     Args:
@@ -568,18 +586,19 @@ async def comments(
         `GET /2.0/repositories/{workspace}/{repo_slug}/pullrequests/{pull_request_id}/comments
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pullrequests/#api-repositories-workspace-repo-slug-pullrequests-pull-request-id-comments-get>`_
     """
-    return [
-        c
-        async for c in async_paginate(
-            get_repositories_workspace_repo_slug_pullrequests_pull_request_id_comments.asyncio,
-            workspace,
-            repo_slug,
-            pull_request_id,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-        if isinstance(c, PullRequestComment)
-    ]
+    result = await async_paginate(
+        get_repositories_workspace_repo_slug_pullrequests_pull_request_id_comments.asyncio,
+        workspace,
+        repo_slug,
+        pull_request_id,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [item for item in result if isinstance(item, PullRequestComment)]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -590,7 +609,7 @@ async def add_comment(
     pull_request_id: int,
     *,
     body: PullRequestComment | Unset = UNSET,
-) -> PullRequestComment | None:
+) -> PullRequestComment | Error | None:
     """Add a comment to a pull request.
 
     Args:
@@ -629,11 +648,13 @@ async def add_comment(
     result = await post_repositories_workspace_repo_slug_pullrequests_pull_request_id_comments.asyncio(
         workspace, repo_slug, pull_request_id, client=client.auth, body=body
     )
-    return result if isinstance(result, PullRequestComment) else None
+    if isinstance(result, (PullRequestComment, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def diff(client: BBClient, workspace: str, repo_slug: str, pull_request_id: int) -> str | None:
+async def diff(client: BBClient, workspace: str, repo_slug: str, pull_request_id: int) -> str | Error | None:
     """Return the unified diff of a pull request as a string.
 
     Args:
@@ -668,13 +689,15 @@ async def diff(client: BBClient, workspace: str, repo_slug: str, pull_request_id
     result = await get_repositories_workspace_repo_slug_pullrequests_pull_request_id_diff.asyncio(
         workspace, repo_slug, pull_request_id, client=client.auth
     )
-    return result if isinstance(result, str) else None
+    if isinstance(result, (str, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
 async def commits(
     client: BBClient, workspace: str, repo_slug: str, pull_request_id: int, *, pagelen: int = 25
-) -> list[Any]:
+) -> list[Any] | Error:
     """List all commits included in a pull request across all pages.
 
     Args:
@@ -707,23 +730,25 @@ async def commits(
         `GET /2.0/repositories/{workspace}/{repo_slug}/pullrequests/{pull_request_id}/commits
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pullrequests/#api-repositories-workspace-repo-slug-pullrequests-pull-request-id-commits-get>`_
     """
-    return [
-        c
-        async for c in async_paginate(
-            get_repositories_workspace_repo_slug_pullrequests_pull_request_id_commits.asyncio,
-            workspace,
-            repo_slug,
-            pull_request_id,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-    ]
+    result = await async_paginate(
+        get_repositories_workspace_repo_slug_pullrequests_pull_request_id_commits.asyncio,
+        workspace,
+        repo_slug,
+        pull_request_id,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [x for x in result]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
 async def tasks(
     client: BBClient, workspace: str, repo_slug: str, pull_request_id: int, *, pagelen: int = 25
-) -> list[Any]:
+) -> list[Any] | Error:
     """List all tasks on a pull request across all pages.
 
     Args:
@@ -756,21 +781,25 @@ async def tasks(
         `GET /2.0/repositories/{workspace}/{repo_slug}/pullrequests/{pull_request_id}/tasks
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pullrequests/#api-repositories-workspace-repo-slug-pullrequests-pull-request-id-tasks-get>`_
     """
-    return [
-        t
-        async for t in async_paginate(
-            get_repositories_workspace_repo_slug_pullrequests_pull_request_id_tasks.asyncio,
-            workspace,
-            repo_slug,
-            pull_request_id,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-    ]
+    result = await async_paginate(
+        get_repositories_workspace_repo_slug_pullrequests_pull_request_id_tasks.asyncio,
+        workspace,
+        repo_slug,
+        pull_request_id,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [x for x in result]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def default_reviewers(client: BBClient, workspace: str, repo_slug: str, *, pagelen: int = 25) -> list[Any]:
+async def default_reviewers(
+    client: BBClient, workspace: str, repo_slug: str, *, pagelen: int = 25
+) -> list[Any] | Error:
     """List all default reviewers for a repository across all pages.
 
     Args:
@@ -802,16 +831,18 @@ async def default_reviewers(client: BBClient, workspace: str, repo_slug: str, *,
         `GET /2.0/repositories/{workspace}/{repo_slug}/default-reviewers
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pullrequests/#api-repositories-workspace-repo-slug-default-reviewers-get>`_
     """
-    return [
-        r
-        async for r in async_paginate(
-            get_repositories_workspace_repo_slug_default_reviewers.asyncio,
-            workspace,
-            repo_slug,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-    ]
+    result = await async_paginate(
+        get_repositories_workspace_repo_slug_default_reviewers.asyncio,
+        workspace,
+        repo_slug,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [x for x in result]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -891,7 +922,9 @@ async def remove_default_reviewer(client: BBClient, workspace: str, repo_slug: s
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def get_default_reviewer(client: BBClient, workspace: str, repo_slug: str, target_username: str) -> Any | None:
+async def get_default_reviewer(
+    client: BBClient, workspace: str, repo_slug: str, target_username: str
+) -> Any | Error | None:
     """Fetch details of a specific default reviewer for a repository.
 
     Args:
@@ -931,7 +964,7 @@ async def get_default_reviewer(client: BBClient, workspace: str, repo_slug: str,
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
 async def effective_default_reviewers(
     client: BBClient, workspace: str, repo_slug: str, *, pagelen: int = 25
-) -> list[Any]:
+) -> list[Any] | Error:
     """List the effective default reviewers for a repository across all pages.
 
     Effective reviewers include those inherited from the parent project as well as
@@ -966,22 +999,24 @@ async def effective_default_reviewers(
         `GET /2.0/repositories/{workspace}/{repo_slug}/effective-default-reviewers
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pullrequests/#api-repositories-workspace-repo-slug-effective-default-reviewers-get>`_
     """
-    return [
-        r
-        async for r in async_paginate(
-            get_repositories_workspace_repo_slug_effective_default_reviewers.asyncio,
-            workspace,
-            repo_slug,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-    ]
+    result = await async_paginate(
+        get_repositories_workspace_repo_slug_effective_default_reviewers.asyncio,
+        workspace,
+        repo_slug,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [x for x in result]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
 async def get_comment(
     client: BBClient, workspace: str, repo_slug: str, pull_request_id: int, comment_id: int
-) -> PullRequestComment | None:
+) -> PullRequestComment | Error | None:
     """Fetch a single comment on a pull request.
 
     Args:
@@ -1019,7 +1054,9 @@ async def get_comment(
     result = await get_repositories_workspace_repo_slug_pullrequests_pull_request_id_comments_comment_id.asyncio(
         workspace, repo_slug, pull_request_id, comment_id, client=client.auth
     )
-    return result if isinstance(result, PullRequestComment) else None
+    if isinstance(result, (PullRequestComment, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -1031,7 +1068,7 @@ async def update_comment(
     comment_id: int,
     *,
     body: PullRequestComment | Unset = UNSET,
-) -> PullRequestComment | None:
+) -> PullRequestComment | Error | None:
     """Update a comment on a pull request.
 
     Args:
@@ -1070,7 +1107,9 @@ async def update_comment(
     result = await put_repositories_workspace_repo_slug_pullrequests_pull_request_id_comments_comment_id.asyncio(
         workspace, repo_slug, pull_request_id, comment_id, client=client.auth, body=body
     )
-    return result if isinstance(result, PullRequestComment) else None
+    if isinstance(result, (PullRequestComment, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -1118,7 +1157,7 @@ async def delete_comment(
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
 async def resolve_comment(
     client: BBClient, workspace: str, repo_slug: str, pull_request_id: int, comment_id: int
-) -> Any | None:
+) -> Any | Error | None:
     """Mark a pull request comment as resolved.
 
     Args:
@@ -1207,7 +1246,7 @@ async def create_task(
     pull_request_id: int,
     *,
     body: Unset = UNSET,
-) -> Any | None:
+) -> Any | Error | None:
     """Create a task on a pull request.
 
     Args:
@@ -1247,7 +1286,9 @@ async def create_task(
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def get_task(client: BBClient, workspace: str, repo_slug: str, pull_request_id: int, task_id: int) -> Any | None:
+async def get_task(
+    client: BBClient, workspace: str, repo_slug: str, pull_request_id: int, task_id: int
+) -> Any | Error | None:
     """Fetch a single task on a pull request.
 
     Args:
@@ -1295,7 +1336,7 @@ async def update_task(
     task_id: int,
     *,
     body: Unset = UNSET,
-) -> Any | None:
+) -> Any | Error | None:
     """Update a task on a pull request.
 
     Args:
@@ -1377,7 +1418,7 @@ async def delete_task(client: BBClient, workspace: str, repo_slug: str, pull_req
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def activity(client: BBClient, workspace: str, repo_slug: str, *, pagelen: int = 25) -> list[Any]:
+async def activity(client: BBClient, workspace: str, repo_slug: str, *, pagelen: int = 25) -> list[Any] | Error:
     """List activity for all pull requests in a repository across all pages.
 
     Args:
@@ -1407,22 +1448,24 @@ async def activity(client: BBClient, workspace: str, repo_slug: str, *, pagelen:
         `GET /2.0/repositories/{workspace}/{repo_slug}/pullrequests/activity
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pullrequests/#api-repositories-workspace-repo-slug-pullrequests-activity-get>`_
     """
-    return [
-        a
-        async for a in async_paginate(
-            get_repositories_workspace_repo_slug_pullrequests_activity.asyncio,
-            workspace,
-            repo_slug,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-    ]
+    result = await async_paginate(
+        get_repositories_workspace_repo_slug_pullrequests_activity.asyncio,
+        workspace,
+        repo_slug,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [x for x in result]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
 async def pr_activity(
     client: BBClient, workspace: str, repo_slug: str, pull_request_id: int, *, pagelen: int = 25
-) -> list[Any]:
+) -> list[Any] | Error:
     """List activity for a specific pull request across all pages.
 
     Args:
@@ -1455,17 +1498,19 @@ async def pr_activity(
         `GET /2.0/repositories/{workspace}/{repo_slug}/pullrequests/{pull_request_id}/activity
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pullrequests/#api-repositories-workspace-repo-slug-pullrequests-pull-request-id-activity-get>`_
     """
-    return [
-        a
-        async for a in async_paginate(
-            get_repositories_workspace_repo_slug_pullrequests_pull_request_id_activity.asyncio,
-            workspace,
-            repo_slug,
-            pull_request_id,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-    ]
+    result = await async_paginate(
+        get_repositories_workspace_repo_slug_pullrequests_pull_request_id_activity.asyncio,
+        workspace,
+        repo_slug,
+        pull_request_id,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [x for x in result]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -1507,7 +1552,7 @@ async def diffstat(client: BBClient, workspace: str, repo_slug: str, pull_reques
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def patch(client: BBClient, workspace: str, repo_slug: str, pull_request_id: int) -> str | None:
+async def patch(client: BBClient, workspace: str, repo_slug: str, pull_request_id: int) -> str | Error | None:
     """Return the patch for a pull request as a string.
 
     Args:
@@ -1542,13 +1587,15 @@ async def patch(client: BBClient, workspace: str, repo_slug: str, pull_request_i
     result = await get_repositories_workspace_repo_slug_pullrequests_pull_request_id_patch.asyncio(
         workspace, repo_slug, pull_request_id, client=client.auth
     )
-    return result if isinstance(result, str) else None
+    if isinstance(result, (str, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
 async def statuses(
     client: BBClient, workspace: str, repo_slug: str, pull_request_id: int, *, pagelen: int = 25
-) -> list[Any]:
+) -> list[Any] | Error:
     """List all commit statuses for a pull request across all pages.
 
     Args:
@@ -1581,21 +1628,25 @@ async def statuses(
         `GET /2.0/repositories/{workspace}/{repo_slug}/pullrequests/{pull_request_id}/statuses
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pullrequests/#api-repositories-workspace-repo-slug-pullrequests-pull-request-id-statuses-get>`_
     """
-    return [
-        s
-        async for s in async_paginate(
-            get_repositories_workspace_repo_slug_pullrequests_pull_request_id_statuses.asyncio,
-            workspace,
-            repo_slug,
-            pull_request_id,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-    ]
+    result = await async_paginate(
+        get_repositories_workspace_repo_slug_pullrequests_pull_request_id_statuses.asyncio,
+        workspace,
+        repo_slug,
+        pull_request_id,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [x for x in result]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def user_prs(client: BBClient, workspace: str, selected_user: str, *, pagelen: int = 25) -> list[Pullrequest]:
+async def user_prs(
+    client: BBClient, workspace: str, selected_user: str, *, pagelen: int = 25
+) -> list[Pullrequest] | Error:
     """List all pull requests authored by a user in a workspace across all pages.
 
     Args:
@@ -1626,23 +1677,24 @@ async def user_prs(client: BBClient, workspace: str, selected_user: str, *, page
         `GET /2.0/workspaces/{workspace}/pullrequests/{selected_user}
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-workspaces/#api-workspaces-workspace-pullrequests-selected-user-get>`_
     """
-    return [
-        pr
-        async for pr in async_paginate(
-            get_workspaces_workspace_pullrequests_selected_user.asyncio,
-            workspace,
-            selected_user,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-        if isinstance(pr, Pullrequest)
-    ]
+    result = await async_paginate(
+        get_workspaces_workspace_pullrequests_selected_user.asyncio,
+        workspace,
+        selected_user,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [item for item in result if isinstance(item, Pullrequest)]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
 async def merge_task_status(
     client: BBClient, workspace: str, repo_slug: str, pull_request_id: int, task_id: str
-) -> Any | None:
+) -> Any | Error | None:
     """Return the status of an asynchronous merge task.
 
     Use this to poll for completion after calling :func:`merge` with ``async_merge=True``.

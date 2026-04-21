@@ -22,11 +22,10 @@ from bb.cloud.sdk import (
     workspaces,
 )
 from bb.cloud.sdk._client import BBClient
-from bb.cloud.sdk._pagination import async_paginate, paginate
+from bb.cloud.sdk._pagination import async_paginate
 
 __all__ = [
     "BBClient",
-    "paginate",
     "async_paginate",
     "addon",
     "branch_restrictions",

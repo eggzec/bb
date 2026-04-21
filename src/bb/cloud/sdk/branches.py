@@ -10,6 +10,7 @@ from bb.cloud.api.refs import (
     post_repositories_workspace_repo_slug_refs_tags,
 )
 from bb.cloud.models.branch import Branch
+from bb.cloud.models.error import Error
 from bb.cloud.models.tag import Tag
 from bb.cloud.sdk._auth_validation import AuthMethod, require_auth
 from bb.cloud.sdk._client import BBClient
@@ -28,7 +29,7 @@ async def list(
     q: str | Unset = UNSET,
     sort: str | Unset = UNSET,
     pagelen: int = 25,
-) -> list[Branch]:
+) -> list[Branch] | Error:
     """List all branches for a repository across all pages.
 
     Args:
@@ -60,23 +61,24 @@ async def list(
         `GET /2.0/repositories/{workspace}/{repo_slug}/refs/branches
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-refs/#api-repositories-workspace-repo-slug-refs-branches-get>`_
     """
-    return [
-        b
-        async for b in async_paginate(
-            get_repositories_workspace_repo_slug_refs_branches.asyncio,
-            workspace,
-            repo_slug,
-            client=client.auth,
-            q=q,
-            sort=sort,
-            pagelen=pagelen,
-        )
-        if isinstance(b, Branch)
-    ]
+    result = await async_paginate(
+        get_repositories_workspace_repo_slug_refs_branches.asyncio,
+        workspace,
+        repo_slug,
+        client=client.auth,
+        q=q,
+        sort=sort,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [item for item in result if isinstance(item, Branch)]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def get(client: BBClient, workspace: str, repo_slug: str, name: str) -> Branch | None:
+async def get(client: BBClient, workspace: str, repo_slug: str, name: str) -> Branch | Error | None:
     """Fetch a single branch by name.
 
     Args:
@@ -111,7 +113,9 @@ async def get(client: BBClient, workspace: str, repo_slug: str, name: str) -> Br
     result = await get_repositories_workspace_repo_slug_refs_branches_name.asyncio(
         workspace, repo_slug, name, client=client.auth
     )
-    return result if isinstance(result, Branch) else None
+    if isinstance(result, (Branch, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -122,7 +126,7 @@ async def create(
     *,
     name: str,
     target_hash: str,
-) -> Branch | None:
+) -> Branch | Error | None:
     """Create a branch pointing at a target commit hash.
 
     The Bitbucket Cloud spec omits ``requestBody`` for this endpoint so the generated
@@ -221,7 +225,7 @@ async def tags(
     q: str | Unset = UNSET,
     sort: str | Unset = UNSET,
     pagelen: int = 25,
-) -> list[Tag]:
+) -> list[Tag] | Error:
     """List all tags for a repository across all pages.
 
     Args:
@@ -253,23 +257,24 @@ async def tags(
         `GET /2.0/repositories/{workspace}/{repo_slug}/refs/tags
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-refs/#api-repositories-workspace-repo-slug-refs-tags-get>`_
     """
-    return [
-        t
-        async for t in async_paginate(
-            get_repositories_workspace_repo_slug_refs_tags.asyncio,
-            workspace,
-            repo_slug,
-            client=client.auth,
-            q=q,
-            sort=sort,
-            pagelen=pagelen,
-        )
-        if isinstance(t, Tag)
-    ]
+    result = await async_paginate(
+        get_repositories_workspace_repo_slug_refs_tags.asyncio,
+        workspace,
+        repo_slug,
+        client=client.auth,
+        q=q,
+        sort=sort,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [item for item in result if isinstance(item, Tag)]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def get_tag(client: BBClient, workspace: str, repo_slug: str, name: str) -> Tag | None:
+async def get_tag(client: BBClient, workspace: str, repo_slug: str, name: str) -> Tag | Error | None:
     """Fetch a single tag by name.
 
     Args:
@@ -304,7 +309,9 @@ async def get_tag(client: BBClient, workspace: str, repo_slug: str, name: str) -
     result = await get_repositories_workspace_repo_slug_refs_tags_name.asyncio(
         workspace, repo_slug, name, client=client.auth
     )
-    return result if isinstance(result, Tag) else None
+    if isinstance(result, (Tag, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -314,7 +321,7 @@ async def create_tag(
     repo_slug: str,
     *,
     body: Tag | Unset = UNSET,
-) -> Tag | None:
+) -> Tag | Error | None:
     """Create a tag in a repository.
 
     Args:
@@ -351,7 +358,9 @@ async def create_tag(
     result = await post_repositories_workspace_repo_slug_refs_tags.asyncio(
         workspace, repo_slug, client=client.auth, body=body
     )
-    return result if isinstance(result, Tag) else None
+    if isinstance(result, (Tag, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)

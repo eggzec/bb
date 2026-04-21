@@ -38,6 +38,7 @@ from bb.cloud.api.issue_tracker import (
     put_repositories_workspace_repo_slug_issues_issue_id_watch,
 )
 from bb.cloud.models.component import Component
+from bb.cloud.models.error import Error
 from bb.cloud.models.issue import Issue
 from bb.cloud.models.issue_change import IssueChange
 from bb.cloud.models.issue_comment import IssueComment
@@ -94,7 +95,7 @@ async def list(
     q: str | Unset = UNSET,
     sort: str | Unset = UNSET,
     pagelen: int = 25,
-) -> list[Issue]:
+) -> list[Issue] | Error:
     """Return all issues for a repository across all pages.
 
     Args:
@@ -127,23 +128,24 @@ async def list(
         `GET /2.0/repositories/{workspace}/{repo_slug}/issues
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-issue-tracker/#api-repositories-workspace-repo-slug-issues-get>`_
     """
-    return [
-        i
-        async for i in async_paginate(
-            get_repositories_workspace_repo_slug_issues.asyncio,
-            workspace,
-            repo_slug,
-            client=client.auth,
-            q=q,
-            sort=sort,
-            pagelen=pagelen,
-        )
-        if isinstance(i, Issue)
-    ]
+    result = await async_paginate(
+        get_repositories_workspace_repo_slug_issues.asyncio,
+        workspace,
+        repo_slug,
+        client=client.auth,
+        q=q,
+        sort=sort,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [item for item in result if isinstance(item, Issue)]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def get(client: BBClient, workspace: str, repo_slug: str, issue_id: int) -> Issue | None:
+async def get(client: BBClient, workspace: str, repo_slug: str, issue_id: int) -> Issue | Error | None:
     """Return a single issue by ID, or ``None`` if not found.
 
     Args:
@@ -177,7 +179,9 @@ async def get(client: BBClient, workspace: str, repo_slug: str, issue_id: int) -
     result = await get_repositories_workspace_repo_slug_issues_issue_id.asyncio(
         workspace, repo_slug, issue_id, client=client.auth
     )
-    return result if isinstance(result, Issue) else None
+    if isinstance(result, (Issue, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -187,7 +191,7 @@ async def create(
     repo_slug: str,
     *,
     body: Issue | Unset = UNSET,
-) -> Issue | None:
+) -> Issue | Error | None:
     """Create an issue and return the created object.
 
     Args:
@@ -223,7 +227,9 @@ async def create(
     result = await post_repositories_workspace_repo_slug_issues.asyncio(
         workspace, repo_slug, client=client.auth, body=body
     )
-    return result if isinstance(result, Issue) else None
+    if isinstance(result, (Issue, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -234,7 +240,7 @@ async def update(
     issue_id: int,
     *,
     body: Issue | Unset = UNSET,
-) -> Issue | None:
+) -> Issue | Error | None:
     """Update an issue and return the updated object.
 
     Args:
@@ -272,7 +278,9 @@ async def update(
     result = await put_repositories_workspace_repo_slug_issues_issue_id.asyncio(
         workspace, repo_slug, issue_id, client=client.auth, body=body
     )
-    return result if isinstance(result, Issue) else None
+    if isinstance(result, (Issue, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -319,7 +327,7 @@ async def comments(
     issue_id: int,
     *,
     pagelen: int = 25,
-) -> list[IssueComment]:
+) -> list[IssueComment] | Error:
     """Return all comments on an issue across all pages.
 
     Args:
@@ -353,18 +361,19 @@ async def comments(
         `GET /2.0/repositories/{workspace}/{repo_slug}/issues/{issue_id}/comments
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-issue-tracker/#api-repositories-workspace-repo-slug-issues-issue-id-comments-get>`_
     """
-    return [
-        c
-        async for c in async_paginate(
-            get_repositories_workspace_repo_slug_issues_issue_id_comments.asyncio,
-            workspace,
-            repo_slug,
-            issue_id,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-        if isinstance(c, IssueComment)
-    ]
+    result = await async_paginate(
+        get_repositories_workspace_repo_slug_issues_issue_id_comments.asyncio,
+        workspace,
+        repo_slug,
+        issue_id,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [item for item in result if isinstance(item, IssueComment)]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -375,7 +384,7 @@ async def add_comment(
     issue_id: int,
     *,
     body: IssueComment | Unset = UNSET,
-) -> IssueComment | None:
+) -> IssueComment | Error | None:
     """Add a comment to an issue and return the created comment.
 
     Args:
@@ -414,7 +423,9 @@ async def add_comment(
     result = await post_repositories_workspace_repo_slug_issues_issue_id_comments.asyncio(
         workspace, repo_slug, issue_id, client=client.auth, body=body
     )
-    return result if isinstance(result, IssueComment) else None
+    if isinstance(result, (IssueComment, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -425,7 +436,7 @@ async def changes(
     issue_id: int,
     *,
     pagelen: int = 25,
-) -> list[IssueChange]:
+) -> list[IssueChange] | Error:
     """Return all changes (edit history) for an issue across all pages.
 
     Args:
@@ -459,18 +470,19 @@ async def changes(
         `GET /2.0/repositories/{workspace}/{repo_slug}/issues/{issue_id}/changes
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-issue-tracker/#api-repositories-workspace-repo-slug-issues-issue-id-changes-get>`_
     """
-    return [
-        c
-        async for c in async_paginate(
-            get_repositories_workspace_repo_slug_issues_issue_id_changes.asyncio,
-            workspace,
-            repo_slug,
-            issue_id,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-        if isinstance(c, IssueChange)
-    ]
+    result = await async_paginate(
+        get_repositories_workspace_repo_slug_issues_issue_id_changes.asyncio,
+        workspace,
+        repo_slug,
+        issue_id,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [item for item in result if isinstance(item, IssueChange)]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -618,7 +630,7 @@ async def unwatch(client: BBClient, workspace: str, repo_slug: str, issue_id: in
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def milestones(client: BBClient, workspace: str, repo_slug: str) -> list[Milestone]:
+async def milestones(client: BBClient, workspace: str, repo_slug: str) -> list[Milestone] | Error:
     """Return all milestones for a repository.
 
     Args:
@@ -648,20 +660,21 @@ async def milestones(client: BBClient, workspace: str, repo_slug: str) -> list[M
         `GET /2.0/repositories/{workspace}/{repo_slug}/milestones
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-issue-tracker/#api-repositories-workspace-repo-slug-milestones-get>`_
     """
-    return [
-        m
-        async for m in async_paginate(
-            get_repositories_workspace_repo_slug_milestones.asyncio,
-            workspace,
-            repo_slug,
-            client=client.auth,
-        )
-        if isinstance(m, Milestone)
-    ]
+    result = await async_paginate(
+        get_repositories_workspace_repo_slug_milestones.asyncio,
+        workspace,
+        repo_slug,
+        client=client.auth,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [item for item in result if isinstance(item, Milestone)]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def versions(client: BBClient, workspace: str, repo_slug: str) -> list[Version]:
+async def versions(client: BBClient, workspace: str, repo_slug: str) -> list[Version] | Error:
     """Return all versions for a repository.
 
     Args:
@@ -690,20 +703,21 @@ async def versions(client: BBClient, workspace: str, repo_slug: str) -> list[Ver
         `GET /2.0/repositories/{workspace}/{repo_slug}/versions
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-issue-tracker/#api-repositories-workspace-repo-slug-versions-get>`_
     """
-    return [
-        v
-        async for v in async_paginate(
-            get_repositories_workspace_repo_slug_versions.asyncio,
-            workspace,
-            repo_slug,
-            client=client.auth,
-        )
-        if isinstance(v, Version)
-    ]
+    result = await async_paginate(
+        get_repositories_workspace_repo_slug_versions.asyncio,
+        workspace,
+        repo_slug,
+        client=client.auth,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [item for item in result if isinstance(item, Version)]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def components(client: BBClient, workspace: str, repo_slug: str) -> list[Component]:
+async def components(client: BBClient, workspace: str, repo_slug: str) -> list[Component] | Error:
     """Return all components for a repository.
 
     Args:
@@ -733,22 +747,23 @@ async def components(client: BBClient, workspace: str, repo_slug: str) -> list[C
         `GET /2.0/repositories/{workspace}/{repo_slug}/components
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-issue-tracker/#api-repositories-workspace-repo-slug-components-get>`_
     """
-    return [
-        c
-        async for c in async_paginate(
-            get_repositories_workspace_repo_slug_components.asyncio,
-            workspace,
-            repo_slug,
-            client=client.auth,
-        )
-        if isinstance(c, Component)
-    ]
+    result = await async_paginate(
+        get_repositories_workspace_repo_slug_components.asyncio,
+        workspace,
+        repo_slug,
+        client=client.auth,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [item for item in result if isinstance(item, Component)]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
 async def get_comment(
     client: BBClient, workspace: str, repo_slug: str, issue_id: int, comment_id: int
-) -> IssueComment | None:
+) -> IssueComment | Error | None:
     """Return a single comment on an issue, or ``None`` if not found.
 
     Args:
@@ -785,7 +800,9 @@ async def get_comment(
     result = await get_repositories_workspace_repo_slug_issues_issue_id_comments_comment_id.asyncio(
         workspace, repo_slug, issue_id, comment_id, client=client.auth
     )
-    return result if isinstance(result, IssueComment) else None
+    if isinstance(result, (IssueComment, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -797,7 +814,7 @@ async def update_comment(
     comment_id: int,
     *,
     body: IssueComment | Unset = UNSET,
-) -> IssueComment | None:
+) -> IssueComment | Error | None:
     """Update a comment on an issue.
 
     Args:
@@ -837,7 +854,9 @@ async def update_comment(
     result = await put_repositories_workspace_repo_slug_issues_issue_id_comments_comment_id.asyncio(
         workspace, repo_slug, issue_id, comment_id, client=client.auth, body=body
     )
-    return result if isinstance(result, IssueComment) else None
+    if isinstance(result, (IssueComment, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -882,7 +901,7 @@ async def delete_comment(client: BBClient, workspace: str, repo_slug: str, issue
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
 async def get_change(
     client: BBClient, workspace: str, repo_slug: str, issue_id: int, change_id: int
-) -> IssueChange | None:
+) -> IssueChange | Error | None:
     """Return a single change entry for an issue, or ``None`` if not found.
 
     Args:
@@ -919,7 +938,9 @@ async def get_change(
     result = await get_repositories_workspace_repo_slug_issues_issue_id_changes_change_id.asyncio(
         workspace, repo_slug, issue_id, change_id, client=client.auth
     )
-    return result if isinstance(result, IssueChange) else None
+    if isinstance(result, (IssueChange, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -930,7 +951,7 @@ async def add_change(
     issue_id: int,
     *,
     body: IssueChange | Unset = UNSET,
-) -> IssueChange | None:
+) -> IssueChange | Error | None:
     """Record a change on an issue (e.g. a status transition).
 
     Args:
@@ -969,11 +990,13 @@ async def add_change(
     result = await post_repositories_workspace_repo_slug_issues_issue_id_changes.asyncio(
         workspace, repo_slug, issue_id, client=client.auth, body=body
     )
-    return result if isinstance(result, IssueChange) else None
+    if isinstance(result, (IssueChange, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def voted(client: BBClient, workspace: str, repo_slug: str, issue_id: int) -> Any | None:
+async def voted(client: BBClient, workspace: str, repo_slug: str, issue_id: int) -> Any | Error | None:
     """Return the current user's vote status on an issue.
 
     Args:
@@ -1010,7 +1033,7 @@ async def voted(client: BBClient, workspace: str, repo_slug: str, issue_id: int)
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def watching(client: BBClient, workspace: str, repo_slug: str, issue_id: int) -> Any | None:
+async def watching(client: BBClient, workspace: str, repo_slug: str, issue_id: int) -> Any | Error | None:
     """Return the current user's watch status on an issue.
 
     Args:
@@ -1047,7 +1070,9 @@ async def watching(client: BBClient, workspace: str, repo_slug: str, issue_id: i
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def get_milestone(client: BBClient, workspace: str, repo_slug: str, milestone_id: int) -> Milestone | None:
+async def get_milestone(
+    client: BBClient, workspace: str, repo_slug: str, milestone_id: int
+) -> Milestone | Error | None:
     """Return a single milestone by ID, or ``None`` if not found.
 
     Args:
@@ -1083,11 +1108,13 @@ async def get_milestone(client: BBClient, workspace: str, repo_slug: str, milest
     result = await get_repositories_workspace_repo_slug_milestones_milestone_id.asyncio(
         workspace, repo_slug, milestone_id, client=client.auth
     )
-    return result if isinstance(result, Milestone) else None
+    if isinstance(result, (Milestone, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def get_version(client: BBClient, workspace: str, repo_slug: str, version_id: int) -> Version | None:
+async def get_version(client: BBClient, workspace: str, repo_slug: str, version_id: int) -> Version | Error | None:
     """Return a single version by ID, or ``None`` if not found.
 
     Args:
@@ -1123,11 +1150,15 @@ async def get_version(client: BBClient, workspace: str, repo_slug: str, version_
     result = await get_repositories_workspace_repo_slug_versions_version_id.asyncio(
         workspace, repo_slug, version_id, client=client.auth
     )
-    return result if isinstance(result, Version) else None
+    if isinstance(result, (Version, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def get_component(client: BBClient, workspace: str, repo_slug: str, component_id: int) -> Component | None:
+async def get_component(
+    client: BBClient, workspace: str, repo_slug: str, component_id: int
+) -> Component | Error | None:
     """Return a single component by ID, or ``None`` if not found.
 
     Args:
@@ -1163,11 +1194,13 @@ async def get_component(client: BBClient, workspace: str, repo_slug: str, compon
     result = await get_repositories_workspace_repo_slug_components_component_id.asyncio(
         workspace, repo_slug, component_id, client=client.auth
     )
-    return result if isinstance(result, Component) else None
+    if isinstance(result, (Component, Error)):
+        return result
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def attachments(client: BBClient, workspace: str, repo_slug: str, issue_id: int) -> Any | None:
+async def attachments(client: BBClient, workspace: str, repo_slug: str, issue_id: int) -> Any | Error | None:
     """Return the list of attachments on an issue.
 
     Args:
@@ -1206,7 +1239,9 @@ async def attachments(client: BBClient, workspace: str, repo_slug: str, issue_id
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def get_attachment(client: BBClient, workspace: str, repo_slug: str, issue_id: int, path: str) -> Any | None:
+async def get_attachment(
+    client: BBClient, workspace: str, repo_slug: str, issue_id: int, path: str
+) -> Any | Error | None:
     """Return the redirect URL for a specific attachment on an issue.
 
     Args:
@@ -1372,7 +1407,9 @@ async def export(
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def export_status(client: BBClient, workspace: str, repo_slug: str, repo_name: str, task_id: str) -> Any | None:
+async def export_status(
+    client: BBClient, workspace: str, repo_slug: str, repo_name: str, task_id: str
+) -> Any | Error | None:
     """Check the status of an in-progress issue export task.
 
     Args:
@@ -1413,7 +1450,7 @@ async def export_status(client: BBClient, workspace: str, repo_slug: str, repo_n
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def import_status(client: BBClient, workspace: str, repo_slug: str) -> Any | None:
+async def import_status(client: BBClient, workspace: str, repo_slug: str) -> Any | Error | None:
     """Check the status of an in-progress issue import task.
 
     Args:

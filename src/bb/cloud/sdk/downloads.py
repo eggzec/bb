@@ -8,6 +8,7 @@ from bb.cloud.api.downloads import (
     get_repositories_workspace_repo_slug_downloads_filename,
     post_repositories_workspace_repo_slug_downloads,
 )
+from bb.cloud.models.error import Error
 from bb.cloud.sdk._auth_validation import AuthMethod, require_auth
 from bb.cloud.sdk._client import BBClient
 from bb.cloud.sdk._pagination import async_paginate
@@ -23,7 +24,7 @@ async def list(
     repo_slug: str,
     *,
     pagelen: int = 25,
-) -> list[Any]:
+) -> list[Any] | Error:
     """Return all download artifacts for a repository.
 
     Args:
@@ -53,16 +54,18 @@ async def list(
         `GET /2.0/repositories/{workspace}/{repo_slug}/downloads
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-downloads/#api-repositories-workspace-repo-slug-downloads-get>`_
     """
-    return [
-        d
-        async for d in async_paginate(
-            get_repositories_workspace_repo_slug_downloads.asyncio,
-            workspace,
-            repo_slug,
-            client=client.auth,
-            pagelen=pagelen,
-        )
-    ]
+    result = await async_paginate(
+        get_repositories_workspace_repo_slug_downloads.asyncio,
+        workspace,
+        repo_slug,
+        client=client.auth,
+        pagelen=pagelen,
+    )
+
+    if isinstance(result, Error):
+        return result
+
+    return [x for x in result]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)

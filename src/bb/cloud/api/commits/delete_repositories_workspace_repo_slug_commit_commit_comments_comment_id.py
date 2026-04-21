@@ -1,16 +1,19 @@
 from http import HTTPStatus
-from typing import Any
+from typing import Any, cast
 from urllib.parse import quote
 
 import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
+from ...models.error import Error
 from ...types import Response
 
 __all__ = [
     "sync_detailed",
     "asyncio_detailed",
+    "sync",
+    "asyncio",
 ]
 
 
@@ -34,16 +37,25 @@ def _get_kwargs(
     return _kwargs
 
 
-type ParsedPayload = Any
-type ParseResult = Any | None
+type ParsedPayload = Any | Error
+type ParseResult = Any | Error | None
 
 
 def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> ParseResult:
     if response.status_code == 204:
-        return None
+        response_204 = cast(Any, None)
+        return response_204
+
+    if response.status_code == 403:
+        if "application/json" not in response.headers.get("content-type", ""):
+            return None
+        response_403 = Error.from_dict(response.json())
+
+        return response_403
 
     if response.status_code == 404:
-        return None
+        response_404 = cast(Any, None)
+        return response_404
 
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
@@ -89,7 +101,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Any]
+        Response[Any | Error]
     """
 
     kwargs = _get_kwargs(
@@ -104,6 +116,47 @@ def sync_detailed(
     )
 
     return _build_response(client=client, response=response)
+
+
+def sync(
+    workspace: str,
+    repo_slug: str,
+    commit: str,
+    comment_id: int,
+    *,
+    client: AuthenticatedClient,
+) -> ParsedPayload | None:
+    """Delete a commit comment
+
+     Deletes the specified commit comment.
+
+    Note that deleting comments that have visible replies that point to
+    them will not really delete the resource. This is to retain the integrity
+    of the original comment tree. Instead, the `deleted` element is set to
+    `true` and the content is blanked out. The comment will continue to be
+    returned by the collections and self endpoints.
+
+    Args:
+        workspace (str):
+        repo_slug (str):
+        commit (str):
+        comment_id (int):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        Any | Error
+    """
+
+    return sync_detailed(
+        workspace=workspace,
+        repo_slug=repo_slug,
+        commit=commit,
+        comment_id=comment_id,
+        client=client,
+    ).parsed
 
 
 async def asyncio_detailed(
@@ -135,7 +188,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Any]
+        Response[Any | Error]
     """
 
     kwargs = _get_kwargs(
@@ -148,3 +201,46 @@ async def asyncio_detailed(
     response = await client.get_async_httpx_client().request(**kwargs)
 
     return _build_response(client=client, response=response)
+
+
+async def asyncio(
+    workspace: str,
+    repo_slug: str,
+    commit: str,
+    comment_id: int,
+    *,
+    client: AuthenticatedClient,
+) -> ParsedPayload | None:
+    """Delete a commit comment
+
+     Deletes the specified commit comment.
+
+    Note that deleting comments that have visible replies that point to
+    them will not really delete the resource. This is to retain the integrity
+    of the original comment tree. Instead, the `deleted` element is set to
+    `true` and the content is blanked out. The comment will continue to be
+    returned by the collections and self endpoints.
+
+    Args:
+        workspace (str):
+        repo_slug (str):
+        commit (str):
+        comment_id (int):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        Any | Error
+    """
+
+    return (
+        await asyncio_detailed(
+            workspace=workspace,
+            repo_slug=repo_slug,
+            commit=commit,
+            comment_id=comment_id,
+            client=client,
+        )
+    ).parsed

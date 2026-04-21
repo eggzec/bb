@@ -178,6 +178,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -235,6 +245,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -272,6 +292,16 @@
           },
           "404": {
             "description": "The linker does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
             "content": {
               "application/json": {
                 "schema": {
@@ -333,6 +363,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -380,6 +420,16 @@
           },
           "404": {
             "description": "The linker does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
             "content": {
               "application/json": {
                 "schema": {
@@ -444,6 +494,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -481,6 +541,16 @@
           },
           "404": {
             "description": "The linker value does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
             "content": {
               "application/json": {
                 "schema": {
@@ -558,6 +628,16 @@
                       }
                     }
                   }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
                 }
               }
             }
@@ -639,6 +719,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -668,123 +758,6 @@
           }
         }
       ]
-    },
-    "/repositories": {
-      "get": {
-        "tags": [
-          "Repositories"
-        ],
-        "description": "**This endpoint is deprecated. Please use the\n[workspace scoped alternative](/cloud/bitbucket/rest/api-group-repositories/#api-repositories-workspace-get).**\n\nReturns a paginated list of all public repositories.\n\nThis endpoint also supports filtering and sorting of the results. See\n[filtering and sorting](/cloud/bitbucket/rest/intro/#filtering) for more details.",
-        "summary": "List public repositories",
-        "responses": {
-          "200": {
-            "description": "All public repositories.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/paginated_repositories"
-                }
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "after",
-            "in": "query",
-            "description": "Filter the results to include only repositories created on or\nafter this [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601)\n timestamp. Example: `YYYY-MM-DDTHH:mm:ss.sssZ`",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "role",
-            "in": "query",
-            "description": "Filters the result based on the authenticated user's role on each repository.\n\n* **member**: returns repositories to which the user has explicit read access\n* **contributor**: returns repositories to which the user has explicit write access\n* **admin**: returns repositories to which the user has explicit administrator access\n* **owner**: returns all repositories owned by the current user\n",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "enum": [
-                "admin",
-                "contributor",
-                "member",
-                "owner"
-              ]
-            }
-          },
-          {
-            "name": "q",
-            "in": "query",
-            "description": "Query string to narrow down the response as per [filtering and sorting](/cloud/bitbucket/rest/intro/#filtering).\n`role` parameter must also be specified.\n",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "sort",
-            "in": "query",
-            "description": "Field by which the results should be sorted as per [filtering and sorting](/cloud/bitbucket/rest/intro/#filtering).\n",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "description": "The page number of elements to retrieve.",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "minimum": 1,
-              "default": 1
-            }
-          },
-          {
-            "name": "pagelen",
-            "description": "The maximum number of results to return.",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "minimum": 1,
-              "maximum": 100,
-              "default": 10
-            }
-          }
-        ],
-        "security": [
-          {
-            "oauth2": [
-              "repository"
-            ]
-          },
-          {
-            "basic": []
-          },
-          {
-            "api_key": []
-          }
-        ],
-        "deprecated": true,
-        "x-atlassian-oauth2-scopes": [
-          {
-            "state": "Current",
-            "scheme": "oauth2",
-            "scopes": [
-              "read:repository:bitbucket"
-            ]
-          }
-        ],
-        "x-atlassian-auth-types": [
-          "api-token"
-        ]
-      },
-      "parameters": []
     },
     "/repositories/{workspace}": {
       "get": {
@@ -1095,6 +1068,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -1189,6 +1172,16 @@
           },
           "401": {
             "description": "If the request was not authenticated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2338,6 +2331,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2386,6 +2389,16 @@
           },
           "404": {
             "description": "If the specified commit, or the repository does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2542,6 +2555,16 @@
           },
           "404": {
             "description": "If a parent ID was passed in that cannot be found"
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -2625,6 +2648,16 @@
           },
           "404": {
             "description": "If the comment doesn't exist"
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2719,6 +2752,16 @@
           },
           "400": {
             "description": "If the comment update was detected as spam"
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -2804,6 +2847,16 @@
         "responses": {
           "204": {
             "description": "An empty response."
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "operationId": "updateCommitHostedPropertyValue",
@@ -2878,6 +2931,16 @@
         "responses": {
           "204": {
             "description": "An empty response."
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "operationId": "deleteCommitHostedPropertyValue",
@@ -2953,6 +3016,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/application_property"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
                 }
               }
             }
@@ -3299,6 +3372,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -3472,6 +3555,16 @@
         "responses": {
           "204": {
             "description": "No content"
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -3660,6 +3753,16 @@
                   "items": {
                     "$ref": "#/components/schemas/report_annotation"
                   }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
                 }
               }
             }
@@ -3884,6 +3987,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -3971,6 +4084,16 @@
         "responses": {
           "204": {
             "description": "No content"
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -4149,6 +4272,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -4248,6 +4381,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -4299,6 +4442,16 @@
           },
           "404": {
             "description": "If the repository or build does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4493,6 +4646,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -4618,6 +4781,16 @@
           },
           "404": {
             "description": "If the specified revision does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5673,6 +5846,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -5760,6 +5943,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -5834,6 +6027,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/paginated_deployment_variable"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
                 }
               }
             }
@@ -5951,6 +6154,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -6058,6 +6271,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -6138,6 +6361,16 @@
           },
           "404": {
             "description": "The account, repository, environment or variable with given UUID was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7143,6 +7376,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -7308,6 +7551,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -7381,6 +7634,16 @@
           },
           "404": {
             "description": "No account, repository or environment with the UUID provided exists.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7699,6 +7962,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -8000,6 +8273,16 @@
           },
           "404": {
             "description": "If the webhook or repository does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
             "content": {
               "application/json": {
                 "schema": {
@@ -9075,6 +9358,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -9150,6 +9443,16 @@
           },
           "404": {
             "description": "The specified repository or issue does not exist or does not have the issue tracker enabled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
             "content": {
               "application/json": {
                 "schema": {
@@ -9755,6 +10058,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -9836,6 +10149,16 @@
         "responses": {
           "204": {
             "description": "Indicates successful deletion."
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -9936,6 +10259,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -10027,6 +10360,16 @@
         "responses": {
           "default": {
             "description": "Unexpected error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
             "content": {
               "application/json": {
                 "schema": {
@@ -10168,6 +10511,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -10259,6 +10612,16 @@
           },
           "404": {
             "description": "The specified repository or issue does not exist or does not have the issue tracker enabled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
             "content": {
               "application/json": {
                 "schema": {
@@ -10393,6 +10756,16 @@
           },
           "404": {
             "description": "If the authenticated user is not watching this issue, or when the repo does not exist, or does not have an issue tracker.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
             "content": {
               "application/json": {
                 "schema": {
@@ -10798,6 +11171,16 @@
           },
           "404": {
             "description": "If no repository exists at this location",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
             "content": {
               "application/json": {
                 "schema": {
@@ -12188,6 +12571,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -12260,6 +12653,16 @@
           },
           "404": {
             "description": "The account or repository was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
             "content": {
               "application/json": {
                 "schema": {
@@ -12345,6 +12748,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -12418,6 +12831,16 @@
           },
           "404": {
             "description": "The workspace, repository or cache_uuid with given UUID was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
             "content": {
               "application/json": {
                 "schema": {
@@ -12512,6 +12935,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -12577,6 +13010,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/paginated_pipeline_runners"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
                 }
               }
             }
@@ -12659,6 +13102,16 @@
           },
           "409": {
             "description": "The repository runner with the provided UUID already exists.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
             "content": {
               "application/json": {
                 "schema": {
@@ -12754,6 +13207,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -12839,6 +13302,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -12911,6 +13384,16 @@
           },
           "404": {
             "description": "The repository runner was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
             "content": {
               "application/json": {
                 "schema": {
@@ -13754,6 +14237,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -13819,6 +14312,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/pipelines_config"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
                 }
               }
             }
@@ -13896,6 +14399,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/pipelines_config"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
                 }
               }
             }
@@ -13991,6 +14504,16 @@
           },
           "404": {
             "description": "The account or repository was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
             "content": {
               "application/json": {
                 "schema": {
@@ -14115,6 +14638,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -14185,6 +14718,16 @@
           },
           "404": {
             "description": "The account or repository was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
             "content": {
               "application/json": {
                 "schema": {
@@ -14272,6 +14815,16 @@
           },
           "404": {
             "description": "The account, repository or schedule was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
             "content": {
               "application/json": {
                 "schema": {
@@ -14375,6 +14928,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -14447,6 +15010,16 @@
           },
           "404": {
             "description": "The account, repository or schedule was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
             "content": {
               "application/json": {
                 "schema": {
@@ -14541,6 +15114,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -14612,6 +15195,16 @@
           },
           "404": {
             "description": "The account, repository or SSH key pair was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
             "content": {
               "application/json": {
                 "schema": {
@@ -14706,6 +15299,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -14768,6 +15371,16 @@
           },
           "404": {
             "description": "The account, repository or SSH key pair was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
             "content": {
               "application/json": {
                 "schema": {
@@ -14840,6 +15453,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/paginated_pipeline_known_hosts"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
                 }
               }
             }
@@ -14948,6 +15571,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -15028,6 +15661,16 @@
           },
           "404": {
             "description": "The account, repository or known host with the specified UUID was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
             "content": {
               "application/json": {
                 "schema": {
@@ -15131,6 +15774,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -15209,6 +15862,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -15274,6 +15937,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/paginated_pipeline_variables"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
                 }
               }
             }
@@ -15382,6 +16055,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -15462,6 +16145,16 @@
           },
           "404": {
             "description": "The account, repository or variable with the specified UUID was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
             "content": {
               "application/json": {
                 "schema": {
@@ -15565,6 +16258,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -15643,6 +16346,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -15678,6 +16391,16 @@
         "responses": {
           "204": {
             "description": "An empty response."
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "operationId": "updateRepositoryHostedPropertyValue",
@@ -15743,6 +16466,16 @@
         "responses": {
           "204": {
             "description": "An empty response."
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "operationId": "deleteRepositoryHostedPropertyValue",
@@ -15809,6 +16542,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/application_property"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
                 }
               }
             }
@@ -16008,6 +16751,16 @@
           },
           "401": {
             "description": "If the request was not authenticated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
             "content": {
               "application/json": {
                 "schema": {
@@ -16281,6 +17034,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -16473,6 +17236,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -16531,6 +17304,16 @@
           },
           "404": {
             "description": "The specified pull request or the repository does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
             "content": {
               "application/json": {
                 "schema": {
@@ -17308,6 +18091,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -17532,6 +18325,16 @@
           },
           "555": {
             "description": "If the merge took too long and timed out.\nIn this case the caller should retry the request later",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
             "content": {
               "application/json": {
                 "schema": {
@@ -17815,6 +18618,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -17883,6 +18696,16 @@
           },
           "404": {
             "description": "The specified pull request or the repository does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
             "content": {
               "application/json": {
                 "schema": {
@@ -18544,6 +19367,16 @@
         "responses": {
           "204": {
             "description": "An empty response."
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "operationId": "updatePullRequestHostedPropertyValue",
@@ -18618,6 +19451,16 @@
         "responses": {
           "204": {
             "description": "An empty response."
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "operationId": "deletePullRequestHostedPropertyValue",
@@ -18693,6 +19536,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/application_property"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
                 }
               }
             }
@@ -19575,6 +20428,16 @@
           },
           "400": {
             "description": "If the target hash is missing, ambiguous, or invalid, or if the name is not provided.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
             "content": {
               "application/json": {
                 "schema": {
@@ -20499,6 +21362,16 @@
           },
           "401": {
             "description": "If the request was not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
             "content": {
               "application/json": {
                 "schema": {
@@ -21743,6 +22616,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -21840,6 +22723,16 @@
           },
           "404": {
             "description": "If the snippet does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
             "content": {
               "application/json": {
                 "schema": {
@@ -22645,6 +23538,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -22721,6 +23624,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -22780,6 +23693,16 @@
           },
           "404": {
             "description": "The account or variable with the given UUID was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
             "content": {
               "application/json": {
                 "schema": {
@@ -22854,6 +23777,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -22904,6 +23837,16 @@
           },
           "404": {
             "description": "The account or the variable with the provided UUID does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
             "content": {
               "application/json": {
                 "schema": {
@@ -23326,6 +24269,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "parameters": [
@@ -23452,6 +24405,16 @@
           },
           "401": {
             "description": "The request wasn't authenticated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
             "content": {
               "application/json": {
                 "schema": {
@@ -24420,6 +25383,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -24496,6 +25469,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -24555,6 +25538,16 @@
           },
           "404": {
             "description": "The account or variable with the given UUID was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
             "content": {
               "application/json": {
                 "schema": {
@@ -24629,6 +25622,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -24686,6 +25689,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -24708,6 +25721,16 @@
         "responses": {
           "204": {
             "description": "An empty response."
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "operationId": "updateUserHostedPropertyValue",
@@ -24764,6 +25787,16 @@
         "responses": {
           "204": {
             "description": "An empty response."
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "operationId": "deleteUserHostedPropertyValue",
@@ -24821,6 +25854,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/application_property"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
                 }
               }
             }
@@ -26069,6 +27112,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -26438,6 +27491,16 @@
           },
           "401": {
             "description": "The request wasn't authenticated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
             "content": {
               "application/json": {
                 "schema": {
@@ -26861,6 +27924,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -26901,6 +27974,16 @@
           },
           "404": {
             "description": "The workspace was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
             "content": {
               "application/json": {
                 "schema": {
@@ -26949,6 +28032,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/paginated_pipeline_runners"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
                 }
               }
             }
@@ -27022,6 +28115,16 @@
           },
           "409": {
             "description": "The workspace runner with the provided UUID already exists.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
             "content": {
               "application/json": {
                 "schema": {
@@ -27108,6 +28211,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -27177,6 +28290,16 @@
           },
           "404": {
             "description": "The workspace runner was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
             "content": {
               "application/json": {
                 "schema": {
@@ -27254,6 +28377,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -27310,6 +28443,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/paginated_pipeline_variables"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
                 }
               }
             }
@@ -27401,6 +28544,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -27472,6 +28625,16 @@
           },
           "404": {
             "description": "The workspace or variable with the given UUID was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
             "content": {
               "application/json": {
                 "schema": {
@@ -27558,6 +28721,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -27620,6 +28793,16 @@
           },
           "404": {
             "description": "The workspace or the variable with the provided UUID does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "If the authenticated user does not have adequate permission.",
             "content": {
               "application/json": {
                 "schema": {

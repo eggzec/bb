@@ -6,6 +6,7 @@ from bb.cloud.api.source import (
     get_repositories_workspace_repo_slug_src_commit_path,
     post_repositories_workspace_repo_slug_src,
 )
+from bb.cloud.models.error import Error
 from bb.cloud.sdk._auth_validation import AuthMethod, require_auth
 from bb.cloud.sdk._client import BBClient
 from bb.cloud.types import UNSET, Unset
@@ -20,7 +21,7 @@ async def get(
     repo_slug: str,
     commit: str,
     path: str,
-) -> object | None:
+) -> object | Error | None:
     """Return the contents of a file at a given commit and path.
 
     Args:
@@ -57,7 +58,7 @@ async def get(
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def root(client: BBClient, workspace: str, repo_slug: str) -> object | None:
+async def root(client: BBClient, workspace: str, repo_slug: str) -> object | Error | None:
     """Return the root directory listing of the default branch.
 
     Args:
@@ -96,7 +97,7 @@ async def history(
     repo_slug: str,
     commit: str,
     path: str,
-) -> object | None:
+) -> object | Error | None:
     """Return the file history — commits that touched a given path.
 
     Args:
@@ -139,7 +140,7 @@ async def upload(
     repo_slug: str,
     *,
     body: Unset = UNSET,
-) -> object | None:
+) -> object | Error | None:
     """Upload files to a repository via the source endpoint.
 
     Args:

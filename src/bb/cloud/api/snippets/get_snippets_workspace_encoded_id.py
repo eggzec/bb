@@ -40,26 +40,36 @@ type ParseResult = Error | Snippet | None
 
 def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> ParseResult:
     if response.status_code == 200:
+        if "application/json" not in response.headers.get("content-type", ""):
+            return None
         response_200 = Snippet.from_dict(response.json())
 
         return response_200
 
     if response.status_code == 401:
+        if "application/json" not in response.headers.get("content-type", ""):
+            return None
         response_401 = Error.from_dict(response.json())
 
         return response_401
 
     if response.status_code == 403:
+        if "application/json" not in response.headers.get("content-type", ""):
+            return None
         response_403 = Error.from_dict(response.json())
 
         return response_403
 
     if response.status_code == 404:
+        if "application/json" not in response.headers.get("content-type", ""):
+            return None
         response_404 = Error.from_dict(response.json())
 
         return response_404
 
     if response.status_code == 410:
+        if "application/json" not in response.headers.get("content-type", ""):
+            return None
         response_410 = Error.from_dict(response.json())
 
         return response_410
