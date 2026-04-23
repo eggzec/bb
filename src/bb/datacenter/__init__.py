@@ -1,4 +1,4 @@
-from bb.datacenter import sdk
+from bb.datacenter import sdk, sync
 from bb.datacenter.errors import UnexpectedStatus
 from bb.datacenter.sdk._client import BBDCClient
 from bb.datacenter.sdk._errors import AuthenticationError
@@ -11,4 +11,5 @@ __all__ = [
     "paginate",
     "async_paginate",
     "sdk",
+    "sync",
 ]

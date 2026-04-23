@@ -59,6 +59,7 @@
 ### Sync Wrappers
 - [x] All `src/bb/cloud/sync/` wrappers regenerated to match expanded SDK `__all__` lists
 - [x] `src/bb/cloud/sync/addon.py` — new sync wrapper for addon module
+- [x] Sync wrapper docstrings now mirror async SDK docs via `scripts/generate_sync_sdk.py`
 
 ### Public Surface
 - [x] `src/bb/cloud/__init__.py` — `__all__`, re-exports `BBClient`, resource modules, `paginate`
@@ -94,6 +95,7 @@
 - [ ] Create `config/datacenter.yml`
 - [ ] Generate DC client → sync into `src/bb/datacenter/`
 - [ ] Mirror SDK wrappers in `src/bb/datacenter/sdk/`
+- [x] Add `src/bb/datacenter/sync/` wrappers mirroring the async SDK surface
 - [ ] Wire datacenter target into CLI (`--target datacenter`)
 
 ---
