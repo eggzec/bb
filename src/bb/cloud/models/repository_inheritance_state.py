@@ -19,7 +19,7 @@ T = TypeVar("T", bound="RepositoryInheritanceState")
 class RepositoryInheritanceState:
     """A json object representing the repository's inheritance state values"""
 
-    type_: str
+    type_: str | Unset = UNSET
     override_settings: RepositoryInheritanceStateOverrideSettings | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -32,11 +32,9 @@ class RepositoryInheritanceState:
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "type": type_,
-            }
-        )
+        field_dict.update({})
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if override_settings is not UNSET:
             field_dict["override_settings"] = override_settings
 
@@ -47,7 +45,7 @@ class RepositoryInheritanceState:
         from ..models.repository_inheritance_state_override_settings import RepositoryInheritanceStateOverrideSettings
 
         d = dict(src_dict)
-        type_ = d.pop("type")
+        type_ = d.pop("type", UNSET)
 
         _override_settings = d.pop("override_settings", UNSET)
         override_settings: RepositoryInheritanceStateOverrideSettings | Unset
