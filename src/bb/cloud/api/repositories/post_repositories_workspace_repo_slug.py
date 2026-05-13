@@ -55,6 +55,13 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
 
         return response_200
 
+    if response.status_code == 201:
+        if "application/json" not in response.headers.get("content-type", ""):
+            return None
+        response_201 = Repository.from_dict(response.json())
+
+        return response_201
+
     if response.status_code == 400:
         if "application/json" not in response.headers.get("content-type", ""):
             return None
