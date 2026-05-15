@@ -17,23 +17,13 @@
 
 ```
 bb/                                       # project root
-├── .amdb/                                # amdb cache/index — DO NOT MOVE (paths are hardcoded)
-├── .fastembed_cache/                     # model cache for amdb — do not delete
-├── .venv/
-├── amdb.toml                             # amdb ignore list config
-├── bb_cloud.openapi.json                 # original Bitbucket Cloud OpenAPI spec — NEVER MODIFY
 ├── bb_cloud_fixed.openapi.json           # fixed spec used for generation — NEVER MODIFY
-├── bb_datacenter.openapi.json            # Bitbucket Data Center OpenAPI spec — NEVER MODIFY
 ├── bb_datacenter_fixed.openapi.json      # fixed spec used for generation — regenerate via scripts/fix_dc_spec.py, NEVER edit manually
 ├── cmd_outputs/                          # captured stdout/stderr — always timestamped, always separate files
 │   └── YYYYMMDD_HHMMSS_<name>_{stdout,stderr}.txt
 ├── config/
 │   ├── generator.yml                     # openapi-python-client config (Cloud)
 │   └── generator_dc.yml                  # openapi-python-client config (Data Center)
-├── context/                              # reference docs — fetch once, reuse
-│   ├── amdb_guide.md
-│   ├── typer/                            # typer docs (*.md + *.ast.json)
-│   └── openapi_python_client/            # template system docs + raw template files
 ├── src/
 │   └── bb/                               # main bb package
 │       ├── __init__.py                   # hand-written package init
@@ -80,12 +70,12 @@ bb/                                       # project root
 | `src/bb/cloud/client.py` | `Client` + `AuthenticatedClient` (httpx wrappers, attrs `@define`) |
 | `src/bb/cloud/types.py` | `Response[T]`, `Unset`, `UNSET`, `File` |
 | `src/bb/cloud/errors.py` | `UnexpectedStatus` exception |
-| `src/bb/cloud/models/` | 382 attrs-based data models + `__init__.py` with `__all__` |
+| `src/bb/cloud/models/` | attrs-based data models + `__init__.py` with `__all__` |
 | `src/bb/cloud/api/` | One module per endpoint: `_get_kwargs`, `_parse_response`, `_build_response`, `sync`, `sync_detailed`, `asyncio`, `asyncio_detailed` |
 | `src/bb/datacenter/client.py` | `Client` + `AuthenticatedClient` (same structure as Cloud) |
 | `src/bb/datacenter/types.py` | `Response[T]`, `Unset`, `UNSET`, `File` |
 | `src/bb/datacenter/errors.py` | `UnexpectedStatus` exception |
-| `src/bb/datacenter/models/` | ~233 attrs-based data models + `__init__.py` with `__all__` |
+| `src/bb/datacenter/models/` | attrs-based data models + `__init__.py` with `__all__` |
 | `src/bb/datacenter/api/` | One module per endpoint, organised by tag |
 
 ### Hand-written — yours to maintain
@@ -102,7 +92,6 @@ bb/                                       # project root
 | `config/generator_dc.yml` | Generator config (Data Center) |
 | `templates/` | Jinja2 template overrides |
 | `pyproject.toml` | Dependencies, entry point, build |
-| `amdb.toml` | amdb ignore list |
 
 ---
 
@@ -154,30 +143,6 @@ Public surface via `src/bb/cloud/__init__.py` with `__all__`.
 
 ---
 
-## amdb — Usage
-
-amdb indexes the codebase for RAG-style context retrieval. Config is in `amdb.toml`.
-
-```bash
-# First time (or after .amdb/ deleted):
-amdb init
-
-# After files change — refresh index:
-amdb generate
-
-# Focused context (writes to .amdb/<slug>.md):
-amdb generate --focus "client authentication"
-amdb generate --focus "sdk repos" --depth 2
-
-# Then sample the output (never open the full file):
-head -80 .amdb/<slug>.md
-grep -n "def \|class " .amdb/<slug>.md
-```
-
-**Note:** `amdb context` subcommand does NOT exist. Use `amdb generate --focus`.
-
----
-
 ## cmd_outputs Naming Convention
 
 Always separate stdout and stderr. Always timestamped:
@@ -207,59 +172,18 @@ tail -10 cmd_outputs/${TS}_<name>_stdout.txt
 
 ---
 
-## Python Traversal
-
-- **Never open files directly** — use `Grep`, `head`, `tail`, `jq`
-- Use **amdb** (`amdb generate --focus`) for structural context
-- Use **AST** (`python3 -c "import ast; ..."`) to verify imports, signatures, class/function names
-- AST output to `cmd_outputs/` and sample — never let it land raw in context
-
----
-
 ## Fetching Reference Docs
 
 Use `gh api` to fetch from GitHub (base64-decode the content field):
 ```bash
 gh api repos/<owner>/<repo>/contents/<path> --jq '.content' | base64 -d > context/<file>
 ```
-
-For HTML docs: `curl | pandoc -f html -t gfm -o context/<file>.md` then generate AST with pandoc.
-Never open large doc files directly — query with `jq` on the AST.
+- you can use context7 mcp to query the latest docs for a specific library
 
 ---
 
-## Generator Workflow (Cloud)
-
-`openapi-python-client` always wraps output in a project directory scaffold.
-Always use `uvx` — it is NOT on PATH directly.
-Generated package lands at `$GEN_TMP/bb/` (NOT `$GEN_TMP/bb/bb/`).
-
-```bash
-GEN_TMP=$(mktemp -d)
-TS=$(date +%Y%m%d_%H%M%S)
-
-BB_PROJECT_ROOT=$(pwd) uvx openapi-python-client generate \
-  --path bb_cloud_fixed.openapi.json \
-  --output-path "$GEN_TMP" \
-  --config config/generator.yml \
-  --custom-template-path templates/ \
-  --overwrite \
-  > cmd_outputs/${TS}_generate_stdout.txt \
-  2> cmd_outputs/${TS}_generate_stderr.txt
-
-# Check error count (0 is the target):
-grep -c "Endpoint will not be generated\|Cannot parse" cmd_outputs/${TS}_generate_stderr.txt
-
-# Sync into src/bb/cloud/ (package is at $GEN_TMP/bb/ directly — NOT $GEN_TMP/bb/bb/)
-rsync -a --delete "$GEN_TMP/bb/models/" src/bb/cloud/models/
-rsync -a --delete "$GEN_TMP/bb/api/"    src/bb/cloud/api/
-cp "$GEN_TMP/bb/client.py"              src/bb/cloud/client.py
-cp "$GEN_TMP/bb/types.py"               src/bb/cloud/types.py
-cp "$GEN_TMP/bb/errors.py"              src/bb/cloud/errors.py
-# __init__.py NOT synced — hand-written src/bb/cloud/__init__.py is preserved
-
-rm -rf "$GEN_TMP"
-```
+**you should use the make file targets for generation of the autogen code for cloud or dc**
+be sure to always do the diff target to make sure that autogen code is upto date with the one in the repo
 
 **Why relative imports survive the move to `src/bb/cloud/`:**
 Generated files use `from ...client import` (3 levels up). From `cloud/api/repositories/file.py`,
@@ -270,37 +194,7 @@ Generated files use `from ...client import` (3 levels up). From `cloud/api/repos
 ## Generator Workflow (Data Center)
 
 Same pattern as Cloud but using `config/generator_dc.yml` and `bb_datacenter_fixed.openapi.json`.
-The fixed spec is produced by `scripts/fix_dc_spec.py` from `bb_datacenter.openapi.json`; run the
-script whenever `bb_datacenter.openapi.json` is updated before regenerating.
-
-```bash
-# (Re-)generate the fixed spec whenever the original changes:
-python3 scripts/fix_dc_spec.py
-
-GEN_TMP=$(mktemp -d)
-TS=$(date +%Y%m%d_%H%M%S)
-
-BB_PROJECT_ROOT=$(pwd) uvx openapi-python-client generate \
-  --path bb_datacenter_fixed.openapi.json \
-  --output-path "$GEN_TMP" \
-  --config config/generator_dc.yml \
-  --overwrite \
-  > cmd_outputs/${TS}_dc_generate_stdout.txt \
-  2> cmd_outputs/${TS}_dc_generate_stderr.txt
-
-# Target: 0 warnings (all spec issues are fixed in bb_datacenter_fixed.openapi.json):
-grep -c "Endpoint will not be generated\|Cannot parse" cmd_outputs/${TS}_dc_generate_stderr.txt
-
-# Sync into src/bb/datacenter/ (package is at $GEN_TMP/bb/ directly)
-rsync -a --delete "$GEN_TMP/bb/models/" src/bb/datacenter/models/
-rsync -a --delete "$GEN_TMP/bb/api/"    src/bb/datacenter/api/
-cp "$GEN_TMP/bb/client.py"              src/bb/datacenter/client.py
-cp "$GEN_TMP/bb/types.py"               src/bb/datacenter/types.py
-cp "$GEN_TMP/bb/errors.py"              src/bb/datacenter/errors.py
-# __init__.py NOT synced — hand-written src/bb/datacenter/__init__.py is preserved
-
-rm -rf "$GEN_TMP"
-```
+use the makefile targets for the generation and comparision of the this.
 
 **DC-specific notes:**
 - Pagination uses `start`/`limit` (not `page`/`pagelen`). Responses have `is_last_page`, `next_page_start`, `values`.
@@ -310,48 +204,70 @@ rm -rf "$GEN_TMP"
 
 ---
 
-## CLI Design (build after SDK is complete)
+## API Conformance Testing (schemathesis)
 
-| Command group | Module | API tag |
-|---|---|---|
-| `bb repo` | `cli/repo.py` | repositories |
-| `bb pr` | `cli/pr.py` | pullrequests |
-| `bb pipeline` | `cli/pipeline.py` | pipelines |
-| `bb commit` | `cli/commit.py` | commits |
-| `bb branch` | `cli/branch.py` | refs |
-| `bb workspace` | `cli/workspace.py` | workspaces |
+Schemathesis tests the live BB Cloud API against `bb_cloud_fixed.openapi.json`. It runs GET-only, one example per operation, and reports every discrepancy between the spec and what Bitbucket actually returns.
 
-Global options: `--workspace`/`BB_WORKSPACE`, `--json`, `--verbose`, `--target cloud|datacenter`.
+### Credentials — `.env` file (project root, gitignored)
+
+Copy `.env.example` to `.env` and fill in `BB_EMAIL`, `BB_TOKEN`, `BB_WORKSPACE`.  
+`BB_TOKEN` is an Atlassian API token from `id.atlassian.com/manage-profile/security/api-tokens`.  
+Optionally set `BB_REPO_SLUG` — run `schema-discover-cloud` to find the best value.
+
+**Critical:** always use `httpx` (not `urllib.request.urlopen`) in any script that calls the BB API.  
+`urllib` follows Bitbucket's redirect and silently drops the `Authorization` header → 401.  
+`httpx.get(..., follow_redirects=True)` preserves auth on same-host redirects.
+
+### Commands
+
+```bash
+make schema-discover-cloud   # probe workspace state, suggest BB_REPO_SLUG for .env
+make schema-test-cloud       # run schemathesis (~150 ops, ~2-3 min) — exits non-zero on failures
+```
+
+Reports are written to `cmd_outputs/` with timestamp prefix:
+- `*_schemathesis_cloud_stdout.txt` — full terminal output with per-failure details
+- `*_schemathesis_cloud.xml` — JUnit XML (CI-compatible)
+- `*_schemathesis_cloud.ndjson` — machine-parseable event stream
+
+### Interpreting failures
+
+Two classes — you must distinguish them:
+
+**Real spec bugs** (fix in `bb_cloud_fixed.openapi.json`):
+- Undocumented status codes (403, 410) on endpoints tested with your real workspace
+- Response schema violations (extra properties, wrong types) on 200 responses
+- Content-Type mismatches on real responses
+
+**Expected noise** (caused by random path params — no seed data):
+- Undocumented 404 on repo-scoped endpoints where the spec only documents 200 — random path
+  params (`workspace=0`, `repo_slug=0`) hit non-existent resources
+- HTML Content-Type on certain 404s with pathological path values
+
+Distinguishing rule: if the same failure appears in `tests/cloud/live/` with real data → real bug.  
+If it only appears with schemathesis's random `0` values → likely noise.
+
+For each confirmed real bug: patch `bb_cloud_fixed.openapi.json` with `jq` surgery, then run  
+`make generate-cloud` and `make diff-cloud` to verify the fix flows into the generated code.
 
 ---
 
 ## Key Constraints
 
-1. Never modify `bb_cloud.openapi.json`, `bb_cloud_fixed.openapi.json`, `bb_datacenter.openapi.json`, or `bb_datacenter_fixed.openapi.json` by hand — `bb_datacenter_fixed.openapi.json` is regenerated by `scripts/fix_dc_spec.py`
-2. Never edit generated files under `src/bb/cloud/{api,models,client.py,types.py,errors.py}` or `src/bb/datacenter/{api,models,client.py,types.py,errors.py}`
-3. Never bypass declined tool calls; never hallucinate
-4. Plan changes and reason to ≥90% confidence before implementing
-5. Document repeated mistakes in `context/pitfalls.md`
-6. Keep `TODO.md` updated
-7. `.amdb/` stays at project root (hardcoded path)
-8. Always use `uvx openapi-python-client` — not direct call
-9. Never `cat` large files — use `head`/`tail`/`grep`/`Grep` to sample
-10. Always separate stdout/stderr in cmd_outputs with timestamps
-11. SDK first — CLI only after SDK is complete
+1. Never edit generated files under `src/bb/cloud/{api,models,client.py,types.py,errors.py}` or `src/bb/datacenter/{api,models,client.py,types.py,errors.py}`
+1. Never bypass declined tool calls; never hallucinate
+1. Plan changes and reason to ≥90% confidence before implementing
+1. Document repeated mistakes in `context/pitfalls.md`
+1. Keep `TODO.md` updated
+1. Never `cat` large files — use `head`/`tail`/`grep`/`Grep` to sample
+1. Always separate stdout/stderr in cmd_outputs with timestamps
 
 ---
 
 ## Pitfalls — Never Repeat
 
-1. **Haiku agents silently fail on WebFetch/Write/Bash.** Use main context with curl instead.
-2. **WebFetch in main context = permanent context bloat.** Use `curl | pandoc -o file`.
 3. **Guessing remote filenames wastes retries.** List via `gh api repos/.../contents/...` first.
 4. **`openapi-python-client` generates a project wrapper** — no `--meta none`. Use `/tmp/` + rsync.
-5. **Generated package is at `$GEN_TMP/bb/` directly** — NOT `$GEN_TMP/bb/bb/`. Sync from there.
-6. **`amdb context` does not exist.** Use `amdb generate --focus "<query>"` → `.amdb/<slug>.md`.
-7. **`amdb generate` errors if never initialized.** Run `amdb init` first, then `amdb generate`.
-8. **HuggingFace 5xx on `amdb init`** is transient — retry, do not copy from sibling projects.
-9. **Never copy files from sibling projects** to fix transient errors.
 10. **Never open large doc or data files directly.** Sample with `head`/`grep`/`tail`.
 11. **`cat` is banned for file inspection.** Always use `Read` tool or `head`/`grep`/`tail`.
 12. **Do not write synthesized docs from memory.** Fetch raw source via `gh api` or `curl`.
