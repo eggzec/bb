@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -28,6 +28,8 @@ class Branch:
     """ Available merge strategies for pull requests targeting this branch. """
     default_merge_strategy: str | Unset = UNSET
     """ The default merge strategy for pull requests targeting this branch. """
+    sync_strategies: list[str] | Unset = UNSET
+    """ Available strategies for syncing a fork branch with this branch. """
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -52,6 +54,10 @@ class Branch:
 
         default_merge_strategy = self.default_merge_strategy
 
+        sync_strategies: list[str] | Unset = UNSET
+        if not isinstance(self.sync_strategies, Unset):
+            sync_strategies = self.sync_strategies
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -69,6 +75,8 @@ class Branch:
             field_dict["merge_strategies"] = merge_strategies
         if default_merge_strategy is not UNSET:
             field_dict["default_merge_strategy"] = default_merge_strategy
+        if sync_strategies is not UNSET:
+            field_dict["sync_strategies"] = sync_strategies
 
         return field_dict
 
@@ -107,6 +115,8 @@ class Branch:
 
         default_merge_strategy = d.pop("default_merge_strategy", UNSET)
 
+        sync_strategies = cast(list[str], d.pop("sync_strategies", UNSET))
+
         branch = cls(
             type_=type_,
             links=links,
@@ -114,6 +124,7 @@ class Branch:
             target=target,
             merge_strategies=merge_strategies,
             default_merge_strategy=default_merge_strategy,
+            sync_strategies=sync_strategies,
         )
 
         branch.additional_properties = d

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import datetime
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -19,7 +19,7 @@ T = TypeVar("T", bound="SshKey")
 
 @_attrs_define
 class SshKey:
-    type_: str
+    type_: str | Unset = UNSET
     uuid: str | Unset = UNSET
     """ The SSH key's immutable ID. """
     key: str | Unset = UNSET
@@ -28,8 +28,8 @@ class SshKey:
     """ The comment parsed from the SSH key (if present) """
     label: str | Unset = UNSET
     """ The user-defined label for the SSH key """
-    created_on: datetime.datetime | Unset = UNSET
-    last_used: datetime.datetime | Unset = UNSET
+    created_on: datetime.datetime | None | Unset = UNSET
+    last_used: datetime.datetime | None | Unset = UNSET
     links: SshKeyLinks | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -44,13 +44,21 @@ class SshKey:
 
         label = self.label
 
-        created_on: str | Unset = UNSET
-        if not isinstance(self.created_on, Unset):
+        created_on: None | str | Unset
+        if isinstance(self.created_on, Unset):
+            created_on = UNSET
+        elif isinstance(self.created_on, datetime.datetime):
             created_on = self.created_on.isoformat()
+        else:
+            created_on = self.created_on
 
-        last_used: str | Unset = UNSET
-        if not isinstance(self.last_used, Unset):
+        last_used: None | str | Unset
+        if isinstance(self.last_used, Unset):
+            last_used = UNSET
+        elif isinstance(self.last_used, datetime.datetime):
             last_used = self.last_used.isoformat()
+        else:
+            last_used = self.last_used
 
         links: dict[str, Any] | Unset = UNSET
         if not isinstance(self.links, Unset):
@@ -58,11 +66,9 @@ class SshKey:
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "type": type_,
-            }
-        )
+        field_dict.update({})
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if uuid is not UNSET:
             field_dict["uuid"] = uuid
         if key is not UNSET:
@@ -85,7 +91,7 @@ class SshKey:
         from ..models.ssh_key_links import SshKeyLinks
 
         d = dict(src_dict)
-        type_ = d.pop("type")
+        type_ = d.pop("type", UNSET)
 
         uuid = d.pop("uuid", UNSET)
 
@@ -95,19 +101,39 @@ class SshKey:
 
         label = d.pop("label", UNSET)
 
-        _created_on = d.pop("created_on", UNSET)
-        created_on: datetime.datetime | Unset
-        if isinstance(_created_on, Unset):
-            created_on = UNSET
-        else:
-            created_on = isoparse(_created_on)
+        def _parse_created_on(data: object) -> datetime.datetime | None | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, str):
+                    raise TypeError()
+                created_on_type_0 = isoparse(data)
 
-        _last_used = d.pop("last_used", UNSET)
-        last_used: datetime.datetime | Unset
-        if isinstance(_last_used, Unset):
-            last_used = UNSET
-        else:
-            last_used = isoparse(_last_used)
+                return created_on_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(datetime.datetime | None | Unset, data)
+
+        created_on = _parse_created_on(d.pop("created_on", UNSET))
+
+        def _parse_last_used(data: object) -> datetime.datetime | None | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, str):
+                    raise TypeError()
+                last_used_type_0 = isoparse(data)
+
+                return last_used_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(datetime.datetime | None | Unset, data)
+
+        last_used = _parse_last_used(d.pop("last_used", UNSET))
 
         _links = d.pop("links", UNSET)
         links: SshKeyLinks | Unset

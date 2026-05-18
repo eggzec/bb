@@ -19,7 +19,7 @@ T = TypeVar("T", bound="Group")
 
 @_attrs_define
 class Group:
-    type_: str
+    type_: str | Unset = UNSET
     links: GroupLinks | Unset = UNSET
     owner: Account | Unset = UNSET
     workspace: Workspace | Unset = UNSET
@@ -56,11 +56,9 @@ class Group:
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "type": type_,
-            }
-        )
+        field_dict.update({})
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if links is not UNSET:
             field_dict["links"] = links
         if owner is not UNSET:
@@ -83,7 +81,7 @@ class Group:
         from ..models.workspace import Workspace
 
         d = dict(src_dict)
-        type_ = d.pop("type")
+        type_ = d.pop("type", UNSET)
 
         _links = d.pop("links", UNSET)
         links: GroupLinks | Unset

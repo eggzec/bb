@@ -12,7 +12,9 @@ from ..models.commitstatus_state import CommitstatusState
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
+    from ..models.commit import Commit
     from ..models.commitstatus_links import CommitstatusLinks
+    from ..models.repository import Repository
 
 
 T = TypeVar("T", bound="Commitstatus")
@@ -20,13 +22,14 @@ T = TypeVar("T", bound="Commitstatus")
 
 @_attrs_define
 class Commitstatus:
-    type_: str
     key: str
     """ An identifier for the status that's unique to
             its type (current "build" is the only supported type) and the vendor,
             e.g. BB-DEPLOY """
     state: CommitstatusState
     """ Provides some indication of the status of this commit """
+    type_: str | Unset = UNSET
+    """ The type discriminator for this object. """
     links: CommitstatusLinks | Unset = UNSET
     refname: str | Unset = UNSET
     """
@@ -48,14 +51,16 @@ class Commitstatus:
     """ A description of the build (e.g. "Unit tests in Bamboo") """
     created_on: datetime.datetime | Unset = UNSET
     updated_on: datetime.datetime | Unset = UNSET
+    commit: Commit | Unset = UNSET
+    repository: Repository | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        type_ = self.type_
-
         key = self.key
 
         state = self.state.value
+
+        type_ = self.type_
 
         links: dict[str, Any] | Unset = UNSET
         if not isinstance(self.links, Unset):
@@ -77,15 +82,24 @@ class Commitstatus:
         if not isinstance(self.updated_on, Unset):
             updated_on = self.updated_on.isoformat()
 
+        commit: dict[str, Any] | Unset = UNSET
+        if not isinstance(self.commit, Unset):
+            commit = self.commit.to_dict()
+
+        repository: dict[str, Any] | Unset = UNSET
+        if not isinstance(self.repository, Unset):
+            repository = self.repository.to_dict()
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
-                "type": type_,
                 "key": key,
                 "state": state,
             }
         )
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if links is not UNSET:
             field_dict["links"] = links
         if refname is not UNSET:
@@ -100,19 +114,25 @@ class Commitstatus:
             field_dict["created_on"] = created_on
         if updated_on is not UNSET:
             field_dict["updated_on"] = updated_on
+        if commit is not UNSET:
+            field_dict["commit"] = commit
+        if repository is not UNSET:
+            field_dict["repository"] = repository
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.commit import Commit
         from ..models.commitstatus_links import CommitstatusLinks
+        from ..models.repository import Repository
 
         d = dict(src_dict)
-        type_ = d.pop("type")
-
         key = d.pop("key")
 
         state = CommitstatusState(d.pop("state"))
+
+        type_ = d.pop("type", UNSET)
 
         _links = d.pop("links", UNSET)
         links: CommitstatusLinks | Unset
@@ -143,10 +163,24 @@ class Commitstatus:
         else:
             updated_on = isoparse(_updated_on)
 
+        _commit = d.pop("commit", UNSET)
+        commit: Commit | Unset
+        if isinstance(_commit, Unset):
+            commit = UNSET
+        else:
+            commit = Commit.from_dict(_commit)
+
+        _repository = d.pop("repository", UNSET)
+        repository: Repository | Unset
+        if isinstance(_repository, Unset):
+            repository = UNSET
+        else:
+            repository = Repository.from_dict(_repository)
+
         commitstatus = cls(
-            type_=type_,
             key=key,
             state=state,
+            type_=type_,
             links=links,
             refname=refname,
             url=url,
@@ -154,6 +188,8 @@ class Commitstatus:
             description=description,
             created_on=created_on,
             updated_on=updated_on,
+            commit=commit,
+            repository=repository,
         )
 
         commitstatus.additional_properties = d

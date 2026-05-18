@@ -17,7 +17,7 @@ T = TypeVar("T", bound="PipelineKnownHost")
 
 @_attrs_define
 class PipelineKnownHost:
-    type_: str
+    type_: str | Unset = UNSET
     uuid: str | Unset = UNSET
     """ The UUID identifying the known host. """
     hostname: str | Unset = UNSET
@@ -38,11 +38,9 @@ class PipelineKnownHost:
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "type": type_,
-            }
-        )
+        field_dict.update({})
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if uuid is not UNSET:
             field_dict["uuid"] = uuid
         if hostname is not UNSET:
@@ -57,7 +55,7 @@ class PipelineKnownHost:
         from ..models.pipeline_ssh_public_key import PipelineSshPublicKey
 
         d = dict(src_dict)
-        type_ = d.pop("type")
+        type_ = d.pop("type", UNSET)
 
         uuid = d.pop("uuid", UNSET)
 

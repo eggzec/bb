@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import datetime
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -26,7 +26,7 @@ T = TypeVar("T", bound="Pullrequest")
 
 @_attrs_define
 class Pullrequest:
-    type_: str
+    type_: str | Unset = UNSET
     links: PullrequestLinks | Unset = UNSET
     id: int | Unset = UNSET
     """ The pull request's unique ID. Note that pull request IDs are only unique within their associated repository.
@@ -41,14 +41,14 @@ class Pullrequest:
     author: Account | Unset = UNSET
     source: PullRequestEndpoint | Unset = UNSET
     destination: PullRequestEndpoint | Unset = UNSET
-    merge_commit: PullrequestPullRequestCommit | Unset = UNSET
+    merge_commit: None | PullrequestPullRequestCommit | Unset = UNSET
     comment_count: int | Unset = UNSET
     """ The number of comments for a specific pull request. """
     task_count: int | Unset = UNSET
     """ The number of open tasks for a specific pull request. """
     close_source_branch: bool | Unset = UNSET
     """ A boolean flag indicating if merging the pull request closes the source branch. """
-    closed_by: Account | Unset = UNSET
+    closed_by: Account | None | Unset = UNSET
     reason: str | Unset = UNSET
     """ Explains why a pull request was declined. This field is only applicable to pull requests in rejected state.
     """
@@ -80,6 +80,9 @@ class Pullrequest:
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
+        from ..models.account import Account
+        from ..models.pullrequest_pull_request_commit import PullrequestPullRequestCommit
+
         type_ = self.type_
 
         links: dict[str, Any] | Unset = UNSET
@@ -114,9 +117,13 @@ class Pullrequest:
         if not isinstance(self.destination, Unset):
             destination = self.destination.to_dict()
 
-        merge_commit: dict[str, Any] | Unset = UNSET
-        if not isinstance(self.merge_commit, Unset):
+        merge_commit: dict[str, Any] | None | Unset
+        if isinstance(self.merge_commit, Unset):
+            merge_commit = UNSET
+        elif isinstance(self.merge_commit, PullrequestPullRequestCommit):
             merge_commit = self.merge_commit.to_dict()
+        else:
+            merge_commit = self.merge_commit
 
         comment_count = self.comment_count
 
@@ -124,9 +131,13 @@ class Pullrequest:
 
         close_source_branch = self.close_source_branch
 
-        closed_by: dict[str, Any] | Unset = UNSET
-        if not isinstance(self.closed_by, Unset):
+        closed_by: dict[str, Any] | None | Unset
+        if isinstance(self.closed_by, Unset):
+            closed_by = UNSET
+        elif isinstance(self.closed_by, Account):
             closed_by = self.closed_by.to_dict()
+        else:
+            closed_by = self.closed_by
 
         reason = self.reason
 
@@ -158,11 +169,9 @@ class Pullrequest:
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "type": type_,
-            }
-        )
+        field_dict.update({})
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if links is not UNSET:
             field_dict["links"] = links
         if id is not UNSET:
@@ -219,7 +228,7 @@ class Pullrequest:
         from ..models.pullrequest_summary import PullrequestSummary
 
         d = dict(src_dict)
-        type_ = d.pop("type")
+        type_ = d.pop("type", UNSET)
 
         _links = d.pop("links", UNSET)
         links: PullrequestLinks | Unset
@@ -274,12 +283,22 @@ class Pullrequest:
         else:
             destination = PullRequestEndpoint.from_dict(_destination)
 
-        _merge_commit = d.pop("merge_commit", UNSET)
-        merge_commit: PullrequestPullRequestCommit | Unset
-        if isinstance(_merge_commit, Unset):
-            merge_commit = UNSET
-        else:
-            merge_commit = PullrequestPullRequestCommit.from_dict(_merge_commit)
+        def _parse_merge_commit(data: object) -> None | PullrequestPullRequestCommit | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                merge_commit_type_0 = PullrequestPullRequestCommit.from_dict(data)
+
+                return merge_commit_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(None | PullrequestPullRequestCommit | Unset, data)
+
+        merge_commit = _parse_merge_commit(d.pop("merge_commit", UNSET))
 
         comment_count = d.pop("comment_count", UNSET)
 
@@ -287,12 +306,22 @@ class Pullrequest:
 
         close_source_branch = d.pop("close_source_branch", UNSET)
 
-        _closed_by = d.pop("closed_by", UNSET)
-        closed_by: Account | Unset
-        if isinstance(_closed_by, Unset):
-            closed_by = UNSET
-        else:
-            closed_by = Account.from_dict(_closed_by)
+        def _parse_closed_by(data: object) -> Account | None | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                closed_by_type_0 = Account.from_dict(data)
+
+                return closed_by_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(Account | None | Unset, data)
+
+        closed_by = _parse_closed_by(d.pop("closed_by", UNSET))
 
         reason = d.pop("reason", UNSET)
 

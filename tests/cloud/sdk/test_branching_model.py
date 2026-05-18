@@ -58,7 +58,7 @@ async def test_update_settings_returns_settings(mock_client):
         f"{_API}.put_repositories_workspace_repo_slug_branching_model_settings.asyncio",
         new=AsyncMock(return_value=settings),
     ):
-        result = await branching_model.update_settings(mock_client, "ws", "slug")
+        result = await branching_model.update_settings(mock_client, "ws", "slug", body=MagicMock(spec=BranchingModelSettings))
     assert result is settings
 
 
@@ -88,7 +88,7 @@ async def test_update_project_settings_returns_settings(mock_client):
         f"{_API}.put_workspaces_workspace_projects_project_key_branching_model_settings.asyncio",
         new=AsyncMock(return_value=settings),
     ):
-        result = await branching_model.update_project_settings(mock_client, "ws", "PROJ")
+        result = await branching_model.update_project_settings(mock_client, "ws", "PROJ", body=MagicMock(spec=BranchingModelSettings))
     assert result is settings
 
 

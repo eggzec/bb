@@ -191,6 +191,42 @@ async def test_create_propagates_error(mock_client):
     assert result is err
 
 
+async def test_list_propagates_error(mock_client):
+    err = _make_error("pagination failed")
+    with patch("bb.cloud.sdk.prs.async_paginate", new=AsyncMock(return_value=err)):
+        result = await prs.list(mock_client, "ws", "slug")
+    assert result is err
+    assert isinstance(result, Error)
+
+
+async def test_diff_returns_error_on_failure(mock_client):
+    err = _make_error("auth failure")
+    mock_response = MagicMock()
+    mock_response.status_code.value = 401
+    mock_response.parsed = err
+    with patch(
+        f"{_API}.get_repositories_workspace_repo_slug_pullrequests_pull_request_id_diff.asyncio_detailed",
+        new=AsyncMock(return_value=mock_response),
+    ):
+        result = await prs.diff(mock_client, "ws", "slug", 1)
+    assert result is err
+    assert isinstance(result, Error)
+
+
+async def test_patch_returns_error_on_failure(mock_client):
+    err = _make_error("auth failure")
+    mock_response = MagicMock()
+    mock_response.status_code.value = 401
+    mock_response.parsed = err
+    with patch(
+        f"{_API}.get_repositories_workspace_repo_slug_pullrequests_pull_request_id_patch.asyncio_detailed",
+        new=AsyncMock(return_value=mock_response),
+    ):
+        result = await prs.patch(mock_client, "ws", "slug", 1)
+    assert result is err
+    assert isinstance(result, Error)
+
+
 async def test_list_raises_on_bad_auth(bad_auth_client):
     with pytest.raises(AuthenticationError):
         await prs.list(bad_auth_client, "ws", "slug")

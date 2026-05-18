@@ -20,7 +20,7 @@ T = TypeVar("T", bound="Workspace")
 
 @_attrs_define
 class Workspace:
-    type_: str
+    type_: str | Unset = UNSET
     links: WorkspaceLinks | Unset = UNSET
     uuid: str | Unset = UNSET
     """ The workspace's immutable id. """
@@ -74,11 +74,9 @@ class Workspace:
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "type": type_,
-            }
-        )
+        field_dict.update({})
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if links is not UNSET:
             field_dict["links"] = links
         if uuid is not UNSET:
@@ -105,7 +103,7 @@ class Workspace:
         from ..models.workspace_links import WorkspaceLinks
 
         d = dict(src_dict)
-        type_ = d.pop("type")
+        type_ = d.pop("type", UNSET)
 
         _links = d.pop("links", UNSET)
         links: WorkspaceLinks | Unset

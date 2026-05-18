@@ -22,7 +22,7 @@ from __future__ import annotations
 
 import inspect
 from collections.abc import AsyncIterator, Awaitable, Callable, Iterator
-from functools import cache
+from functools import lru_cache
 from typing import Any
 
 from bb.cloud.models.error import Error
@@ -36,7 +36,7 @@ __all__ = [
 ]
 
 
-@cache
+@lru_cache(maxsize=256)
 def _accepts(fn: Callable[..., Any], name: str) -> bool:
     """Return True iff *fn* declares a keyword argument called *name*.
 

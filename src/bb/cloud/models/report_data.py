@@ -1,17 +1,13 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..models.report_data_type import ReportDataType
 from ..types import UNSET, Unset
-
-if TYPE_CHECKING:
-    from ..models.report_data_value import ReportDataValue
-
 
 T = TypeVar("T", bound="ReportData")
 
@@ -25,8 +21,9 @@ class ReportData:
     boolean, number or string. """
     title: str | Unset = UNSET
     """ A string describing what this data field represents. """
-    value: ReportDataValue | Unset = UNSET
-    """ The value of the data element. """
+    value: Any | Unset = UNSET
+    """ The value of the data element. Can be a number, string, boolean, or object depending on the data type
+    (PERCENTAGE, DATE, DURATION, TEXT, NUMBER, BOOLEAN, LINK). """
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -36,9 +33,7 @@ class ReportData:
 
         title = self.title
 
-        value: dict[str, Any] | Unset = UNSET
-        if not isinstance(self.value, Unset):
-            value = self.value.to_dict()
+        value = self.value
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
@@ -54,8 +49,6 @@ class ReportData:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.report_data_value import ReportDataValue
-
         d = dict(src_dict)
         _type_ = d.pop("type", UNSET)
         type_: ReportDataType | Unset
@@ -66,12 +59,7 @@ class ReportData:
 
         title = d.pop("title", UNSET)
 
-        _value = d.pop("value", UNSET)
-        value: ReportDataValue | Unset
-        if isinstance(_value, Unset):
-            value = UNSET
-        else:
-            value = ReportDataValue.from_dict(_value)
+        value = d.pop("value", UNSET)
 
         report_data = cls(
             type_=type_,

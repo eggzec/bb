@@ -125,6 +125,14 @@ async def test_create_propagates_error(mock_client):
     assert result is err
 
 
+async def test_list_propagates_error(mock_client):
+    err = _make_error("pagination failed")
+    with patch("bb.cloud.sdk.repos.async_paginate", new=AsyncMock(return_value=err)):
+        result = await repos.list(mock_client, workspace="ws")
+    assert result is err
+    assert isinstance(result, Error)
+
+
 async def test_list_raises_on_bad_auth(bad_auth_client):
     with pytest.raises(AuthenticationError):
         await repos.list(bad_auth_client, workspace="ws")

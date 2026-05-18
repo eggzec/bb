@@ -23,7 +23,10 @@ def _get_kwargs(
     workspace: str,
     repo_slug: str,
     issue_id: str,
+    *,
+    body: Issue,
 ) -> dict[str, Any]:
+    headers: dict[str, Any] = {}
 
     _kwargs: dict[str, Any] = {
         "method": "put",
@@ -34,6 +37,11 @@ def _get_kwargs(
         ),
     }
 
+    _kwargs["json"] = body.to_dict()
+
+    headers["Content-Type"] = "application/json"
+
+    _kwargs["headers"] = headers
     return _kwargs
 
 
@@ -48,6 +56,13 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
         response_200 = Issue.from_dict(response.json())
 
         return response_200
+
+    if response.status_code == 401:
+        if "application/json" not in response.headers.get("content-type", ""):
+            return None
+        response_401 = Error.from_dict(response.json())
+
+        return response_401
 
     if response.status_code == 403:
         if "application/json" not in response.headers.get("content-type", ""):
@@ -85,6 +100,7 @@ def sync_detailed(
     issue_id: str,
     *,
     client: AuthenticatedClient,
+    body: Issue,
 ) -> Response[ParsedPayload]:
     r""" Update an issue
 
@@ -119,6 +135,7 @@ def sync_detailed(
         workspace (str):
         repo_slug (str):
         issue_id (str):
+        body (Issue):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -132,6 +149,7 @@ def sync_detailed(
         workspace=workspace,
         repo_slug=repo_slug,
         issue_id=issue_id,
+        body=body,
     )
 
     response = client.get_httpx_client().request(
@@ -148,6 +166,7 @@ def sync(
     issue_id: str,
     *,
     client: AuthenticatedClient,
+    body: Issue,
 ) -> ParsedPayload | None:
     r""" Update an issue
 
@@ -182,6 +201,7 @@ def sync(
         workspace (str):
         repo_slug (str):
         issue_id (str):
+        body (Issue):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -196,6 +216,7 @@ def sync(
         repo_slug=repo_slug,
         issue_id=issue_id,
         client=client,
+        body=body,
     ).parsed
 
 
@@ -206,6 +227,7 @@ async def asyncio_detailed(
     issue_id: str,
     *,
     client: AuthenticatedClient,
+    body: Issue,
 ) -> Response[ParsedPayload]:
     r""" Update an issue
 
@@ -240,6 +262,7 @@ async def asyncio_detailed(
         workspace (str):
         repo_slug (str):
         issue_id (str):
+        body (Issue):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -253,6 +276,7 @@ async def asyncio_detailed(
         workspace=workspace,
         repo_slug=repo_slug,
         issue_id=issue_id,
+        body=body,
     )
 
     response = await client.get_async_httpx_client().request(**kwargs)
@@ -267,6 +291,7 @@ async def asyncio(
     issue_id: str,
     *,
     client: AuthenticatedClient,
+    body: Issue,
 ) -> ParsedPayload | None:
     r""" Update an issue
 
@@ -301,6 +326,7 @@ async def asyncio(
         workspace (str):
         repo_slug (str):
         issue_id (str):
+        body (Issue):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -316,5 +342,6 @@ async def asyncio(
             repo_slug=repo_slug,
             issue_id=issue_id,
             client=client,
+            body=body,
         )
     ).parsed

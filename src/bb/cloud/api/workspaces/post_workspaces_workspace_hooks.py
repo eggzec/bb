@@ -20,7 +20,10 @@ __all__ = [
 
 def _get_kwargs(
     workspace: str,
+    *,
+    body: WebhookSubscription,
 ) -> dict[str, Any]:
+    headers: dict[str, Any] = {}
 
     _kwargs: dict[str, Any] = {
         "method": "post",
@@ -29,6 +32,11 @@ def _get_kwargs(
         ),
     }
 
+    _kwargs["json"] = body.to_dict()
+
+    headers["Content-Type"] = "application/json"
+
+    _kwargs["headers"] = headers
     return _kwargs
 
 
@@ -43,6 +51,13 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
         response_201 = WebhookSubscription.from_dict(response.json())
 
         return response_201
+
+    if response.status_code == 401:
+        if "application/json" not in response.headers.get("content-type", ""):
+            return None
+        response_401 = Error.from_dict(response.json())
+
+        return response_401
 
     if response.status_code == 403:
         if "application/json" not in response.headers.get("content-type", ""):
@@ -77,6 +92,7 @@ def sync_detailed(
     workspace: str,
     *,
     client: AuthenticatedClient,
+    body: WebhookSubscription,
 ) -> Response[ParsedPayload]:
     r"""Create a webhook for a workspace
 
@@ -120,6 +136,7 @@ def sync_detailed(
 
     Args:
         workspace (str):
+        body (WebhookSubscription):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -131,6 +148,7 @@ def sync_detailed(
 
     kwargs = _get_kwargs(
         workspace=workspace,
+        body=body,
     )
 
     response = client.get_httpx_client().request(
@@ -144,6 +162,7 @@ def sync(
     workspace: str,
     *,
     client: AuthenticatedClient,
+    body: WebhookSubscription,
 ) -> ParsedPayload | None:
     r"""Create a webhook for a workspace
 
@@ -187,6 +206,7 @@ def sync(
 
     Args:
         workspace (str):
+        body (WebhookSubscription):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -199,6 +219,7 @@ def sync(
     return sync_detailed(
         workspace=workspace,
         client=client,
+        body=body,
     ).parsed
 
 
@@ -206,6 +227,7 @@ async def asyncio_detailed(
     workspace: str,
     *,
     client: AuthenticatedClient,
+    body: WebhookSubscription,
 ) -> Response[ParsedPayload]:
     r"""Create a webhook for a workspace
 
@@ -249,6 +271,7 @@ async def asyncio_detailed(
 
     Args:
         workspace (str):
+        body (WebhookSubscription):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -260,6 +283,7 @@ async def asyncio_detailed(
 
     kwargs = _get_kwargs(
         workspace=workspace,
+        body=body,
     )
 
     response = await client.get_async_httpx_client().request(**kwargs)
@@ -271,6 +295,7 @@ async def asyncio(
     workspace: str,
     *,
     client: AuthenticatedClient,
+    body: WebhookSubscription,
 ) -> ParsedPayload | None:
     r"""Create a webhook for a workspace
 
@@ -314,6 +339,7 @@ async def asyncio(
 
     Args:
         workspace (str):
+        body (WebhookSubscription):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -327,5 +353,6 @@ async def asyncio(
         await asyncio_detailed(
             workspace=workspace,
             client=client,
+            body=body,
         )
     ).parsed

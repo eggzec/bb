@@ -17,7 +17,7 @@ T = TypeVar("T", bound="PipelinesPipelineLinks")
 
 @_attrs_define
 class PipelinesPipelineLinks:
-    type_: str
+    type_: str | Unset = UNSET
     self_: PipelinesLinksSectionHref | Unset = UNSET
     steps: PipelinesLinksSectionHref | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
@@ -35,11 +35,9 @@ class PipelinesPipelineLinks:
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "type": type_,
-            }
-        )
+        field_dict.update({})
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if self_ is not UNSET:
             field_dict["self"] = self_
         if steps is not UNSET:
@@ -52,7 +50,7 @@ class PipelinesPipelineLinks:
         from ..models.pipelines_links_section_href import PipelinesLinksSectionHref
 
         d = dict(src_dict)
-        type_ = d.pop("type")
+        type_ = d.pop("type", UNSET)
 
         _self_ = d.pop("self", UNSET)
         self_: PipelinesLinksSectionHref | Unset

@@ -28,7 +28,7 @@ T = TypeVar("T", bound="Issue")
 
 @_attrs_define
 class Issue:
-    type_: str
+    type_: str | Unset = UNSET
     links: IssueLinks | Unset = UNSET
     id: int | Unset = UNSET
     repository: Repository | Unset = UNSET
@@ -115,11 +115,9 @@ class Issue:
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "type": type_,
-            }
-        )
+        field_dict.update({})
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if links is not UNSET:
             field_dict["links"] = links
         if id is not UNSET:
@@ -168,7 +166,7 @@ class Issue:
         from ..models.version import Version
 
         d = dict(src_dict)
-        type_ = d.pop("type")
+        type_ = d.pop("type", UNSET)
 
         _links = d.pop("links", UNSET)
         links: IssueLinks | Unset

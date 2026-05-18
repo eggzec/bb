@@ -22,7 +22,6 @@ T = TypeVar("T", bound="Branchrestriction")
 
 @_attrs_define
 class Branchrestriction:
-    type_: str
     kind: BranchrestrictionKind
     """ The type of restriction that is being applied. """
     branch_match_kind: BranchrestrictionBranchMatchKind
@@ -30,6 +29,7 @@ class Branchrestriction:
     pattern: str
     """ Apply the restriction to branches that match this pattern. Active when `branch_match_kind` is `glob`. Will
     be empty when `branch_match_kind` is `branching_model`. """
+    type_: str | Unset = UNSET
     links: BranchrestrictionLinks | Unset = UNSET
     id: int | Unset = UNSET
     """ The branch restriction status' id. """
@@ -53,13 +53,13 @@ class Branchrestriction:
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        type_ = self.type_
-
         kind = self.kind.value
 
         branch_match_kind = self.branch_match_kind.value
 
         pattern = self.pattern
+
+        type_ = self.type_
 
         links: dict[str, Any] | Unset = UNSET
         if not isinstance(self.links, Unset):
@@ -91,12 +91,13 @@ class Branchrestriction:
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
-                "type": type_,
                 "kind": kind,
                 "branch_match_kind": branch_match_kind,
                 "pattern": pattern,
             }
         )
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if links is not UNSET:
             field_dict["links"] = links
         if id is not UNSET:
@@ -119,13 +120,13 @@ class Branchrestriction:
         from ..models.group import Group
 
         d = dict(src_dict)
-        type_ = d.pop("type")
-
         kind = BranchrestrictionKind(d.pop("kind"))
 
         branch_match_kind = BranchrestrictionBranchMatchKind(d.pop("branch_match_kind"))
 
         pattern = d.pop("pattern")
+
+        type_ = d.pop("type", UNSET)
 
         _links = d.pop("links", UNSET)
         links: BranchrestrictionLinks | Unset
@@ -164,10 +165,10 @@ class Branchrestriction:
                 groups.append(groups_item)
 
         branchrestriction = cls(
-            type_=type_,
             kind=kind,
             branch_match_kind=branch_match_kind,
             pattern=pattern,
+            type_=type_,
             links=links,
             id=id,
             branch_type=branch_type,

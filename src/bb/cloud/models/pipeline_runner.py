@@ -20,7 +20,7 @@ T = TypeVar("T", bound="PipelineRunner")
 
 @_attrs_define
 class PipelineRunner:
-    type_: str
+    type_: str | Unset = UNSET
     uuid: str | Unset = UNSET
     """ The UUID identifying the runner. """
     name: str | Unset = UNSET
@@ -64,11 +64,9 @@ class PipelineRunner:
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "type": type_,
-            }
-        )
+        field_dict.update({})
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if uuid is not UNSET:
             field_dict["uuid"] = uuid
         if name is not UNSET:
@@ -92,7 +90,7 @@ class PipelineRunner:
         from ..models.pipeline_runner_state import PipelineRunnerState
 
         d = dict(src_dict)
-        type_ = d.pop("type")
+        type_ = d.pop("type", UNSET)
 
         uuid = d.pop("uuid", UNSET)
 

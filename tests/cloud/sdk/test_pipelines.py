@@ -9,8 +9,10 @@ import pytest
 from bb.cloud.models.pipeline import Pipeline
 from bb.cloud.models.pipeline_known_host import PipelineKnownHost
 from bb.cloud.models.pipeline_schedule import PipelineSchedule
+from bb.cloud.models.pipeline_schedule_post_request_body import PipelineSchedulePostRequestBody
 from bb.cloud.models.pipeline_ssh_key_pair import PipelineSshKeyPair
 from bb.cloud.models.pipeline_variable import PipelineVariable
+from bb.cloud.models.pipelines_config import PipelinesConfig
 from bb.cloud.sdk import pipelines
 from bb.cloud.sdk._errors import AuthenticationError
 
@@ -71,10 +73,15 @@ async def test_step_returns_step(mock_client):
 
 
 async def test_step_log_returns_log(mock_client):
-    log = MagicMock()
-    with patch(f"{_API}.get_pipeline_step_log_for_repository.asyncio", new=AsyncMock(return_value=log)):
+    mock_response = MagicMock()
+    mock_response.status_code.value = 200
+    mock_response.content = b"log output"
+    with patch(
+        f"{_API}.get_pipeline_step_log_for_repository.asyncio_detailed",
+        new=AsyncMock(return_value=mock_response),
+    ):
         result = await pipelines.step_log(mock_client, "ws", "slug", "{uuid}", "{step-uuid}")
-    assert result is log
+    assert result == "log output"
 
 
 async def test_config_returns_config(mock_client):
@@ -87,7 +94,7 @@ async def test_config_returns_config(mock_client):
 async def test_update_config_returns_config(mock_client):
     config = MagicMock()
     with patch(f"{_API}.update_repository_pipeline_config.asyncio", new=AsyncMock(return_value=config)):
-        result = await pipelines.update_config(mock_client, "ws", "slug")
+        result = await pipelines.update_config(mock_client, "ws", "slug", body=MagicMock(spec=PipelinesConfig))
     assert result is config
 
 
@@ -135,7 +142,9 @@ async def test_get_schedule_returns_schedule(mock_client):
 async def test_create_schedule_returns_schedule(mock_client):
     sched = MagicMock(spec=PipelineSchedule)
     with patch(f"{_API}.create_repository_pipeline_schedule.asyncio", new=AsyncMock(return_value=sched)):
-        result = await pipelines.create_schedule(mock_client, "ws", "slug")
+        result = await pipelines.create_schedule(
+            mock_client, "ws", "slug", body=MagicMock(spec=PipelineSchedulePostRequestBody)
+        )
     assert result is sched
 
 
@@ -164,6 +173,29 @@ async def test_workspace_variables_returns_list(mock_client, make_page):
     with patch(f"{_API}.get_pipeline_variables_for_workspace.asyncio", new=AsyncMock(return_value=make_page([item]))):
         result = await pipelines.workspace_variables(mock_client, "ws")
     assert result == [item]
+
+
+async def test_step_log_returns_none_on_non_200(mock_client):
+    mock_response = MagicMock()
+    mock_response.status_code.value = 404
+    with patch(
+        f"{_API}.get_pipeline_step_log_for_repository.asyncio_detailed",
+        new=AsyncMock(return_value=mock_response),
+    ):
+        result = await pipelines.step_log(mock_client, "ws", "slug", "{uuid}", "{step-uuid}")
+    assert result is None
+
+
+async def test_step_log_returns_content_on_200(mock_client):
+    mock_response = MagicMock()
+    mock_response.status_code.value = 200
+    mock_response.content = b"log content"
+    with patch(
+        f"{_API}.get_pipeline_step_log_for_repository.asyncio_detailed",
+        new=AsyncMock(return_value=mock_response),
+    ):
+        result = await pipelines.step_log(mock_client, "ws", "slug", "{uuid}", "{step-uuid}")
+    assert result == "log content"
 
 
 async def test_list_raises_on_bad_auth(bad_auth_client):

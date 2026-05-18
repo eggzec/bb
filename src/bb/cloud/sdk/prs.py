@@ -47,6 +47,8 @@ from bb.cloud.models.get_repositories_workspace_repo_slug_pullrequests_state imp
 from bb.cloud.models.participant import Participant
 from bb.cloud.models.pull_request_merge_parameters import PullRequestMergeParameters
 from bb.cloud.models.pullrequest import Pullrequest
+from bb.cloud.models.pull_request_task_create import PullRequestTaskCreate
+from bb.cloud.models.pull_request_task_update import PullRequestTaskUpdate
 from bb.cloud.models.pullrequest_comment import PullrequestComment as PullRequestComment
 from bb.cloud.sdk._auth_validation import AuthMethod, require_auth
 from bb.cloud.sdk._client import BBClient
@@ -645,11 +647,14 @@ async def add_comment(
         `POST /2.0/repositories/{workspace}/{repo_slug}/pullrequests/{pull_request_id}/comments
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pullrequests/#api-repositories-workspace-repo-slug-pullrequests-pull-request-id-comments-post>`_
     """
-    result = await post_repositories_workspace_repo_slug_pullrequests_pull_request_id_comments.asyncio(
+    response = await post_repositories_workspace_repo_slug_pullrequests_pull_request_id_comments.asyncio_detailed(
         workspace, repo_slug, pull_request_id, client=client.auth, body=body
     )
-    if isinstance(result, (PullRequestComment, Error)):
-        return result
+    if response.status_code.value in (200, 201):
+        import json as _json
+        return PullRequestComment.from_dict(_json.loads(response.content))
+    if isinstance(response.parsed, Error):
+        return response.parsed
     return None
 
 
@@ -686,11 +691,13 @@ async def diff(client: BBClient, workspace: str, repo_slug: str, pull_request_id
         `GET /2.0/repositories/{workspace}/{repo_slug}/pullrequests/{pull_request_id}/diff
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pullrequests/#api-repositories-workspace-repo-slug-pullrequests-pull-request-id-diff-get>`_
     """
-    result = await get_repositories_workspace_repo_slug_pullrequests_pull_request_id_diff.asyncio(
+    response = await get_repositories_workspace_repo_slug_pullrequests_pull_request_id_diff.asyncio_detailed(
         workspace, repo_slug, pull_request_id, client=client.auth
     )
-    if isinstance(result, (str, Error)):
-        return result
+    if response.status_code.value in (200, 302):
+        return response.content.decode()
+    if isinstance(response.parsed, Error):
+        return response.parsed
     return None
 
 
@@ -1245,7 +1252,7 @@ async def create_task(
     repo_slug: str,
     pull_request_id: int,
     *,
-    body: Unset = UNSET,
+    body: PullRequestTaskCreate,
 ) -> Any | Error | None:
     """Create a task on a pull request.
 
@@ -1254,8 +1261,7 @@ async def create_task(
         workspace: Workspace slug or UUID (with surrounding braces, e.g. ``{abc-123}``).
         repo_slug: Repository slug or UUID.
         pull_request_id: Numeric pull request ID.
-        body: Task payload. Currently limited to :data:`~bb.cloud.types.UNSET` due to
-            spec constraints.
+        body: Task payload — a :class:`~bb.cloud.models.pull_request_task_create.PullRequestTaskCreate` object.
 
     Returns:
         The created task object, or ``None`` on error.
@@ -1335,7 +1341,7 @@ async def update_task(
     pull_request_id: int,
     task_id: int,
     *,
-    body: Unset = UNSET,
+    body: PullRequestTaskUpdate,
 ) -> Any | Error | None:
     """Update a task on a pull request.
 
@@ -1345,8 +1351,7 @@ async def update_task(
         repo_slug: Repository slug or UUID.
         pull_request_id: Numeric pull request ID.
         task_id: Numeric task ID.
-        body: Updated task payload. Currently limited to :data:`~bb.cloud.types.UNSET` due to
-            spec constraints.
+        body: Updated task payload — a :class:`~bb.cloud.models.pull_request_task_update.PullRequestTaskUpdate` object.
 
     Returns:
         The updated task object, or ``None`` on error.
@@ -1546,9 +1551,13 @@ async def diffstat(client: BBClient, workspace: str, repo_slug: str, pull_reques
         `GET /2.0/repositories/{workspace}/{repo_slug}/pullrequests/{pull_request_id}/diffstat
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pullrequests/#api-repositories-workspace-repo-slug-pullrequests-pull-request-id-diffstat-get>`_
     """
-    return await get_repositories_workspace_repo_slug_pullrequests_pull_request_id_diffstat.asyncio(
+    response = await get_repositories_workspace_repo_slug_pullrequests_pull_request_id_diffstat.asyncio_detailed(
         workspace, repo_slug, pull_request_id, client=client.auth
     )
+    if response.status_code.value == 200:
+        import json as _json
+        return _json.loads(response.content)
+    return response.parsed
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -1584,11 +1593,13 @@ async def patch(client: BBClient, workspace: str, repo_slug: str, pull_request_i
         `GET /2.0/repositories/{workspace}/{repo_slug}/pullrequests/{pull_request_id}/patch
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pullrequests/#api-repositories-workspace-repo-slug-pullrequests-pull-request-id-patch-get>`_
     """
-    result = await get_repositories_workspace_repo_slug_pullrequests_pull_request_id_patch.asyncio(
+    response = await get_repositories_workspace_repo_slug_pullrequests_pull_request_id_patch.asyncio_detailed(
         workspace, repo_slug, pull_request_id, client=client.auth
     )
-    if isinstance(result, (str, Error)):
-        return result
+    if response.status_code.value in (200, 302):
+        return response.content.decode()
+    if isinstance(response.parsed, Error):
+        return response.parsed
     return None
 
 
@@ -1730,6 +1741,7 @@ async def merge_task_status(
         `GET /2.0/repositories/{workspace}/{repo_slug}/pullrequests/{pull_request_id}/merge/task-status/{task_id}
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pullrequests/#api-repositories-workspace-repo-slug-pullrequests-pull-request-id-merge-task-status-task-id-get>`_
     """
-    return await get_repositories_workspace_repo_slug_pullrequests_pull_request_id_merge_task_status_task_id.asyncio(
+    response = await get_repositories_workspace_repo_slug_pullrequests_pull_request_id_merge_task_status_task_id.asyncio_detailed(
         workspace, repo_slug, pull_request_id, task_id, client=client.auth
     )
+    return response.parsed

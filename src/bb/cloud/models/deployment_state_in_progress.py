@@ -20,7 +20,7 @@ T = TypeVar("T", bound="DeploymentStateInProgress")
 
 @_attrs_define
 class DeploymentStateInProgress:
-    type_: str
+    type_: str | Unset = UNSET
     name: DeploymentStateInProgressName | Unset = UNSET
     """ The name of deployment state (IN_PROGRESS). """
     url: str | Unset = UNSET
@@ -49,11 +49,9 @@ class DeploymentStateInProgress:
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "type": type_,
-            }
-        )
+        field_dict.update({})
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if name is not UNSET:
             field_dict["name"] = name
         if url is not UNSET:
@@ -70,7 +68,7 @@ class DeploymentStateInProgress:
         from ..models.account import Account
 
         d = dict(src_dict)
-        type_ = d.pop("type")
+        type_ = d.pop("type", UNSET)
 
         _name = d.pop("name", UNSET)
         name: DeploymentStateInProgressName | Unset

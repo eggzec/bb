@@ -14,24 +14,24 @@ T = TypeVar("T", bound="PipelineSelector")
 
 @_attrs_define
 class PipelineSelector:
-    type_: PipelineSelectorType
+    type_: PipelineSelectorType | Unset = UNSET
     """ The type of selector. """
     pattern: str | Unset = UNSET
     """ The name of the matching pipeline definition. """
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        type_ = self.type_.value
+        type_: str | Unset = UNSET
+        if not isinstance(self.type_, Unset):
+            type_ = self.type_.value
 
         pattern = self.pattern
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "type": type_,
-            }
-        )
+        field_dict.update({})
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if pattern is not UNSET:
             field_dict["pattern"] = pattern
 
@@ -40,7 +40,12 @@ class PipelineSelector:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        type_ = PipelineSelectorType(d.pop("type"))
+        _type_ = d.pop("type", UNSET)
+        type_: PipelineSelectorType | Unset
+        if isinstance(_type_, Unset):
+            type_ = UNSET
+        else:
+            type_ = PipelineSelectorType(_type_)
 
         pattern = d.pop("pattern", UNSET)
 

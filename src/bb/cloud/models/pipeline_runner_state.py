@@ -20,7 +20,7 @@ T = TypeVar("T", bound="PipelineRunnerState")
 
 @_attrs_define
 class PipelineRunnerState:
-    type_: str
+    type_: str | Unset = UNSET
     status: PipelineRunnerStateStatus | Unset = UNSET
     """ The current status of the runner. """
     version: PipelineRunnerVersion | Unset = UNSET
@@ -49,11 +49,9 @@ class PipelineRunnerState:
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "type": type_,
-            }
-        )
+        field_dict.update({})
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if status is not UNSET:
             field_dict["status"] = status
         if version is not UNSET:
@@ -70,7 +68,7 @@ class PipelineRunnerState:
         from ..models.pipeline_runner_version import PipelineRunnerVersion
 
         d = dict(src_dict)
-        type_ = d.pop("type")
+        type_ = d.pop("type", UNSET)
 
         _status = d.pop("status", UNSET)
         status: PipelineRunnerStateStatus | Unset

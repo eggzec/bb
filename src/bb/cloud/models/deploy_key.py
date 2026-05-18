@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import datetime
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -21,7 +21,7 @@ T = TypeVar("T", bound="DeployKey")
 
 @_attrs_define
 class DeployKey:
-    type_: str
+    type_: str | Unset = UNSET
     key: str | Unset = UNSET
     """ The deploy key value. """
     repository: Repository | Unset = UNSET
@@ -30,7 +30,7 @@ class DeployKey:
     label: str | Unset = UNSET
     """ The user-defined label for the deploy key """
     added_on: datetime.datetime | Unset = UNSET
-    last_used: datetime.datetime | Unset = UNSET
+    last_used: datetime.datetime | None | Unset = UNSET
     links: DeployKeyLinks | Unset = UNSET
     owner: Account | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
@@ -52,9 +52,13 @@ class DeployKey:
         if not isinstance(self.added_on, Unset):
             added_on = self.added_on.isoformat()
 
-        last_used: str | Unset = UNSET
-        if not isinstance(self.last_used, Unset):
+        last_used: None | str | Unset
+        if isinstance(self.last_used, Unset):
+            last_used = UNSET
+        elif isinstance(self.last_used, datetime.datetime):
             last_used = self.last_used.isoformat()
+        else:
+            last_used = self.last_used
 
         links: dict[str, Any] | Unset = UNSET
         if not isinstance(self.links, Unset):
@@ -66,11 +70,9 @@ class DeployKey:
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "type": type_,
-            }
-        )
+        field_dict.update({})
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if key is not UNSET:
             field_dict["key"] = key
         if repository is not UNSET:
@@ -97,7 +99,7 @@ class DeployKey:
         from ..models.repository import Repository
 
         d = dict(src_dict)
-        type_ = d.pop("type")
+        type_ = d.pop("type", UNSET)
 
         key = d.pop("key", UNSET)
 
@@ -119,12 +121,22 @@ class DeployKey:
         else:
             added_on = isoparse(_added_on)
 
-        _last_used = d.pop("last_used", UNSET)
-        last_used: datetime.datetime | Unset
-        if isinstance(_last_used, Unset):
-            last_used = UNSET
-        else:
-            last_used = isoparse(_last_used)
+        def _parse_last_used(data: object) -> datetime.datetime | None | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, str):
+                    raise TypeError()
+                last_used_type_0 = isoparse(data)
+
+                return last_used_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(datetime.datetime | None | Unset, data)
+
+        last_used = _parse_last_used(d.pop("last_used", UNSET))
 
         _links = d.pop("links", UNSET)
         links: DeployKeyLinks | Unset

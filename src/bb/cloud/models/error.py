@@ -22,7 +22,7 @@ class Error:
 
     """
 
-    type_: str
+    type_: str | Unset = UNSET
     error: ErrorError | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -35,11 +35,9 @@ class Error:
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "type": type_,
-            }
-        )
+        field_dict.update({})
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if error is not UNSET:
             field_dict["error"] = error
 
@@ -50,7 +48,7 @@ class Error:
         from ..models.error_error import ErrorError
 
         d = dict(src_dict)
-        type_ = d.pop("type")
+        type_ = d.pop("type", UNSET)
 
         _error = d.pop("error", UNSET)
         error: ErrorError | Unset

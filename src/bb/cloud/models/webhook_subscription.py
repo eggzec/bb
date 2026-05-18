@@ -21,7 +21,7 @@ T = TypeVar("T", bound="WebhookSubscription")
 
 @_attrs_define
 class WebhookSubscription:
-    type_: str
+    type_: str | Unset = UNSET
     uuid: str | Unset = UNSET
     """ The webhook's id """
     url: str | Unset = UNSET
@@ -46,6 +46,14 @@ class WebhookSubscription:
     used during updates. The secret can be set to `null` or "" to remove the secret (or create a hook with no
     secret). Leaving out the secret field during updates will leave the secret unchanged. Leaving out the secret
     during creation will create a hook with no secret. """
+    history_enabled: bool | Unset = UNSET
+    """ Whether event delivery history is enabled. """
+    read_only: bool | Unset = UNSET
+    """ Whether this webhook is read-only. """
+    skip_cert_verification: bool | Unset = UNSET
+    """ Whether SSL certificate verification is skipped. """
+    source: str | Unset = UNSET
+    """ Source of the webhook (e.g. USER). """
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -82,13 +90,19 @@ class WebhookSubscription:
 
         secret = self.secret
 
+        history_enabled = self.history_enabled
+
+        read_only = self.read_only
+
+        skip_cert_verification = self.skip_cert_verification
+
+        source = self.source
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "type": type_,
-            }
-        )
+        field_dict.update({})
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if uuid is not UNSET:
             field_dict["uuid"] = uuid
         if url is not UNSET:
@@ -109,6 +123,14 @@ class WebhookSubscription:
             field_dict["secret_set"] = secret_set
         if secret is not UNSET:
             field_dict["secret"] = secret
+        if history_enabled is not UNSET:
+            field_dict["history_enabled"] = history_enabled
+        if read_only is not UNSET:
+            field_dict["read_only"] = read_only
+        if skip_cert_verification is not UNSET:
+            field_dict["skip_cert_verification"] = skip_cert_verification
+        if source is not UNSET:
+            field_dict["source"] = source
 
         return field_dict
 
@@ -117,7 +139,7 @@ class WebhookSubscription:
         from ..models.object_ import Object
 
         d = dict(src_dict)
-        type_ = d.pop("type")
+        type_ = d.pop("type", UNSET)
 
         uuid = d.pop("uuid", UNSET)
 
@@ -161,6 +183,14 @@ class WebhookSubscription:
 
         secret = d.pop("secret", UNSET)
 
+        history_enabled = d.pop("history_enabled", UNSET)
+
+        read_only = d.pop("read_only", UNSET)
+
+        skip_cert_verification = d.pop("skip_cert_verification", UNSET)
+
+        source = d.pop("source", UNSET)
+
         webhook_subscription = cls(
             type_=type_,
             uuid=uuid,
@@ -173,6 +203,10 @@ class WebhookSubscription:
             events=events,
             secret_set=secret_set,
             secret=secret,
+            history_enabled=history_enabled,
+            read_only=read_only,
+            skip_cert_verification=skip_cert_verification,
+            source=source,
         )
 
         webhook_subscription.additional_properties = d

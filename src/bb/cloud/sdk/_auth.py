@@ -68,7 +68,7 @@ class APITokenAuth(BaseAuth):
     def get_authenticated_client(self) -> AuthenticatedClient:
         credentials = f"{self.email}:{self.token}"
         encoded = base64.b64encode(credentials.encode()).decode()
-        return AuthenticatedClient(base_url=BASE_URL, token=encoded, prefix="Basic")
+        return AuthenticatedClient(base_url=BASE_URL, token=encoded, prefix="Basic", follow_redirects=True)
 
     def to_dict(self) -> dict:
         return {
@@ -118,6 +118,7 @@ class OAuthTokenAuth(BaseAuth):
             base_url=BASE_URL,
             token=self.access_token,
             prefix=self.token_type.capitalize(),
+            follow_redirects=True,
         )
 
     def is_expired(self) -> bool:
@@ -201,7 +202,7 @@ class OAuthClientCredsAuth(BaseAuth):
         return (datetime.now(UTC) - self.created_at).total_seconds() > self.expires_in
 
     def get_authenticated_client(self) -> AuthenticatedClient:
-        return AuthenticatedClient(base_url=BASE_URL, token=self.get_access_token(), prefix="Bearer")
+        return AuthenticatedClient(base_url=BASE_URL, token=self.get_access_token(), prefix="Bearer", follow_redirects=True)
 
     def to_dict(self) -> dict:
         return {
@@ -265,7 +266,7 @@ class JWTAuth(BaseAuth):
         return (int(time.time()) - self._issued_at) > 540  # refresh 1 min before expiry
 
     def get_authenticated_client(self) -> AuthenticatedClient:
-        return AuthenticatedClient(base_url=BASE_URL, token=self._create_jwt_token(), prefix="JWT")
+        return AuthenticatedClient(base_url=BASE_URL, token=self._create_jwt_token(), prefix="JWT", follow_redirects=True)
 
     def to_dict(self) -> dict:
         return {
@@ -304,7 +305,7 @@ class AppPasswordAuth(BaseAuth):
     def get_authenticated_client(self) -> AuthenticatedClient:
         credentials = f"{self.username}:{self.app_password}"
         encoded = base64.b64encode(credentials.encode()).decode()
-        return AuthenticatedClient(base_url=BASE_URL, token=encoded, prefix="Basic")
+        return AuthenticatedClient(base_url=BASE_URL, token=encoded, prefix="Basic", follow_redirects=True)
 
     def to_dict(self) -> dict:
         return {

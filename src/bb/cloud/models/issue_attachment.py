@@ -17,7 +17,7 @@ T = TypeVar("T", bound="IssueAttachment")
 
 @_attrs_define
 class IssueAttachment:
-    type_: str
+    type_: str | Unset = UNSET
     links: IssueAttachmentLinks | Unset = UNSET
     name: str | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
@@ -33,11 +33,9 @@ class IssueAttachment:
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "type": type_,
-            }
-        )
+        field_dict.update({})
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if links is not UNSET:
             field_dict["links"] = links
         if name is not UNSET:
@@ -50,7 +48,7 @@ class IssueAttachment:
         from ..models.issue_attachment_links import IssueAttachmentLinks
 
         d = dict(src_dict)
-        type_ = d.pop("type")
+        type_ = d.pop("type", UNSET)
 
         _links = d.pop("links", UNSET)
         links: IssueAttachmentLinks | Unset

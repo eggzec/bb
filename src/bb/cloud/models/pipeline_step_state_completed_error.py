@@ -18,7 +18,7 @@ T = TypeVar("T", bound="PipelineStepStateCompletedError")
 
 @_attrs_define
 class PipelineStepStateCompletedError:
-    type_: str
+    type_: str | Unset = UNSET
     name: PipelineStepStateCompletedErrorName | Unset = UNSET
     """ The name of the result (ERROR) """
     error: PipelineStepError | Unset = UNSET
@@ -37,11 +37,9 @@ class PipelineStepStateCompletedError:
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "type": type_,
-            }
-        )
+        field_dict.update({})
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if name is not UNSET:
             field_dict["name"] = name
         if error is not UNSET:
@@ -54,7 +52,7 @@ class PipelineStepStateCompletedError:
         from ..models.pipeline_step_error import PipelineStepError
 
         d = dict(src_dict)
-        type_ = d.pop("type")
+        type_ = d.pop("type", UNSET)
 
         _name = d.pop("name", UNSET)
         name: PipelineStepStateCompletedErrorName | Unset

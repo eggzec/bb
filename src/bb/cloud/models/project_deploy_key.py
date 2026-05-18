@@ -21,7 +21,7 @@ T = TypeVar("T", bound="ProjectDeployKey")
 
 @_attrs_define
 class ProjectDeployKey:
-    type_: str
+    type_: str | Unset = UNSET
     key: str | Unset = UNSET
     """ The deploy key value. """
     project: Project | Unset = UNSET
@@ -66,11 +66,9 @@ class ProjectDeployKey:
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "type": type_,
-            }
-        )
+        field_dict.update({})
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if key is not UNSET:
             field_dict["key"] = key
         if project is not UNSET:
@@ -97,7 +95,7 @@ class ProjectDeployKey:
         from ..models.project_deploy_key_links import ProjectDeployKeyLinks
 
         d = dict(src_dict)
-        type_ = d.pop("type")
+        type_ = d.pop("type", UNSET)
 
         key = d.pop("key", UNSET)
 

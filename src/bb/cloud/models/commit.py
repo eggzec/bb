@@ -24,7 +24,7 @@ T = TypeVar("T", bound="Commit")
 
 @_attrs_define
 class Commit:
-    type_: str
+    type_: str | Unset = UNSET
     hash_: str | Unset = UNSET
     date: datetime.datetime | Unset = UNSET
     author: Author | Unset = UNSET
@@ -79,11 +79,9 @@ class Commit:
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "type": type_,
-            }
-        )
+        field_dict.update({})
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if hash_ is not UNSET:
             field_dict["hash"] = hash_
         if date is not UNSET:
@@ -115,7 +113,7 @@ class Commit:
         from ..models.repository import Repository
 
         d = dict(src_dict)
-        type_ = d.pop("type")
+        type_ = d.pop("type", UNSET)
 
         hash_ = d.pop("hash", UNSET)
 

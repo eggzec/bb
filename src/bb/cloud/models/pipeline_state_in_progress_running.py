@@ -14,7 +14,7 @@ T = TypeVar("T", bound="PipelineStateInProgressRunning")
 
 @_attrs_define
 class PipelineStateInProgressRunning:
-    type_: str
+    type_: str | Unset = UNSET
     name: PipelineStateInProgressRunningName | Unset = UNSET
     """ The name of the stage (RUNNING) """
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
@@ -28,11 +28,9 @@ class PipelineStateInProgressRunning:
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "type": type_,
-            }
-        )
+        field_dict.update({})
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if name is not UNSET:
             field_dict["name"] = name
 
@@ -41,7 +39,7 @@ class PipelineStateInProgressRunning:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        type_ = d.pop("type")
+        type_ = d.pop("type", UNSET)
 
         _name = d.pop("name", UNSET)
         name: PipelineStateInProgressRunningName | Unset

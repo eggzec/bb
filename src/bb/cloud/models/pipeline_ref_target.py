@@ -19,7 +19,7 @@ T = TypeVar("T", bound="PipelineRefTarget")
 
 @_attrs_define
 class PipelineRefTarget:
-    type_: str
+    type_: str | Unset = UNSET
     ref_type: PipelineRefTargetRefType | Unset = UNSET
     """ The type of reference (branch/tag). """
     ref_name: str | Unset = UNSET
@@ -47,11 +47,9 @@ class PipelineRefTarget:
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "type": type_,
-            }
-        )
+        field_dict.update({})
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if ref_type is not UNSET:
             field_dict["ref_type"] = ref_type
         if ref_name is not UNSET:
@@ -69,7 +67,7 @@ class PipelineRefTarget:
         from ..models.pipeline_selector import PipelineSelector
 
         d = dict(src_dict)
-        type_ = d.pop("type")
+        type_ = d.pop("type", UNSET)
 
         _ref_type = d.pop("ref_type", UNSET)
         ref_type: PipelineRefTargetRefType | Unset

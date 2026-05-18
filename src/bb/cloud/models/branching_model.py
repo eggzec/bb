@@ -19,7 +19,7 @@ T = TypeVar("T", bound="BranchingModel")
 
 @_attrs_define
 class BranchingModel:
-    type_: str
+    type_: str | Unset = UNSET
     branch_types: list[BranchingModelBranchTypesItem] | Unset = UNSET
     """ The active branch types. """
     development: BranchingModelDevelopment | Unset = UNSET
@@ -46,11 +46,9 @@ class BranchingModel:
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "type": type_,
-            }
-        )
+        field_dict.update({})
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if branch_types is not UNSET:
             field_dict["branch_types"] = branch_types
         if development is not UNSET:
@@ -67,7 +65,7 @@ class BranchingModel:
         from ..models.branching_model_production import BranchingModelProduction
 
         d = dict(src_dict)
-        type_ = d.pop("type")
+        type_ = d.pop("type", UNSET)
 
         _branch_types = d.pop("branch_types", UNSET)
         branch_types: list[BranchingModelBranchTypesItem] | Unset = UNSET

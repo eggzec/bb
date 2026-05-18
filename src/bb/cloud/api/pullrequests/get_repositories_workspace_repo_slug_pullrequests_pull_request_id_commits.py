@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any, cast
+from typing import Any
 from urllib.parse import quote
 
 import httpx
@@ -7,6 +7,7 @@ import httpx
 from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.error import Error
+from ...models.paginated_commits import PaginatedCommits
 from ...types import Response
 
 __all__ = [
@@ -35,14 +36,24 @@ def _get_kwargs(
     return _kwargs
 
 
-type ParsedPayload = Any | Error
-type ParseResult = Any | Error | None
+type ParsedPayload = Error | PaginatedCommits
+type ParseResult = Error | PaginatedCommits | None
 
 
 def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> ParseResult:
     if response.status_code == 200:
-        response_200 = cast(Any, None)
+        if "application/json" not in response.headers.get("content-type", ""):
+            return None
+        response_200 = PaginatedCommits.from_dict(response.json())
+
         return response_200
+
+    if response.status_code == 401:
+        if "application/json" not in response.headers.get("content-type", ""):
+            return None
+        response_401 = Error.from_dict(response.json())
+
+        return response_401
 
     if response.status_code == 403:
         if "application/json" not in response.headers.get("content-type", ""):
@@ -97,7 +108,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Any | Error]
+        Response[Error | PaginatedCommits]
     """
 
     kwargs = _get_kwargs(
@@ -137,7 +148,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Any | Error
+        Error | PaginatedCommits
     """
 
     return sync_detailed(
@@ -172,7 +183,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Any | Error]
+        Response[Error | PaginatedCommits]
     """
 
     kwargs = _get_kwargs(
@@ -210,7 +221,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Any | Error
+        Error | PaginatedCommits
     """
 
     return (

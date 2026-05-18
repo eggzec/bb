@@ -24,7 +24,7 @@ T = TypeVar("T", bound="Repository")
 
 @_attrs_define
 class Repository:
-    type_: str
+    type_: str | Unset = UNSET
     links: RepositoryLinks | Unset = UNSET
     uuid: str | Unset = UNSET
     """ The repository's immutable id. This can be used as a substitute for the slug segment in URLs. Doing this
@@ -131,11 +131,9 @@ class Repository:
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "type": type_,
-            }
-        )
+        field_dict.update({})
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if links is not UNSET:
             field_dict["links"] = links
         if uuid is not UNSET:
@@ -183,7 +181,7 @@ class Repository:
         from ..models.repository_links import RepositoryLinks
 
         d = dict(src_dict)
-        type_ = d.pop("type")
+        type_ = d.pop("type", UNSET)
 
         _links = d.pop("links", UNSET)
         links: RepositoryLinks | Unset

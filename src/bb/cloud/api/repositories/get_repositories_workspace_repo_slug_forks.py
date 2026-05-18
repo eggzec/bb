@@ -6,6 +6,7 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
+from ...models.error import Error
 from ...models.get_repositories_workspace_repo_slug_forks_role import GetRepositoriesWorkspaceRepoSlugForksRole
 from ...models.paginated_repositories import PaginatedRepositories
 from ...types import UNSET, Response, Unset
@@ -59,8 +60,8 @@ def _get_kwargs(
     return _kwargs
 
 
-type ParsedPayload = PaginatedRepositories
-type ParseResult = PaginatedRepositories | None
+type ParsedPayload = Error | PaginatedRepositories
+type ParseResult = Error | PaginatedRepositories | None
 
 
 def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> ParseResult:
@@ -70,6 +71,27 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
         response_200 = PaginatedRepositories.from_dict(response.json())
 
         return response_200
+
+    if response.status_code == 401:
+        if "application/json" not in response.headers.get("content-type", ""):
+            return None
+        response_401 = Error.from_dict(response.json())
+
+        return response_401
+
+    if response.status_code == 403:
+        if "application/json" not in response.headers.get("content-type", ""):
+            return None
+        response_403 = Error.from_dict(response.json())
+
+        return response_403
+
+    if response.status_code == 404:
+        if "application/json" not in response.headers.get("content-type", ""):
+            return None
+        response_404 = Error.from_dict(response.json())
+
+        return response_404
 
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
@@ -116,7 +138,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[PaginatedRepositories]
+        Response[Error | PaginatedRepositories]
     """
 
     kwargs = _get_kwargs(
@@ -166,7 +188,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        PaginatedRepositories
+        Error | PaginatedRepositories
     """
 
     return sync_detailed(
@@ -211,7 +233,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[PaginatedRepositories]
+        Response[Error | PaginatedRepositories]
     """
 
     kwargs = _get_kwargs(
@@ -259,7 +281,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        PaginatedRepositories
+        Error | PaginatedRepositories
     """
 
     return (

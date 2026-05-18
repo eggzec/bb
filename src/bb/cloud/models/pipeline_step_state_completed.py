@@ -18,7 +18,7 @@ T = TypeVar("T", bound="PipelineStepStateCompleted")
 
 @_attrs_define
 class PipelineStepStateCompleted:
-    type_: str
+    type_: str | Unset = UNSET
     name: PipelineStepStateCompletedName | Unset = UNSET
     """ The name of pipeline step state (COMPLETED). """
     result: PipelineStepStateCompletedResult | Unset = UNSET
@@ -37,11 +37,9 @@ class PipelineStepStateCompleted:
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "type": type_,
-            }
-        )
+        field_dict.update({})
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if name is not UNSET:
             field_dict["name"] = name
         if result is not UNSET:
@@ -54,7 +52,7 @@ class PipelineStepStateCompleted:
         from ..models.pipeline_step_state_completed_result import PipelineStepStateCompletedResult
 
         d = dict(src_dict)
-        type_ = d.pop("type")
+        type_ = d.pop("type", UNSET)
 
         _name = d.pop("name", UNSET)
         name: PipelineStepStateCompletedName | Unset

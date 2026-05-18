@@ -21,7 +21,7 @@ T = TypeVar("T", bound="Participant")
 
 @_attrs_define
 class Participant:
-    type_: str
+    type_: str | Unset = UNSET
     user: Account | Unset = UNSET
     role: ParticipantRole | Unset = UNSET
     approved: bool | Unset = UNSET
@@ -59,11 +59,9 @@ class Participant:
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "type": type_,
-            }
-        )
+        field_dict.update({})
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if user is not UNSET:
             field_dict["user"] = user
         if role is not UNSET:
@@ -82,7 +80,7 @@ class Participant:
         from ..models.account import Account
 
         d = dict(src_dict)
-        type_ = d.pop("type")
+        type_ = d.pop("type", UNSET)
 
         _user = d.pop("user", UNSET)
         user: Account | Unset

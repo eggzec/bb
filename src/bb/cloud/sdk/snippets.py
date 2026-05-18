@@ -36,7 +36,6 @@ from bb.cloud.models.snippet_commit import SnippetCommit
 from bb.cloud.sdk._auth_validation import AuthMethod, require_auth
 from bb.cloud.sdk._client import BBClient
 from bb.cloud.sdk._pagination import async_paginate
-from bb.cloud.types import UNSET, Unset
 
 __all__ = [
     "list",
@@ -112,6 +111,12 @@ async def list(
     if isinstance(result, Error):
         return result
 
+    # Bitbucket API quirk (Free plan): returns HTTP 200 with a plain error string
+    # as the first element of values[] instead of snippet objects.  Detect this
+    # and surface it as an Error so callers are not silently handed garbage data.
+    if result and isinstance(result[0], str):
+        return Error.from_dict({"type": "error", "error": {"message": result[0]}})
+
     return [item for item in result if isinstance(item, Snippet)]
 
 
@@ -157,7 +162,7 @@ async def create(
     client: BBClient,
     workspace: str,
     *,
-    body: Snippet | Unset = UNSET,
+    body: Snippet = Snippet(),
 ) -> Snippet | Error | None:
     """Create a snippet in a workspace and return the created object.
 
@@ -203,7 +208,7 @@ async def update(
     workspace: str,
     encoded_id: str,
     *,
-    body: Snippet | Unset = UNSET,
+    body: Snippet = Snippet(),
 ) -> Snippet | Error | None:
     """Update a snippet and return the updated object.
 
@@ -332,7 +337,7 @@ async def add_comment(
     workspace: str,
     encoded_id: str,
     *,
-    body: SnippetComment | Unset = UNSET,
+    body: SnippetComment = SnippetComment(),
 ) -> SnippetComment | Error | None:
     """Add a comment to a snippet and return the created comment.
 
@@ -613,7 +618,7 @@ async def list_all(client: BBClient, *, pagelen: int = 25) -> list[Snippet] | Er
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def create_default(client: BBClient, *, body: Snippet | Unset = UNSET) -> Snippet | Error | None:
+async def create_default(client: BBClient, *, body: Snippet = Snippet()) -> Snippet | Error | None:
     """Create a snippet under the authenticated user's default workspace.
 
     Args:
@@ -700,7 +705,7 @@ async def update_comment(
     encoded_id: str,
     comment_id: int,
     *,
-    body: SnippetComment | Unset = UNSET,
+    body: SnippetComment = SnippetComment(),
 ) -> SnippetComment | Error | None:
     """Update a comment on a snippet.
 
@@ -903,7 +908,7 @@ async def update_node(
     encoded_id: str,
     node_id: str,
     *,
-    body: Snippet | Unset = UNSET,
+    body: Snippet = Snippet(),
 ) -> Any | Error | None:
     """Update a snippet at a specific node.
 

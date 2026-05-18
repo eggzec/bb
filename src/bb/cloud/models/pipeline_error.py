@@ -13,7 +13,7 @@ T = TypeVar("T", bound="PipelineError")
 
 @_attrs_define
 class PipelineError:
-    type_: str
+    type_: str | Unset = UNSET
     key: str | Unset = UNSET
     """ The error key. """
     message: str | Unset = UNSET
@@ -29,11 +29,9 @@ class PipelineError:
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "type": type_,
-            }
-        )
+        field_dict.update({})
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if key is not UNSET:
             field_dict["key"] = key
         if message is not UNSET:
@@ -44,7 +42,7 @@ class PipelineError:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        type_ = d.pop("type")
+        type_ = d.pop("type", UNSET)
 
         key = d.pop("key", UNSET)
 

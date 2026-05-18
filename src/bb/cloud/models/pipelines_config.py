@@ -17,7 +17,7 @@ T = TypeVar("T", bound="PipelinesConfig")
 
 @_attrs_define
 class PipelinesConfig:
-    type_: str
+    type_: str | Unset = UNSET
     enabled: bool | Unset = UNSET
     """ Whether Pipelines is enabled for the repository. """
     repository: Repository | Unset = UNSET
@@ -34,11 +34,9 @@ class PipelinesConfig:
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "type": type_,
-            }
-        )
+        field_dict.update({})
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if enabled is not UNSET:
             field_dict["enabled"] = enabled
         if repository is not UNSET:
@@ -51,7 +49,7 @@ class PipelinesConfig:
         from ..models.repository import Repository
 
         d = dict(src_dict)
-        type_ = d.pop("type")
+        type_ = d.pop("type", UNSET)
 
         enabled = d.pop("enabled", UNSET)
 

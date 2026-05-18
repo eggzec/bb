@@ -1,7 +1,7 @@
 from enum import StrEnum
 
 
-class CommitFileAttributes(StrEnum):
+class CommitFileAttributesItem(StrEnum):
     BINARY = "binary"
     EXECUTABLE = "executable"
     LFS = "lfs"

@@ -281,16 +281,19 @@ async def repo_permissions(client: BBClient, workspace: str, *, pagelen: int = 2
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def get_repo_permission(client: BBClient, workspace: str, repo_slug: str) -> Any | Error | None:
-    """Fetch the permission configuration for a specific repository within a workspace.
+async def get_repo_permission(
+    client: BBClient, workspace: str, repo_slug: str, *, pagelen: int = 25
+) -> list[Any] | Error:
+    """List all user permissions for a specific repository within a workspace.
 
     Args:
         client: Authenticated :class:`~bb.cloud.sdk._client.BBClient` instance.
         workspace: Workspace slug or UUID.
         repo_slug: Repository slug or UUID.
+        pagelen: Number of results per page. Defaults to ``25``.
 
     Returns:
-        The repository permission object, or ``None`` if not found.
+        List of repository permission objects, or ``Error`` on failure.
 
     Raises:
         :exc:`~bb.cloud.sdk._errors.AuthenticationError`: If ``client`` uses an unrecognised or unsupported auth method.
@@ -303,7 +306,7 @@ async def get_repo_permission(client: BBClient, workspace: str, repo_slug: str) 
         from bb.cloud.sdk import workspaces
 
         client = BBClient.from_env()
-        perm = await workspaces.get_repo_permission(
+        perms = await workspaces.get_repo_permission(
             client, workspace="myworkspace", repo_slug="myrepo"
         )
         ```
@@ -312,9 +315,16 @@ async def get_repo_permission(client: BBClient, workspace: str, repo_slug: str) 
         `GET /2.0/workspaces/{workspace}/permissions/repositories/{repo_slug}
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-workspaces/#api-workspaces-workspace-permissions-repositories-repo-slug-get>`_
     """
-    return await get_workspaces_workspace_permissions_repositories_repo_slug.asyncio(
-        workspace, repo_slug, client=client.auth
+    result = await async_paginate(
+        get_workspaces_workspace_permissions_repositories_repo_slug.asyncio,
+        workspace,
+        repo_slug,
+        client=client.auth,
+        pagelen=pagelen,
     )
+    if isinstance(result, Error):
+        return result
+    return [x for x in result]
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)

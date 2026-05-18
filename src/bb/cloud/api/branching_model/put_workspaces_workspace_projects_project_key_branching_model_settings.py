@@ -21,7 +21,10 @@ __all__ = [
 def _get_kwargs(
     workspace: str,
     project_key: str,
+    *,
+    body: BranchingModelSettings,
 ) -> dict[str, Any]:
+    headers: dict[str, Any] = {}
 
     _kwargs: dict[str, Any] = {
         "method": "put",
@@ -31,6 +34,11 @@ def _get_kwargs(
         ),
     }
 
+    _kwargs["json"] = body.to_dict()
+
+    headers["Content-Type"] = "application/json"
+
+    _kwargs["headers"] = headers
     return _kwargs
 
 
@@ -94,6 +102,7 @@ def sync_detailed(
     project_key: str,
     *,
     client: AuthenticatedClient,
+    body: BranchingModelSettings,
 ) -> Response[ParsedPayload]:
     """Update the branching model config for a project
 
@@ -139,6 +148,7 @@ def sync_detailed(
     Args:
         workspace (str):
         project_key (str):
+        body (BranchingModelSettings):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -151,6 +161,7 @@ def sync_detailed(
     kwargs = _get_kwargs(
         workspace=workspace,
         project_key=project_key,
+        body=body,
     )
 
     response = client.get_httpx_client().request(
@@ -165,6 +176,7 @@ def sync(
     project_key: str,
     *,
     client: AuthenticatedClient,
+    body: BranchingModelSettings,
 ) -> ParsedPayload | None:
     """Update the branching model config for a project
 
@@ -210,6 +222,7 @@ def sync(
     Args:
         workspace (str):
         project_key (str):
+        body (BranchingModelSettings):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -223,6 +236,7 @@ def sync(
         workspace=workspace,
         project_key=project_key,
         client=client,
+        body=body,
     ).parsed
 
 
@@ -231,6 +245,7 @@ async def asyncio_detailed(
     project_key: str,
     *,
     client: AuthenticatedClient,
+    body: BranchingModelSettings,
 ) -> Response[ParsedPayload]:
     """Update the branching model config for a project
 
@@ -276,6 +291,7 @@ async def asyncio_detailed(
     Args:
         workspace (str):
         project_key (str):
+        body (BranchingModelSettings):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -288,6 +304,7 @@ async def asyncio_detailed(
     kwargs = _get_kwargs(
         workspace=workspace,
         project_key=project_key,
+        body=body,
     )
 
     response = await client.get_async_httpx_client().request(**kwargs)
@@ -300,6 +317,7 @@ async def asyncio(
     project_key: str,
     *,
     client: AuthenticatedClient,
+    body: BranchingModelSettings,
 ) -> ParsedPayload | None:
     """Update the branching model config for a project
 
@@ -345,6 +363,7 @@ async def asyncio(
     Args:
         workspace (str):
         project_key (str):
+        body (BranchingModelSettings):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -359,5 +378,6 @@ async def asyncio(
             workspace=workspace,
             project_key=project_key,
             client=client,
+            body=body,
         )
     ).parsed

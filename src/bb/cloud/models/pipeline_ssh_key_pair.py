@@ -13,7 +13,7 @@ T = TypeVar("T", bound="PipelineSshKeyPair")
 
 @_attrs_define
 class PipelineSshKeyPair:
-    type_: str
+    type_: str | Unset = UNSET
     private_key: str | Unset = UNSET
     """ The SSH private key. This value will be empty when retrieving the SSH key pair. """
     public_key: str | Unset = UNSET
@@ -29,11 +29,9 @@ class PipelineSshKeyPair:
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "type": type_,
-            }
-        )
+        field_dict.update({})
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if private_key is not UNSET:
             field_dict["private_key"] = private_key
         if public_key is not UNSET:
@@ -44,7 +42,7 @@ class PipelineSshKeyPair:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        type_ = d.pop("type")
+        type_ = d.pop("type", UNSET)
 
         private_key = d.pop("private_key", UNSET)
 

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import datetime
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -28,12 +28,15 @@ class Tag:
     target: Commit | Unset = UNSET
     message: str | Unset = UNSET
     """ The message associated with the tag, if available. """
-    date: datetime.datetime | Unset = UNSET
+    date: datetime.datetime | None | Unset = UNSET
     """ The date that the tag was created, if available """
-    tagger: Author | Unset = UNSET
+    tagger: Author | None | Unset = UNSET
+    """ The author that tagged this commit, if available. """
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
+        from ..models.author import Author
+
         type_ = self.type_
 
         links: dict[str, Any] | Unset = UNSET
@@ -48,13 +51,21 @@ class Tag:
 
         message = self.message
 
-        date: str | Unset = UNSET
-        if not isinstance(self.date, Unset):
+        date: None | str | Unset
+        if isinstance(self.date, Unset):
+            date = UNSET
+        elif isinstance(self.date, datetime.datetime):
             date = self.date.isoformat()
+        else:
+            date = self.date
 
-        tagger: dict[str, Any] | Unset = UNSET
-        if not isinstance(self.tagger, Unset):
+        tagger: dict[str, Any] | None | Unset
+        if isinstance(self.tagger, Unset):
+            tagger = UNSET
+        elif isinstance(self.tagger, Author):
             tagger = self.tagger.to_dict()
+        else:
+            tagger = self.tagger
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
@@ -105,19 +116,39 @@ class Tag:
 
         message = d.pop("message", UNSET)
 
-        _date = d.pop("date", UNSET)
-        date: datetime.datetime | Unset
-        if isinstance(_date, Unset):
-            date = UNSET
-        else:
-            date = isoparse(_date)
+        def _parse_date(data: object) -> datetime.datetime | None | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, str):
+                    raise TypeError()
+                date_type_0 = isoparse(data)
 
-        _tagger = d.pop("tagger", UNSET)
-        tagger: Author | Unset
-        if isinstance(_tagger, Unset):
-            tagger = UNSET
-        else:
-            tagger = Author.from_dict(_tagger)
+                return date_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(datetime.datetime | None | Unset, data)
+
+        date = _parse_date(d.pop("date", UNSET))
+
+        def _parse_tagger(data: object) -> Author | None | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                tagger_type_0 = Author.from_dict(data)
+
+                return tagger_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(Author | None | Unset, data)
+
+        tagger = _parse_tagger(d.pop("tagger", UNSET))
 
         tag = cls(
             type_=type_,

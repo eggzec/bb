@@ -291,7 +291,7 @@ async def update_env(
     repo_slug: str,
     environment_uuid: str,
     *,
-    body: DeploymentEnvironment | Unset = UNSET,
+    body: DeploymentEnvironment,
 ) -> DeploymentEnvironment | Error | None:
     """Update a deployment environment.
 
@@ -300,7 +300,7 @@ async def update_env(
         workspace: Workspace slug or UUID.
         repo_slug: Repository slug.
         environment_uuid: UUID of the deployment environment.
-        body: Updated environment definition. Defaults to :data:`~bb.cloud.types.UNSET`.
+        body: Updated environment definition.
 
     Returns:
         The updated :class:`~bb.cloud.models.deployment_environment.DeploymentEnvironment`,
@@ -426,7 +426,7 @@ async def deploy_keys(
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def get_deploy_key(client: BBClient, workspace: str, repo_slug: str, key_id: int) -> Any:
+async def get_deploy_key(client: BBClient, workspace: str, repo_slug: str, key_id: int) -> DeployKey | Error | None:
     """Return a single deploy key by ID.
 
     Args:
@@ -472,15 +472,15 @@ async def create_deploy_key(
     workspace: str,
     repo_slug: str,
     *,
-    body: DeployKey | Unset = UNSET,
-) -> Any:
+    body: DeployKey,
+) -> DeployKey | Error | None:
     """Create a deploy key for a repository.
 
     Args:
         client: Authenticated :class:`~bb.cloud.sdk._client.BBClient` instance.
         workspace: Workspace slug or UUID.
         repo_slug: Repository slug.
-        body: Deploy key definition. Defaults to :data:`~bb.cloud.types.UNSET`.
+        body: Deploy key definition — a :class:`~bb.cloud.models.deploy_key.DeployKey` object.
 
     Returns:
         The created deploy key object, or ``None`` if the API returned no body.
@@ -521,8 +521,8 @@ async def update_deploy_key(
     repo_slug: str,
     key_id: int,
     *,
-    body: DeployKey | Unset = UNSET,
-) -> Any:
+    body: DeployKey,
+) -> DeployKey | Error | None:
     """Update a deploy key for a repository.
 
     Args:
@@ -530,7 +530,7 @@ async def update_deploy_key(
         workspace: Workspace slug or UUID.
         repo_slug: Repository slug.
         key_id: Numeric ID of the deploy key.
-        body: Updated deploy key definition. Defaults to :data:`~bb.cloud.types.UNSET`.
+        body: Updated deploy key definition — a :class:`~bb.cloud.models.deploy_key.DeployKey` object.
 
     Returns:
         The updated deploy key object, or ``None`` if the API returned no body.

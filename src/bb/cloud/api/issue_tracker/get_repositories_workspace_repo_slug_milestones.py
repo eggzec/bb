@@ -47,6 +47,20 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
 
         return response_200
 
+    if response.status_code == 401:
+        if "application/json" not in response.headers.get("content-type", ""):
+            return None
+        response_401 = Error.from_dict(response.json())
+
+        return response_401
+
+    if response.status_code == 403:
+        if "application/json" not in response.headers.get("content-type", ""):
+            return None
+        response_403 = Error.from_dict(response.json())
+
+        return response_403
+
     if response.status_code == 404:
         if "application/json" not in response.headers.get("content-type", ""):
             return None

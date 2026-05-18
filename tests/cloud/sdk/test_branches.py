@@ -97,6 +97,22 @@ async def test_get_propagates_error(mock_client):
     assert isinstance(result, Error)
 
 
+async def test_list_propagates_error(mock_client):
+    err = _make_error("pagination failed")
+    with patch("bb.cloud.sdk.branches.async_paginate", new=AsyncMock(return_value=err)):
+        result = await branches.list(mock_client, "ws", "slug")
+    assert result is err
+    assert isinstance(result, Error)
+
+
+async def test_tags_propagates_error(mock_client):
+    err = _make_error("tags pagination failed")
+    with patch("bb.cloud.sdk.branches.async_paginate", new=AsyncMock(return_value=err)):
+        result = await branches.tags(mock_client, "ws", "slug")
+    assert result is err
+    assert isinstance(result, Error)
+
+
 async def test_list_raises_on_bad_auth(bad_auth_client):
     with pytest.raises(AuthenticationError):
         await branches.list(bad_auth_client, "ws", "slug")

@@ -18,7 +18,7 @@ T = TypeVar("T", bound="SnippetComment")
 
 @_attrs_define
 class SnippetComment:
-    type_: str
+    type_: str | Unset = UNSET
     links: SnippetCommentLinks | Unset = UNSET
     snippet: Snippet | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
@@ -36,11 +36,9 @@ class SnippetComment:
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "type": type_,
-            }
-        )
+        field_dict.update({})
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if links is not UNSET:
             field_dict["links"] = links
         if snippet is not UNSET:
@@ -54,7 +52,7 @@ class SnippetComment:
         from ..models.snippet_comment_links import SnippetCommentLinks
 
         d = dict(src_dict)
-        type_ = d.pop("type")
+        type_ = d.pop("type", UNSET)
 
         _links = d.pop("links", UNSET)
         links: SnippetCommentLinks | Unset

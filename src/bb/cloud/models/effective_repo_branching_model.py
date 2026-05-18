@@ -19,7 +19,7 @@ T = TypeVar("T", bound="EffectiveRepoBranchingModel")
 
 @_attrs_define
 class EffectiveRepoBranchingModel:
-    type_: str
+    type_: str | Unset = UNSET
     branch_types: list[EffectiveRepoBranchingModelBranchTypesItem] | Unset = UNSET
     """ The active branch types. """
     development: EffectiveRepoBranchingModelDevelopment | Unset = UNSET
@@ -46,11 +46,9 @@ class EffectiveRepoBranchingModel:
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "type": type_,
-            }
-        )
+        field_dict.update({})
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if branch_types is not UNSET:
             field_dict["branch_types"] = branch_types
         if development is not UNSET:
@@ -67,7 +65,7 @@ class EffectiveRepoBranchingModel:
         from ..models.effective_repo_branching_model_production import EffectiveRepoBranchingModelProduction
 
         d = dict(src_dict)
-        type_ = d.pop("type")
+        type_ = d.pop("type", UNSET)
 
         _branch_types = d.pop("branch_types", UNSET)
         branch_types: list[EffectiveRepoBranchingModelBranchTypesItem] | Unset = UNSET

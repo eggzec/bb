@@ -13,7 +13,7 @@ T = TypeVar("T", bound="PipelineSchedulePutRequestBody")
 
 @_attrs_define
 class PipelineSchedulePutRequestBody:
-    type_: str
+    type_: str | Unset = UNSET
     enabled: bool | Unset = UNSET
     """ Whether the schedule is enabled. """
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
@@ -25,11 +25,9 @@ class PipelineSchedulePutRequestBody:
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "type": type_,
-            }
-        )
+        field_dict.update({})
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if enabled is not UNSET:
             field_dict["enabled"] = enabled
 
@@ -38,7 +36,7 @@ class PipelineSchedulePutRequestBody:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        type_ = d.pop("type")
+        type_ = d.pop("type", UNSET)
 
         enabled = d.pop("enabled", UNSET)
 

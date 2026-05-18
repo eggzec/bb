@@ -173,6 +173,11 @@ async def create(
     )
     if resp.status_code == 201:
         return Branch.from_dict(resp.json())
+    if "application/json" in resp.headers.get("content-type", ""):
+        try:
+            return Error.from_dict(resp.json())
+        except Exception:
+            pass
     return None
 
 

@@ -2,17 +2,19 @@ from __future__ import annotations
 
 import datetime
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from dateutil.parser import isoparse
 
 from ..models.task_state import TaskState
+from ..models.task_type import TaskType
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
     from ..models.account import Account
     from ..models.task_content import TaskContent
+    from ..models.task_links import TaskLinks
 
 
 T = TypeVar("T", bound="Task")
@@ -29,11 +31,17 @@ class Task:
     creator: Account
     id: int | Unset = UNSET
     pending: bool | Unset = UNSET
-    resolved_on: datetime.datetime | Unset = UNSET
+    resolved_on: datetime.datetime | None | Unset = UNSET
     """ The ISO8601 timestamp for when the task was resolved. """
-    resolved_by: Account | Unset = UNSET
+    resolved_by: Account | None | Unset = UNSET
+    links: TaskLinks | Unset = UNSET
+    """ Navigation links for this task """
+    type_: TaskType | Unset = UNSET
+    """ The type discriminator for this object. """
 
     def to_dict(self) -> dict[str, Any]:
+        from ..models.account import Account
+
         created_on = self.created_on.isoformat()
 
         updated_on = self.updated_on.isoformat()
@@ -48,13 +56,29 @@ class Task:
 
         pending = self.pending
 
-        resolved_on: str | Unset = UNSET
-        if not isinstance(self.resolved_on, Unset):
+        resolved_on: None | str | Unset
+        if isinstance(self.resolved_on, Unset):
+            resolved_on = UNSET
+        elif isinstance(self.resolved_on, datetime.datetime):
             resolved_on = self.resolved_on.isoformat()
+        else:
+            resolved_on = self.resolved_on
 
-        resolved_by: dict[str, Any] | Unset = UNSET
-        if not isinstance(self.resolved_by, Unset):
+        resolved_by: dict[str, Any] | None | Unset
+        if isinstance(self.resolved_by, Unset):
+            resolved_by = UNSET
+        elif isinstance(self.resolved_by, Account):
             resolved_by = self.resolved_by.to_dict()
+        else:
+            resolved_by = self.resolved_by
+
+        links: dict[str, Any] | Unset = UNSET
+        if not isinstance(self.links, Unset):
+            links = self.links.to_dict()
+
+        type_: str | Unset = UNSET
+        if not isinstance(self.type_, Unset):
+            type_ = self.type_.value
 
         field_dict: dict[str, Any] = {}
 
@@ -75,6 +99,10 @@ class Task:
             field_dict["resolved_on"] = resolved_on
         if resolved_by is not UNSET:
             field_dict["resolved_by"] = resolved_by
+        if links is not UNSET:
+            field_dict["links"] = links
+        if type_ is not UNSET:
+            field_dict["type"] = type_
 
         return field_dict
 
@@ -82,6 +110,7 @@ class Task:
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.account import Account
         from ..models.task_content import TaskContent
+        from ..models.task_links import TaskLinks
 
         d = dict(src_dict)
         created_on = isoparse(d.pop("created_on"))
@@ -98,19 +127,53 @@ class Task:
 
         pending = d.pop("pending", UNSET)
 
-        _resolved_on = d.pop("resolved_on", UNSET)
-        resolved_on: datetime.datetime | Unset
-        if isinstance(_resolved_on, Unset):
-            resolved_on = UNSET
-        else:
-            resolved_on = isoparse(_resolved_on)
+        def _parse_resolved_on(data: object) -> datetime.datetime | None | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, str):
+                    raise TypeError()
+                resolved_on_type_0 = isoparse(data)
 
-        _resolved_by = d.pop("resolved_by", UNSET)
-        resolved_by: Account | Unset
-        if isinstance(_resolved_by, Unset):
-            resolved_by = UNSET
+                return resolved_on_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(datetime.datetime | None | Unset, data)
+
+        resolved_on = _parse_resolved_on(d.pop("resolved_on", UNSET))
+
+        def _parse_resolved_by(data: object) -> Account | None | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                resolved_by_type_0 = Account.from_dict(data)
+
+                return resolved_by_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(Account | None | Unset, data)
+
+        resolved_by = _parse_resolved_by(d.pop("resolved_by", UNSET))
+
+        _links = d.pop("links", UNSET)
+        links: TaskLinks | Unset
+        if isinstance(_links, Unset):
+            links = UNSET
         else:
-            resolved_by = Account.from_dict(_resolved_by)
+            links = TaskLinks.from_dict(_links)
+
+        _type_ = d.pop("type", UNSET)
+        type_: TaskType | Unset
+        if isinstance(_type_, Unset):
+            type_ = UNSET
+        else:
+            type_ = TaskType(_type_)
 
         task = cls(
             created_on=created_on,
@@ -122,6 +185,8 @@ class Task:
             pending=pending,
             resolved_on=resolved_on,
             resolved_by=resolved_by,
+            links=links,
+            type_=type_,
         )
 
         return task

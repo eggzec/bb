@@ -21,7 +21,7 @@ T = TypeVar("T", bound="DeploymentStateCompleted")
 
 @_attrs_define
 class DeploymentStateCompleted:
-    type_: str
+    type_: str | Unset = UNSET
     name: DeploymentStateCompletedName | Unset = UNSET
     """ The name of deployment state (COMPLETED). """
     url: str | Unset = UNSET
@@ -61,11 +61,9 @@ class DeploymentStateCompleted:
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "type": type_,
-            }
-        )
+        field_dict.update({})
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if name is not UNSET:
             field_dict["name"] = name
         if url is not UNSET:
@@ -87,7 +85,7 @@ class DeploymentStateCompleted:
         from ..models.deployment_state_completed_status import DeploymentStateCompletedStatus
 
         d = dict(src_dict)
-        type_ = d.pop("type")
+        type_ = d.pop("type", UNSET)
 
         _name = d.pop("name", UNSET)
         name: DeploymentStateCompletedName | Unset

@@ -17,7 +17,7 @@ T = TypeVar("T", bound="PipelineScheduleExecutionErrored")
 
 @_attrs_define
 class PipelineScheduleExecutionErrored:
-    type_: str
+    type_: str | Unset = UNSET
     error: PipelineError | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -30,11 +30,9 @@ class PipelineScheduleExecutionErrored:
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "type": type_,
-            }
-        )
+        field_dict.update({})
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if error is not UNSET:
             field_dict["error"] = error
 
@@ -45,7 +43,7 @@ class PipelineScheduleExecutionErrored:
         from ..models.pipeline_error import PipelineError
 
         d = dict(src_dict)
-        type_ = d.pop("type")
+        type_ = d.pop("type", UNSET)
 
         _error = d.pop("error", UNSET)
         error: PipelineError | Unset

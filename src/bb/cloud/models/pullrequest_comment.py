@@ -25,7 +25,7 @@ T = TypeVar("T", bound="PullrequestComment")
 
 @_attrs_define
 class PullrequestComment:
-    type_: str
+    type_: str | Unset = UNSET
     id: int | Unset = UNSET
     created_on: datetime.datetime | Unset = UNSET
     updated_on: datetime.datetime | Unset = UNSET
@@ -88,11 +88,9 @@ class PullrequestComment:
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "type": type_,
-            }
-        )
+        field_dict.update({})
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if id is not UNSET:
             field_dict["id"] = id
         if created_on is not UNSET:
@@ -131,7 +129,7 @@ class PullrequestComment:
         from ..models.pullrequest import Pullrequest
 
         d = dict(src_dict)
-        type_ = d.pop("type")
+        type_ = d.pop("type", UNSET)
 
         id = d.pop("id", UNSET)
 

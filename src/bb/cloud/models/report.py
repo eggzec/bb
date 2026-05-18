@@ -10,9 +10,11 @@ from dateutil.parser import isoparse
 
 from ..models.report_report_type import ReportReportType
 from ..models.report_result import ReportResult
+from ..models.report_type import ReportType
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
+    from ..models.account import Account
     from ..models.report_data import ReportData
 
 
@@ -21,7 +23,8 @@ T = TypeVar("T", bound="Report")
 
 @_attrs_define
 class Report:
-    type_: str
+    type_: ReportType | Unset = UNSET
+    """ The type discriminator for this object. """
     uuid: str | Unset = UNSET
     """ The UUID that can be used to identify the report. """
     title: str | Unset = UNSET
@@ -32,8 +35,6 @@ class Report:
     """ ID of the report provided by the report creator. It can be used to identify the report as an alternative to
     it's generated uuid. It is not used by Bitbucket, but only by the report creator for updating or deleting this
     specific report. Needs to be unique. """
-    reporter: str | Unset = UNSET
-    """ A string to describe the tool or company who created the report. """
     link: str | Unset = UNSET
     """ A URL linking to the results of the report in an external tool. """
     remote_link_enabled: bool | Unset = UNSET
@@ -51,10 +52,13 @@ class Report:
     """ The timestamp when the report was created. """
     updated_on: datetime.datetime | Unset = UNSET
     """ The timestamp when the report was updated. """
+    created_by: Account | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        type_ = self.type_
+        type_: str | Unset = UNSET
+        if not isinstance(self.type_, Unset):
+            type_ = self.type_.value
 
         uuid = self.uuid
 
@@ -63,8 +67,6 @@ class Report:
         details = self.details
 
         external_id = self.external_id
-
-        reporter = self.reporter
 
         link = self.link
 
@@ -95,13 +97,15 @@ class Report:
         if not isinstance(self.updated_on, Unset):
             updated_on = self.updated_on.isoformat()
 
+        created_by: dict[str, Any] | Unset = UNSET
+        if not isinstance(self.created_by, Unset):
+            created_by = self.created_by.to_dict()
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "type": type_,
-            }
-        )
+        field_dict.update({})
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if uuid is not UNSET:
             field_dict["uuid"] = uuid
         if title is not UNSET:
@@ -110,8 +114,6 @@ class Report:
             field_dict["details"] = details
         if external_id is not UNSET:
             field_dict["external_id"] = external_id
-        if reporter is not UNSET:
-            field_dict["reporter"] = reporter
         if link is not UNSET:
             field_dict["link"] = link
         if remote_link_enabled is not UNSET:
@@ -128,15 +130,23 @@ class Report:
             field_dict["created_on"] = created_on
         if updated_on is not UNSET:
             field_dict["updated_on"] = updated_on
+        if created_by is not UNSET:
+            field_dict["created_by"] = created_by
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.account import Account
         from ..models.report_data import ReportData
 
         d = dict(src_dict)
-        type_ = d.pop("type")
+        _type_ = d.pop("type", UNSET)
+        type_: ReportType | Unset
+        if isinstance(_type_, Unset):
+            type_ = UNSET
+        else:
+            type_ = ReportType(_type_)
 
         uuid = d.pop("uuid", UNSET)
 
@@ -145,8 +155,6 @@ class Report:
         details = d.pop("details", UNSET)
 
         external_id = d.pop("external_id", UNSET)
-
-        reporter = d.pop("reporter", UNSET)
 
         link = d.pop("link", UNSET)
 
@@ -191,13 +199,19 @@ class Report:
         else:
             updated_on = isoparse(_updated_on)
 
+        _created_by = d.pop("created_by", UNSET)
+        created_by: Account | Unset
+        if isinstance(_created_by, Unset):
+            created_by = UNSET
+        else:
+            created_by = Account.from_dict(_created_by)
+
         report = cls(
             type_=type_,
             uuid=uuid,
             title=title,
             details=details,
             external_id=external_id,
-            reporter=reporter,
             link=link,
             remote_link_enabled=remote_link_enabled,
             logo_url=logo_url,
@@ -206,6 +220,7 @@ class Report:
             data=data,
             created_on=created_on,
             updated_on=updated_on,
+            created_by=created_by,
         )
 
         report.additional_properties = d

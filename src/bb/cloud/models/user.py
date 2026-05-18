@@ -19,7 +19,7 @@ T = TypeVar("T", bound="User")
 
 @_attrs_define
 class User:
-    type_: str
+    type_: str | Unset = UNSET
     links: AccountLinks | Unset = UNSET
     """ Links related to an Account. """
     created_on: datetime.datetime | Unset = UNSET
@@ -64,11 +64,9 @@ class User:
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "type": type_,
-            }
-        )
+        field_dict.update({})
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if links is not UNSET:
             field_dict["links"] = links
         if created_on is not UNSET:
@@ -95,7 +93,7 @@ class User:
         from ..models.account_links import AccountLinks
 
         d = dict(src_dict)
-        type_ = d.pop("type")
+        type_ = d.pop("type", UNSET)
 
         _links = d.pop("links", UNSET)
         links: AccountLinks | Unset

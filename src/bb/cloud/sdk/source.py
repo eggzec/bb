@@ -52,9 +52,15 @@ async def get(
         `GET /2.0/repositories/{workspace}/{repo_slug}/src/{commit}/{path}
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-source/#api-repositories-workspace-repo-slug-src-commit-path-get>`_
     """
-    return await get_repositories_workspace_repo_slug_src_commit_path.asyncio(
+    response = await get_repositories_workspace_repo_slug_src_commit_path.asyncio_detailed(
         workspace, repo_slug, commit, path, client=client.auth
     )
+    if response.status_code.value == 200:
+        content_type = response.headers.get("content-type", "")
+        if "application/json" in content_type:
+            return response.parsed
+        return response.content.decode()
+    return response.parsed
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)

@@ -21,7 +21,10 @@ __all__ = [
 def _get_kwargs(
     workspace: str,
     repo_slug: str,
+    *,
+    body: BranchingModelSettings,
 ) -> dict[str, Any]:
+    headers: dict[str, Any] = {}
 
     _kwargs: dict[str, Any] = {
         "method": "put",
@@ -31,6 +34,11 @@ def _get_kwargs(
         ),
     }
 
+    _kwargs["json"] = body.to_dict()
+
+    headers["Content-Type"] = "application/json"
+
+    _kwargs["headers"] = headers
     return _kwargs
 
 
@@ -94,6 +102,7 @@ def sync_detailed(
     repo_slug: str,
     *,
     client: AuthenticatedClient,
+    body: BranchingModelSettings,
 ) -> Response[ParsedPayload]:
     """Update the branching model config for a repository
 
@@ -159,6 +168,7 @@ def sync_detailed(
     Args:
         workspace (str):
         repo_slug (str):
+        body (BranchingModelSettings):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -171,6 +181,7 @@ def sync_detailed(
     kwargs = _get_kwargs(
         workspace=workspace,
         repo_slug=repo_slug,
+        body=body,
     )
 
     response = client.get_httpx_client().request(
@@ -185,6 +196,7 @@ def sync(
     repo_slug: str,
     *,
     client: AuthenticatedClient,
+    body: BranchingModelSettings,
 ) -> ParsedPayload | None:
     """Update the branching model config for a repository
 
@@ -250,6 +262,7 @@ def sync(
     Args:
         workspace (str):
         repo_slug (str):
+        body (BranchingModelSettings):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -263,6 +276,7 @@ def sync(
         workspace=workspace,
         repo_slug=repo_slug,
         client=client,
+        body=body,
     ).parsed
 
 
@@ -271,6 +285,7 @@ async def asyncio_detailed(
     repo_slug: str,
     *,
     client: AuthenticatedClient,
+    body: BranchingModelSettings,
 ) -> Response[ParsedPayload]:
     """Update the branching model config for a repository
 
@@ -336,6 +351,7 @@ async def asyncio_detailed(
     Args:
         workspace (str):
         repo_slug (str):
+        body (BranchingModelSettings):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -348,6 +364,7 @@ async def asyncio_detailed(
     kwargs = _get_kwargs(
         workspace=workspace,
         repo_slug=repo_slug,
+        body=body,
     )
 
     response = await client.get_async_httpx_client().request(**kwargs)
@@ -360,6 +377,7 @@ async def asyncio(
     repo_slug: str,
     *,
     client: AuthenticatedClient,
+    body: BranchingModelSettings,
 ) -> ParsedPayload | None:
     """Update the branching model config for a repository
 
@@ -425,6 +443,7 @@ async def asyncio(
     Args:
         workspace (str):
         repo_slug (str):
+        body (BranchingModelSettings):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -439,5 +458,6 @@ async def asyncio(
             workspace=workspace,
             repo_slug=repo_slug,
             client=client,
+            body=body,
         )
     ).parsed

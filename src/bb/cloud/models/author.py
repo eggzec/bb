@@ -17,7 +17,7 @@ T = TypeVar("T", bound="Author")
 
 @_attrs_define
 class Author:
-    type_: str
+    type_: str | Unset = UNSET
     raw: str | Unset = UNSET
     """ The raw author value from the repository. This may be the only value available if the author does not match
     a user in Bitbucket. """
@@ -35,11 +35,9 @@ class Author:
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "type": type_,
-            }
-        )
+        field_dict.update({})
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if raw is not UNSET:
             field_dict["raw"] = raw
         if user is not UNSET:
@@ -52,7 +50,7 @@ class Author:
         from ..models.account import Account
 
         d = dict(src_dict)
-        type_ = d.pop("type")
+        type_ = d.pop("type", UNSET)
 
         raw = d.pop("raw", UNSET)
 

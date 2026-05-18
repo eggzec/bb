@@ -7,6 +7,7 @@ import httpx
 from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.error import Error
+from ...models.repository_inheritance_state import RepositoryInheritanceState
 from ...types import Response
 
 __all__ = [
@@ -20,7 +21,10 @@ __all__ = [
 def _get_kwargs(
     workspace: str,
     repo_slug: str,
+    *,
+    body: RepositoryInheritanceState,
 ) -> dict[str, Any]:
+    headers: dict[str, Any] = {}
 
     _kwargs: dict[str, Any] = {
         "method": "put",
@@ -30,6 +34,11 @@ def _get_kwargs(
         ),
     }
 
+    _kwargs["json"] = body.to_dict()
+
+    headers["Content-Type"] = "application/json"
+
+    _kwargs["headers"] = headers
     return _kwargs
 
 
@@ -41,6 +50,13 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
     if response.status_code == 204:
         response_204 = cast(Any, None)
         return response_204
+
+    if response.status_code == 401:
+        if "application/json" not in response.headers.get("content-type", ""):
+            return None
+        response_401 = Error.from_dict(response.json())
+
+        return response_401
 
     if response.status_code == 403:
         if "application/json" not in response.headers.get("content-type", ""):
@@ -76,6 +92,7 @@ def sync_detailed(
     repo_slug: str,
     *,
     client: AuthenticatedClient,
+    body: RepositoryInheritanceState,
 ) -> Response[ParsedPayload]:
     """Set the inheritance state for repository settings
 
@@ -83,6 +100,8 @@ def sync_detailed(
     Args:
         workspace (str):
         repo_slug (str):
+        body (RepositoryInheritanceState): A json object representing the repository's inheritance
+            state values
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -95,6 +114,7 @@ def sync_detailed(
     kwargs = _get_kwargs(
         workspace=workspace,
         repo_slug=repo_slug,
+        body=body,
     )
 
     response = client.get_httpx_client().request(
@@ -109,6 +129,7 @@ def sync(
     repo_slug: str,
     *,
     client: AuthenticatedClient,
+    body: RepositoryInheritanceState,
 ) -> ParsedPayload | None:
     """Set the inheritance state for repository settings
 
@@ -116,6 +137,8 @@ def sync(
     Args:
         workspace (str):
         repo_slug (str):
+        body (RepositoryInheritanceState): A json object representing the repository's inheritance
+            state values
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -129,6 +152,7 @@ def sync(
         workspace=workspace,
         repo_slug=repo_slug,
         client=client,
+        body=body,
     ).parsed
 
 
@@ -137,6 +161,7 @@ async def asyncio_detailed(
     repo_slug: str,
     *,
     client: AuthenticatedClient,
+    body: RepositoryInheritanceState,
 ) -> Response[ParsedPayload]:
     """Set the inheritance state for repository settings
 
@@ -144,6 +169,8 @@ async def asyncio_detailed(
     Args:
         workspace (str):
         repo_slug (str):
+        body (RepositoryInheritanceState): A json object representing the repository's inheritance
+            state values
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -156,6 +183,7 @@ async def asyncio_detailed(
     kwargs = _get_kwargs(
         workspace=workspace,
         repo_slug=repo_slug,
+        body=body,
     )
 
     response = await client.get_async_httpx_client().request(**kwargs)
@@ -168,6 +196,7 @@ async def asyncio(
     repo_slug: str,
     *,
     client: AuthenticatedClient,
+    body: RepositoryInheritanceState,
 ) -> ParsedPayload | None:
     """Set the inheritance state for repository settings
 
@@ -175,6 +204,8 @@ async def asyncio(
     Args:
         workspace (str):
         repo_slug (str):
+        body (RepositoryInheritanceState): A json object representing the repository's inheritance
+            state values
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -189,5 +220,6 @@ async def asyncio(
             workspace=workspace,
             repo_slug=repo_slug,
             client=client,
+            body=body,
         )
     ).parsed

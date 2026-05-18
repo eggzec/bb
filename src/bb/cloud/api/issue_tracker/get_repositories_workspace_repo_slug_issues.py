@@ -9,7 +9,7 @@ from ...client import AuthenticatedClient, Client
 from ...deprecation import deprecated_endpoint
 from ...models.error import Error
 from ...models.paginated_issues import PaginatedIssues
-from ...types import Response
+from ...types import UNSET, Response, Unset
 
 __all__ = [
     "sync_detailed",
@@ -22,7 +22,24 @@ __all__ = [
 def _get_kwargs(
     workspace: str,
     repo_slug: str,
+    *,
+    q: str | Unset = UNSET,
+    sort: str | Unset = UNSET,
+    page: int | Unset = UNSET,
+    pagelen: int | Unset = UNSET,
 ) -> dict[str, Any]:
+
+    params: dict[str, Any] = {}
+
+    params["q"] = q
+
+    params["sort"] = sort
+
+    params["page"] = page
+
+    params["pagelen"] = pagelen
+
+    params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
     _kwargs: dict[str, Any] = {
         "method": "get",
@@ -30,6 +47,7 @@ def _get_kwargs(
             workspace=quote(str(workspace), safe=""),
             repo_slug=quote(str(repo_slug), safe=""),
         ),
+        "params": params,
     }
 
     return _kwargs
@@ -46,6 +64,20 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
         response_200 = PaginatedIssues.from_dict(response.json())
 
         return response_200
+
+    if response.status_code == 401:
+        if "application/json" not in response.headers.get("content-type", ""):
+            return None
+        response_401 = Error.from_dict(response.json())
+
+        return response_401
+
+    if response.status_code == 403:
+        if "application/json" not in response.headers.get("content-type", ""):
+            return None
+        response_403 = Error.from_dict(response.json())
+
+        return response_403
 
     if response.status_code == 404:
         if "application/json" not in response.headers.get("content-type", ""):
@@ -75,6 +107,10 @@ def sync_detailed(
     repo_slug: str,
     *,
     client: AuthenticatedClient,
+    q: str | Unset = UNSET,
+    sort: str | Unset = UNSET,
+    page: int | Unset = UNSET,
+    pagelen: int | Unset = UNSET,
 ) -> Response[ParsedPayload]:
     """List issues
 
@@ -83,6 +119,10 @@ def sync_detailed(
     Args:
         workspace (str):
         repo_slug (str):
+        q (str | Unset):
+        sort (str | Unset):
+        page (int | Unset):
+        pagelen (int | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -95,6 +135,10 @@ def sync_detailed(
     kwargs = _get_kwargs(
         workspace=workspace,
         repo_slug=repo_slug,
+        q=q,
+        sort=sort,
+        page=page,
+        pagelen=pagelen,
     )
 
     response = client.get_httpx_client().request(
@@ -110,6 +154,10 @@ def sync(
     repo_slug: str,
     *,
     client: AuthenticatedClient,
+    q: str | Unset = UNSET,
+    sort: str | Unset = UNSET,
+    page: int | Unset = UNSET,
+    pagelen: int | Unset = UNSET,
 ) -> ParsedPayload | None:
     """List issues
 
@@ -118,6 +166,10 @@ def sync(
     Args:
         workspace (str):
         repo_slug (str):
+        q (str | Unset):
+        sort (str | Unset):
+        page (int | Unset):
+        pagelen (int | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -131,6 +183,10 @@ def sync(
         workspace=workspace,
         repo_slug=repo_slug,
         client=client,
+        q=q,
+        sort=sort,
+        page=page,
+        pagelen=pagelen,
     ).parsed
 
 
@@ -140,6 +196,10 @@ async def asyncio_detailed(
     repo_slug: str,
     *,
     client: AuthenticatedClient,
+    q: str | Unset = UNSET,
+    sort: str | Unset = UNSET,
+    page: int | Unset = UNSET,
+    pagelen: int | Unset = UNSET,
 ) -> Response[ParsedPayload]:
     """List issues
 
@@ -148,6 +208,10 @@ async def asyncio_detailed(
     Args:
         workspace (str):
         repo_slug (str):
+        q (str | Unset):
+        sort (str | Unset):
+        page (int | Unset):
+        pagelen (int | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -160,6 +224,10 @@ async def asyncio_detailed(
     kwargs = _get_kwargs(
         workspace=workspace,
         repo_slug=repo_slug,
+        q=q,
+        sort=sort,
+        page=page,
+        pagelen=pagelen,
     )
 
     response = await client.get_async_httpx_client().request(**kwargs)
@@ -173,6 +241,10 @@ async def asyncio(
     repo_slug: str,
     *,
     client: AuthenticatedClient,
+    q: str | Unset = UNSET,
+    sort: str | Unset = UNSET,
+    page: int | Unset = UNSET,
+    pagelen: int | Unset = UNSET,
 ) -> ParsedPayload | None:
     """List issues
 
@@ -181,6 +253,10 @@ async def asyncio(
     Args:
         workspace (str):
         repo_slug (str):
+        q (str | Unset):
+        sort (str | Unset):
+        page (int | Unset):
+        pagelen (int | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -195,5 +271,9 @@ async def asyncio(
             workspace=workspace,
             repo_slug=repo_slug,
             client=client,
+            q=q,
+            sort=sort,
+            page=page,
+            pagelen=pagelen,
         )
     ).parsed

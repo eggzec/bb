@@ -143,7 +143,7 @@ async def update_settings(
     workspace: str,
     repo_slug: str,
     *,
-    body: BranchingModelSettings | Unset = UNSET,
+    body: BranchingModelSettings,
 ) -> BranchingModelSettings | None:
     """Update the branching model settings for a repository.
 
@@ -151,7 +151,7 @@ async def update_settings(
         client: Authenticated :class:`~bb.cloud.sdk._client.BBClient` instance.
         workspace: Workspace slug or UUID.
         repo_slug: Repository slug or UUID.
-        body: Updated branching model settings payload. Defaults to :data:`~bb.cloud.types.UNSET`.
+        body: Updated branching model settings payload.
 
     Returns:
         The updated :class:`~bb.cloud.models.branching_model_settings.BranchingModelSettings`,
@@ -262,7 +262,7 @@ async def update_project_settings(
     workspace: str,
     project_key: str,
     *,
-    body: BranchingModelSettings | Unset = UNSET,
+    body: BranchingModelSettings,
 ) -> BranchingModelSettings | None:
     """Update the branching model settings for a project.
 
@@ -270,7 +270,7 @@ async def update_project_settings(
         client: Authenticated :class:`~bb.cloud.sdk._client.BBClient` instance.
         workspace: Workspace slug or UUID.
         project_key: Project key.
-        body: Updated branching model settings payload. Defaults to :data:`~bb.cloud.types.UNSET`.
+        body: Updated branching model settings payload.
 
     Returns:
         The updated :class:`~bb.cloud.models.branching_model_settings.BranchingModelSettings`,

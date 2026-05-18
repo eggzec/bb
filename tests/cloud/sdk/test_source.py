@@ -12,18 +12,43 @@ from bb.cloud.sdk._errors import AuthenticationError
 _API = "bb.cloud.api.source"
 
 
-async def test_get_returns_content(mock_client):
-    content = MagicMock()
+async def test_get_returns_parsed_on_json_response(mock_client):
+    """On 200 with application/json content-type, return response.parsed."""
+    expected = MagicMock()
+    mock_resp = MagicMock()
+    mock_resp.status_code.value = 200
+    mock_resp.headers.get.return_value = "application/json; charset=utf-8"
+    mock_resp.parsed = expected
     with patch(
-        f"{_API}.get_repositories_workspace_repo_slug_src_commit_path.asyncio", new=AsyncMock(return_value=content)
+        f"{_API}.get_repositories_workspace_repo_slug_src_commit_path.asyncio_detailed",
+        new=AsyncMock(return_value=mock_resp),
     ):
         result = await source.get(mock_client, "ws", "slug", "abc123", "README.md")
-    assert result is content
+    assert result is expected
 
 
-async def test_get_returns_none(mock_client):
+async def test_get_returns_decoded_on_raw_response(mock_client):
+    """On 200 with non-JSON content-type, return decoded bytes."""
+    mock_resp = MagicMock()
+    mock_resp.status_code.value = 200
+    mock_resp.headers.get.return_value = "text/plain"
+    mock_resp.content = b"file content here"
     with patch(
-        f"{_API}.get_repositories_workspace_repo_slug_src_commit_path.asyncio", new=AsyncMock(return_value=None)
+        f"{_API}.get_repositories_workspace_repo_slug_src_commit_path.asyncio_detailed",
+        new=AsyncMock(return_value=mock_resp),
+    ):
+        result = await source.get(mock_client, "ws", "slug", "abc123", "README.md")
+    assert result == "file content here"
+
+
+async def test_get_returns_none_on_non_200(mock_client):
+    """On non-200 status, return response.parsed (None when resource not found)."""
+    mock_resp = MagicMock()
+    mock_resp.status_code.value = 404
+    mock_resp.parsed = None
+    with patch(
+        f"{_API}.get_repositories_workspace_repo_slug_src_commit_path.asyncio_detailed",
+        new=AsyncMock(return_value=mock_resp),
     ):
         result = await source.get(mock_client, "ws", "slug", "abc123", "README.md")
     assert result is None

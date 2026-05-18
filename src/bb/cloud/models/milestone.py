@@ -17,7 +17,7 @@ T = TypeVar("T", bound="Milestone")
 
 @_attrs_define
 class Milestone:
-    type_: str
+    type_: str | Unset = UNSET
     links: MilestoneLinks | Unset = UNSET
     name: str | Unset = UNSET
     id: int | Unset = UNSET
@@ -36,11 +36,9 @@ class Milestone:
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "type": type_,
-            }
-        )
+        field_dict.update({})
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if links is not UNSET:
             field_dict["links"] = links
         if name is not UNSET:
@@ -55,7 +53,7 @@ class Milestone:
         from ..models.milestone_links import MilestoneLinks
 
         d = dict(src_dict)
-        type_ = d.pop("type")
+        type_ = d.pop("type", UNSET)
 
         _links = d.pop("links", UNSET)
         links: MilestoneLinks | Unset

@@ -18,7 +18,7 @@ T = TypeVar("T", bound="PipelineCommitTarget")
 
 @_attrs_define
 class PipelineCommitTarget:
-    type_: str
+    type_: str | Unset = UNSET
     commit: Commit | Unset = UNSET
     selector: PipelineSelector | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
@@ -36,11 +36,9 @@ class PipelineCommitTarget:
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "type": type_,
-            }
-        )
+        field_dict.update({})
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if commit is not UNSET:
             field_dict["commit"] = commit
         if selector is not UNSET:
@@ -54,7 +52,7 @@ class PipelineCommitTarget:
         from ..models.pipeline_selector import PipelineSelector
 
         d = dict(src_dict)
-        type_ = d.pop("type")
+        type_ = d.pop("type", UNSET)
 
         _commit = d.pop("commit", UNSET)
         commit: Commit | Unset

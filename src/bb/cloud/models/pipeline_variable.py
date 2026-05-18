@@ -13,7 +13,7 @@ T = TypeVar("T", bound="PipelineVariable")
 
 @_attrs_define
 class PipelineVariable:
-    type_: str
+    type_: str | Unset = UNSET
     uuid: str | Unset = UNSET
     """ The UUID identifying the variable. """
     key: str | Unset = UNSET
@@ -38,11 +38,9 @@ class PipelineVariable:
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "type": type_,
-            }
-        )
+        field_dict.update({})
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if uuid is not UNSET:
             field_dict["uuid"] = uuid
         if key is not UNSET:
@@ -57,7 +55,7 @@ class PipelineVariable:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        type_ = d.pop("type")
+        type_ = d.pop("type", UNSET)
 
         uuid = d.pop("uuid", UNSET)
 

@@ -6,6 +6,7 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
+from ...models.deployment_environment import DeploymentEnvironment
 from ...models.error import Error
 from ...types import Response
 
@@ -21,7 +22,10 @@ def _get_kwargs(
     workspace: str,
     repo_slug: str,
     environment_uuid: str,
+    *,
+    body: DeploymentEnvironment,
 ) -> dict[str, Any]:
+    headers: dict[str, Any] = {}
 
     _kwargs: dict[str, Any] = {
         "method": "post",
@@ -32,6 +36,11 @@ def _get_kwargs(
         ),
     }
 
+    _kwargs["json"] = body.to_dict()
+
+    headers["Content-Type"] = "application/json"
+
+    _kwargs["headers"] = headers
     return _kwargs
 
 
@@ -43,6 +52,13 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
     if response.status_code == 202:
         response_202 = cast(Any, None)
         return response_202
+
+    if response.status_code == 401:
+        if "application/json" not in response.headers.get("content-type", ""):
+            return None
+        response_401 = Error.from_dict(response.json())
+
+        return response_401
 
     if response.status_code == 403:
         if "application/json" not in response.headers.get("content-type", ""):
@@ -79,6 +95,7 @@ def sync_detailed(
     environment_uuid: str,
     *,
     client: AuthenticatedClient,
+    body: DeploymentEnvironment,
 ) -> Response[ParsedPayload]:
     """Update an environment
 
@@ -88,6 +105,7 @@ def sync_detailed(
         workspace (str):
         repo_slug (str):
         environment_uuid (str):
+        body (DeploymentEnvironment):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -101,6 +119,7 @@ def sync_detailed(
         workspace=workspace,
         repo_slug=repo_slug,
         environment_uuid=environment_uuid,
+        body=body,
     )
 
     response = client.get_httpx_client().request(
@@ -116,6 +135,7 @@ def sync(
     environment_uuid: str,
     *,
     client: AuthenticatedClient,
+    body: DeploymentEnvironment,
 ) -> ParsedPayload | None:
     """Update an environment
 
@@ -125,6 +145,7 @@ def sync(
         workspace (str):
         repo_slug (str):
         environment_uuid (str):
+        body (DeploymentEnvironment):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -139,6 +160,7 @@ def sync(
         repo_slug=repo_slug,
         environment_uuid=environment_uuid,
         client=client,
+        body=body,
     ).parsed
 
 
@@ -148,6 +170,7 @@ async def asyncio_detailed(
     environment_uuid: str,
     *,
     client: AuthenticatedClient,
+    body: DeploymentEnvironment,
 ) -> Response[ParsedPayload]:
     """Update an environment
 
@@ -157,6 +180,7 @@ async def asyncio_detailed(
         workspace (str):
         repo_slug (str):
         environment_uuid (str):
+        body (DeploymentEnvironment):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -170,6 +194,7 @@ async def asyncio_detailed(
         workspace=workspace,
         repo_slug=repo_slug,
         environment_uuid=environment_uuid,
+        body=body,
     )
 
     response = await client.get_async_httpx_client().request(**kwargs)
@@ -183,6 +208,7 @@ async def asyncio(
     environment_uuid: str,
     *,
     client: AuthenticatedClient,
+    body: DeploymentEnvironment,
 ) -> ParsedPayload | None:
     """Update an environment
 
@@ -192,6 +218,7 @@ async def asyncio(
         workspace (str):
         repo_slug (str):
         environment_uuid (str):
+        body (DeploymentEnvironment):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -207,5 +234,6 @@ async def asyncio(
             repo_slug=repo_slug,
             environment_uuid=environment_uuid,
             client=client,
+            body=body,
         )
     ).parsed

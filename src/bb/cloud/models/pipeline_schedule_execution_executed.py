@@ -17,7 +17,7 @@ T = TypeVar("T", bound="PipelineScheduleExecutionExecuted")
 
 @_attrs_define
 class PipelineScheduleExecutionExecuted:
-    type_: str
+    type_: str | Unset = UNSET
     pipeline: Pipeline | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -30,11 +30,9 @@ class PipelineScheduleExecutionExecuted:
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "type": type_,
-            }
-        )
+        field_dict.update({})
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if pipeline is not UNSET:
             field_dict["pipeline"] = pipeline
 
@@ -45,7 +43,7 @@ class PipelineScheduleExecutionExecuted:
         from ..models.pipeline import Pipeline
 
         d = dict(src_dict)
-        type_ = d.pop("type")
+        type_ = d.pop("type", UNSET)
 
         _pipeline = d.pop("pipeline", UNSET)
         pipeline: Pipeline | Unset

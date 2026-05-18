@@ -67,7 +67,8 @@ def pytest_collection_modifyitems(config, items):
         "(BB_EMAIL/BB_TOKEN, BB_OAUTH_*, BB_JWT_*, or BB_USERNAME/BB_APP_PASSWORD) — see tests/cloud/live/index.md",
     )
     for item in items:
-        item.add_marker(skip)
+        if item.get_closest_marker("live"):
+            item.add_marker(skip)
 
 
 @pytest.fixture(scope="session")
@@ -83,12 +84,17 @@ def client() -> BBClient:
     return BBClient.from_env()
 
 
-@pytest.fixture
-async def probe_repo_slug(client: BBClient, workspace: str) -> str:
+@pytest.fixture(scope="session")
+def _session_client() -> BBClient:
+    return BBClient.from_env()
+
+
+@pytest.fixture(scope="session")
+async def probe_repo_slug(_session_client: BBClient, workspace: str) -> str:
     pinned = os.environ.get("BB_REPO_SLUG", "").strip()
     if pinned:
         return pinned
-    repo_list = await repos_sdk.list(client, workspace, pagelen=1)
+    repo_list = await repos_sdk.list(_session_client, workspace, pagelen=1)
     if isinstance(repo_list, Error):
         msg = repo_list.error.message if getattr(repo_list, "error", None) else repo_list
         pytest.skip(f"repos.list errored: {msg!r}")
@@ -99,9 +105,9 @@ async def probe_repo_slug(client: BBClient, workspace: str) -> str:
     return full_name.split("/", 1)[-1]
 
 
-@pytest.fixture
-async def probe_branch_name(client: BBClient, workspace: str, probe_repo_slug: str) -> str:
-    branch_list = await branches_sdk.list(client, workspace, probe_repo_slug, pagelen=1)
+@pytest.fixture(scope="session")
+async def probe_branch_name(_session_client: BBClient, workspace: str, probe_repo_slug: str) -> str:
+    branch_list = await branches_sdk.list(_session_client, workspace, probe_repo_slug, pagelen=1)
     if isinstance(branch_list, Error):
         msg = branch_list.error.message if getattr(branch_list, "error", None) else branch_list
         pytest.skip(f"branches.list errored on {probe_repo_slug!r}: {msg!r}")
@@ -112,9 +118,9 @@ async def probe_branch_name(client: BBClient, workspace: str, probe_repo_slug: s
     return name
 
 
-@pytest.fixture
-async def probe_commit_hash(client: BBClient, workspace: str, probe_repo_slug: str) -> str:
-    commit_list = await commits_sdk.list(client, workspace, probe_repo_slug, pagelen=1)
+@pytest.fixture(scope="session")
+async def probe_commit_hash(_session_client: BBClient, workspace: str, probe_repo_slug: str) -> str:
+    commit_list = await commits_sdk.list(_session_client, workspace, probe_repo_slug, pagelen=1)
     if isinstance(commit_list, Error):
         msg = commit_list.error.message if getattr(commit_list, "error", None) else commit_list
         pytest.skip(f"commits.list errored on {probe_repo_slug!r}: {msg!r}")
@@ -125,8 +131,8 @@ async def probe_commit_hash(client: BBClient, workspace: str, probe_repo_slug: s
     return hash_
 
 
-@pytest.fixture
-async def probe_pr_id(client: BBClient, workspace: str, probe_repo_slug: str) -> int:
+@pytest.fixture(scope="session")
+async def probe_pr_id(_session_client: BBClient, workspace: str, probe_repo_slug: str) -> int:
     from bb.cloud.models.get_repositories_workspace_repo_slug_pullrequests_state import (
         GetRepositoriesWorkspaceRepoSlugPullrequestsState as State,
     )
@@ -135,7 +141,7 @@ async def probe_pr_id(client: BBClient, workspace: str, probe_repo_slug: str) ->
         kwargs: dict = {"pagelen": 1}
         if state is not None:
             kwargs["state"] = state
-        pr_list = await prs_sdk.list(client, workspace, probe_repo_slug, **kwargs)
+        pr_list = await prs_sdk.list(_session_client, workspace, probe_repo_slug, **kwargs)
         if isinstance(pr_list, Error) or not pr_list:
             continue
         first = pr_list[0]
@@ -144,12 +150,12 @@ async def probe_pr_id(client: BBClient, workspace: str, probe_repo_slug: str) ->
     pytest.skip(f"repo {probe_repo_slug!r} has no pull requests in any state")
 
 
-@pytest.fixture
-async def probe_project_key(client: BBClient, workspace: str) -> str:
+@pytest.fixture(scope="session")
+async def probe_project_key(_session_client: BBClient, workspace: str) -> str:
     pinned = os.environ.get("BB_PROJECT_KEY", "").strip()
     if pinned:
         return pinned
-    project_list = await projects_sdk.list(client, workspace, pagelen=1)
+    project_list = await projects_sdk.list(_session_client, workspace, pagelen=1)
     if isinstance(project_list, Error):
         msg = project_list.error.message if getattr(project_list, "error", None) else project_list
         pytest.skip(f"projects.list errored: {msg!r}")

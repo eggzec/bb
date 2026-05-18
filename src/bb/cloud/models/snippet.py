@@ -20,7 +20,7 @@ T = TypeVar("T", bound="Snippet")
 
 @_attrs_define
 class Snippet:
-    type_: str
+    type_: str | Unset = UNSET
     id: int | Unset = UNSET
     title: str | Unset = UNSET
     scm: SnippetScm | Unset = UNSET
@@ -63,11 +63,9 @@ class Snippet:
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "type": type_,
-            }
-        )
+        field_dict.update({})
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if id is not UNSET:
             field_dict["id"] = id
         if title is not UNSET:
@@ -92,7 +90,7 @@ class Snippet:
         from ..models.account import Account
 
         d = dict(src_dict)
-        type_ = d.pop("type")
+        type_ = d.pop("type", UNSET)
 
         id = d.pop("id", UNSET)
 

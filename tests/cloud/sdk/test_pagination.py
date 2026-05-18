@@ -77,6 +77,33 @@ def test_paginate_forwards_positional_and_keyword_args():
     fn.assert_called_once_with("ws", "repo", page=1, pagelen=25, q="foo")
 
 
+def test_paginate_no_page_param_omits_page_kwarg():
+    """fn without page param must not receive page= kwarg."""
+    calls = []
+
+    def fn(*, pagelen: int = 25):
+        calls.append(dict(pagelen=pagelen))
+        return _page([1, 2, 3])  # next_ is UNSET by default
+
+    result = paginate(fn)
+    assert result == [1, 2, 3]
+    assert calls == [{"pagelen": 25}]
+
+
+def test_paginate_no_page_param_does_not_loop_even_with_next():
+    """fn without page param stops after first page even when next_ is set."""
+    call_count = 0
+
+    def fn(*, pagelen: int = 25):
+        nonlocal call_count
+        call_count += 1
+        return _page([1], next_="https://next")
+
+    result = paginate(fn)
+    assert result == [1]
+    assert call_count == 1  # only called once — no loop
+
+
 # ---------------------------------------------------------------------------
 # async_paginate (async, collect → list | Error)
 # ---------------------------------------------------------------------------
@@ -124,6 +151,37 @@ async def test_async_paginate_page_number_increments(n_pages):
         assert call.kwargs["page"] == expected
 
 
+async def test_async_paginate_forwards_positional_and_keyword_args():
+    fn = AsyncMock(return_value=_page(["x"]))
+    await async_paginate(fn, "ws", "repo", q="foo")
+    fn.assert_awaited_once_with("ws", "repo", page=1, pagelen=25, q="foo")
+
+
+async def test_async_paginate_no_page_param_omits_page_kwarg():
+    calls = []
+
+    async def fn(*, pagelen: int = 25):
+        calls.append(dict(pagelen=pagelen))
+        return _page(["a", "b"])
+
+    result = await async_paginate(fn)
+    assert result == ["a", "b"]
+    assert calls == [{"pagelen": 25}]
+
+
+async def test_async_paginate_no_page_param_does_not_loop_even_with_next():
+    call_count = 0
+
+    async def fn(*, pagelen: int = 25):
+        nonlocal call_count
+        call_count += 1
+        return _page([1], next_="https://next")
+
+    result = await async_paginate(fn)
+    assert result == [1]
+    assert call_count == 1
+
+
 # ---------------------------------------------------------------------------
 # iter_pages (sync, lazy generator)
 # ---------------------------------------------------------------------------
@@ -145,6 +203,22 @@ def test_iter_pages_stops_on_none():
     assert list(iter_pages(fn)) == []
 
 
+def test_iter_pages_stops_on_empty_values():
+    fn = MagicMock(return_value=_page([]))
+    assert list(iter_pages(fn)) == []
+
+
+def test_iter_pages_single_page_no_next():
+    fn = MagicMock(return_value=_page([1, 2]))
+    assert list(iter_pages(fn)) == [1, 2]
+
+
+def test_iter_pages_pagelen_forwarded():
+    fn = MagicMock(return_value=_page(["x"]))
+    list(iter_pages(fn, pagelen=50))
+    fn.assert_called_once_with(page=1, pagelen=50)
+
+
 # ---------------------------------------------------------------------------
 # aiter_pages (async, lazy generator)
 # ---------------------------------------------------------------------------
@@ -159,3 +233,18 @@ async def test_aiter_pages_stops_on_error():
     err = Error(type_="error")
     fn = AsyncMock(side_effect=[_page(["a"], "next"), err])
     assert [item async for item in aiter_pages(fn)] == ["a"]
+
+
+async def test_aiter_pages_stops_on_none():
+    fn = AsyncMock(return_value=None)
+    assert [item async for item in aiter_pages(fn)] == []
+
+
+async def test_aiter_pages_stops_on_empty_values():
+    fn = AsyncMock(return_value=_page([]))
+    assert [item async for item in aiter_pages(fn)] == []
+
+
+async def test_aiter_pages_single_page_no_next():
+    fn = AsyncMock(return_value=_page(["a", "b"]))
+    assert [item async for item in aiter_pages(fn)] == ["a", "b"]

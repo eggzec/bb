@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..models.commit_file_attributes import CommitFileAttributes
+from ..models.commit_file_attributes_item import CommitFileAttributesItem
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
@@ -24,7 +24,7 @@ class CommitFile:
     path: str | Unset = UNSET
     """ The path in the repository """
     commit: Commit | Unset = UNSET
-    attributes: CommitFileAttributes | Unset = UNSET
+    attributes: list[CommitFileAttributesItem] | Unset = UNSET
     escaped_path: str | Unset = UNSET
     """ The escaped version of the path as it appears in a diff. If the path does not require escaping this will be
     the same as path. """
@@ -39,9 +39,12 @@ class CommitFile:
         if not isinstance(self.commit, Unset):
             commit = self.commit.to_dict()
 
-        attributes: str | Unset = UNSET
+        attributes: list[str] | Unset = UNSET
         if not isinstance(self.attributes, Unset):
-            attributes = self.attributes.value
+            attributes = []
+            for attributes_item_data in self.attributes:
+                attributes_item = attributes_item_data.value
+                attributes.append(attributes_item)
 
         escaped_path = self.escaped_path
 
@@ -80,11 +83,13 @@ class CommitFile:
             commit = Commit.from_dict(_commit)
 
         _attributes = d.pop("attributes", UNSET)
-        attributes: CommitFileAttributes | Unset
-        if isinstance(_attributes, Unset):
-            attributes = UNSET
-        else:
-            attributes = CommitFileAttributes(_attributes)
+        attributes: list[CommitFileAttributesItem] | Unset = UNSET
+        if _attributes is not UNSET:
+            attributes = []
+            for attributes_item_data in _attributes:
+                attributes_item = CommitFileAttributesItem(attributes_item_data)
+
+                attributes.append(attributes_item)
 
         escaped_path = d.pop("escaped_path", UNSET)
 

@@ -17,7 +17,7 @@ T = TypeVar("T", bound="WorkspaceAccess")
 
 @_attrs_define
 class WorkspaceAccess:
-    type_: str
+    type_: str | Unset = UNSET
     administrator: bool | Unset = UNSET
     """ The permission level the user has for the workspace. True if the user is an administrator, otherwise False.
     """
@@ -35,11 +35,9 @@ class WorkspaceAccess:
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "type": type_,
-            }
-        )
+        field_dict.update({})
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if administrator is not UNSET:
             field_dict["administrator"] = administrator
         if workspace is not UNSET:
@@ -52,7 +50,7 @@ class WorkspaceAccess:
         from ..models.workspace_base import WorkspaceBase
 
         d = dict(src_dict)
-        type_ = d.pop("type")
+        type_ = d.pop("type", UNSET)
 
         administrator = d.pop("administrator", UNSET)
 

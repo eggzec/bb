@@ -20,7 +20,7 @@ T = TypeVar("T", bound="Project")
 
 @_attrs_define
 class Project:
-    type_: str
+    type_: str | Unset = UNSET
     links: ProjectLinks | Unset = UNSET
     uuid: str | Unset = UNSET
     """ The project's immutable id. """
@@ -76,11 +76,9 @@ class Project:
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "type": type_,
-            }
-        )
+        field_dict.update({})
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if links is not UNSET:
             field_dict["links"] = links
         if uuid is not UNSET:
@@ -110,7 +108,7 @@ class Project:
         from ..models.team import Team
 
         d = dict(src_dict)
-        type_ = d.pop("type")
+        type_ = d.pop("type", UNSET)
 
         _links = d.pop("links", UNSET)
         links: ProjectLinks | Unset

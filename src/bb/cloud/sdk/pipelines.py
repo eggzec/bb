@@ -68,10 +68,14 @@ from bb.cloud.api.pipelines import (
 )
 from bb.cloud.models.error import Error
 from bb.cloud.models.pipeline import Pipeline
+from bb.cloud.models.pipeline_build_number import PipelineBuildNumber
 from bb.cloud.models.pipeline_known_host import PipelineKnownHost
 from bb.cloud.models.pipeline_schedule import PipelineSchedule
+from bb.cloud.models.pipeline_schedule_post_request_body import PipelineSchedulePostRequestBody
+from bb.cloud.models.pipeline_schedule_put_request_body import PipelineSchedulePutRequestBody
 from bb.cloud.models.pipeline_ssh_key_pair import PipelineSshKeyPair
 from bb.cloud.models.pipeline_variable import PipelineVariable
+from bb.cloud.models.pipelines_config import PipelinesConfig
 from bb.cloud.sdk._auth_validation import AuthMethod, require_auth
 from bb.cloud.sdk._client import BBClient
 from bb.cloud.sdk._pagination import async_paginate
@@ -467,10 +471,13 @@ async def step_log(
         `GET /2.0/repositories/{workspace}/{repo_slug}/pipelines/{pipeline_uuid}/steps/{step_uuid}/log
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pipelines/#api-repositories-workspace-repo-slug-pipelines-pipeline-uuid-steps-step-uuid-log-get>`_
     """
-    result = await get_pipeline_step_log_for_repository.asyncio(
+    response = await get_pipeline_step_log_for_repository.asyncio_detailed(
         workspace, repo_slug, pipeline_uuid, step_uuid, client=client.auth
     )
-    return result  # type: ignore[return-value]
+    if response.status_code.value == 200:
+        return response.content.decode("utf-8", errors="replace")
+    # 304, 404, 416, or any other non-200 → no log available
+    return None
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -513,7 +520,7 @@ async def update_config(
     workspace: str,
     repo_slug: str,
     *,
-    body: Unset = UNSET,
+    body: PipelinesConfig,
 ) -> Any:
     """Update the pipeline configuration for a repository.
 
@@ -522,7 +529,7 @@ async def update_config(
         workspace: Workspace slug or UUID.
         repo_slug: Repository slug or UUID.
         body: Updated :class:`~bb.cloud.models.pipelines_config.PipelinesConfig`
-            request body. Omit to send an empty update.
+            request body (required).
 
     Returns:
         The updated :class:`~bb.cloud.models.pipelines_config.PipelinesConfig` object,
@@ -903,7 +910,7 @@ async def create_schedule(
     workspace: str,
     repo_slug: str,
     *,
-    body: PipelineSchedule | Unset = UNSET,
+    body: PipelineSchedulePostRequestBody,
 ) -> PipelineSchedule | Error | None:
     """Create a pipeline schedule for a repository.
 
@@ -911,7 +918,7 @@ async def create_schedule(
         client: Authenticated :class:`~bb.cloud.sdk._client.BBClient` instance.
         workspace: Workspace slug or UUID.
         repo_slug: Repository slug or UUID.
-        body: :class:`~bb.cloud.models.pipeline_schedule.PipelineSchedule` request body
+        body: :class:`~bb.cloud.models.pipeline_schedule_post_request_body.PipelineSchedulePostRequestBody` request body
             defining the schedule's cron expression and target.
 
     Returns:
@@ -955,7 +962,7 @@ async def update_schedule(
     repo_slug: str,
     schedule_uuid: str,
     *,
-    body: PipelineSchedule | Unset = UNSET,
+    body: PipelineSchedulePutRequestBody,
 ) -> PipelineSchedule | Error | None:
     """Update a pipeline schedule for a repository.
 
@@ -964,7 +971,7 @@ async def update_schedule(
         workspace: Workspace slug or UUID.
         repo_slug: Repository slug or UUID.
         schedule_uuid: Schedule UUID (e.g. ``{schedule-uuid}``).
-        body: :class:`~bb.cloud.models.pipeline_schedule.PipelineSchedule` request body
+        body: :class:`~bb.cloud.models.pipeline_schedule_put_request_body.PipelineSchedulePutRequestBody` request body
             with updated fields.
 
     Returns:
@@ -1183,9 +1190,12 @@ async def create_known_host(
         `POST /2.0/repositories/{workspace}/{repo_slug}/pipelines/config/ssh/known_hosts
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pipelines/#api-repositories-workspace-repo-slug-pipelines-config-ssh-known-hosts-post>`_
     """
-    result = await create_repository_pipeline_known_host.asyncio(workspace, repo_slug, client=client.auth, body=body)
-    if isinstance(result, (PipelineKnownHost, Error)):
-        return result
+    response = await create_repository_pipeline_known_host.asyncio_detailed(workspace, repo_slug, client=client.auth, body=body)
+    if response.status_code.value in (200, 201):
+        import json as _json
+        return PipelineKnownHost.from_dict(_json.loads(response.content))
+    if isinstance(response.parsed, Error):
+        return response.parsed
     return None
 
 
@@ -1507,7 +1517,7 @@ async def delete_cache(client: BBClient, workspace: str, repo_slug: str, cache_u
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def oidc_config(client: BBClient, workspace: str, repo_slug: str) -> Any:
+async def oidc_config(client: BBClient, workspace: str) -> Any:
     """Return the OIDC configuration for a workspace's pipelines.
 
     Retrieves the OpenID Connect well-known configuration document that
@@ -1516,7 +1526,6 @@ async def oidc_config(client: BBClient, workspace: str, repo_slug: str) -> Any:
     Args:
         client: Authenticated :class:`~bb.cloud.sdk._client.BBClient` instance.
         workspace: Workspace slug or UUID.
-        repo_slug: Repository slug or UUID (passed through to the underlying API call).
 
     Returns:
         OIDC configuration document, or ``None`` if not available.
@@ -1532,20 +1541,18 @@ async def oidc_config(client: BBClient, workspace: str, repo_slug: str) -> Any:
         from bb.cloud.sdk import pipelines
 
         client = BBClient.from_env()
-        oidc = await pipelines.oidc_config(
-            client, workspace="myws", repo_slug="myrepo"
-        )
+        oidc = await pipelines.oidc_config(client, workspace="myws")
         ```
 
     References:
         `GET /2.0/workspaces/{workspace}/pipelines-config/identity/oidc/.well-known/openid-configuration
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pipelines/#api-workspaces-workspace-pipelines-config-identity-oidc-well-known-openid-configuration-get>`_
     """
-    return await get_oidc_configuration.asyncio(workspace, repo_slug, client=client.auth)
+    return await get_oidc_configuration.asyncio(workspace, client=client.auth)
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def oidc_keys(client: BBClient, workspace: str, repo_slug: str) -> Any:
+async def oidc_keys(client: BBClient, workspace: str) -> Any:
     """Return the OIDC public key set for a workspace's pipelines.
 
     Retrieves the JSON Web Key Set (JWKS) used to verify OIDC tokens issued
@@ -1554,7 +1561,6 @@ async def oidc_keys(client: BBClient, workspace: str, repo_slug: str) -> Any:
     Args:
         client: Authenticated :class:`~bb.cloud.sdk._client.BBClient` instance.
         workspace: Workspace slug or UUID.
-        repo_slug: Repository slug or UUID (passed through to the underlying API call).
 
     Returns:
         JWKS document, or ``None`` if not available.
@@ -1570,16 +1576,14 @@ async def oidc_keys(client: BBClient, workspace: str, repo_slug: str) -> Any:
         from bb.cloud.sdk import pipelines
 
         client = BBClient.from_env()
-        keys = await pipelines.oidc_keys(
-            client, workspace="myws", repo_slug="myrepo"
-        )
+        keys = await pipelines.oidc_keys(client, workspace="myws")
         ```
 
     References:
         `GET /2.0/workspaces/{workspace}/pipelines-config/identity/oidc/keys.json
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pipelines/#api-workspaces-workspace-pipelines-config-identity-oidc-keys-json-get>`_
     """
-    return await get_oidc_keys.asyncio(workspace, repo_slug, client=client.auth)
+    return await get_oidc_keys.asyncio(workspace, client=client.auth)
 
 
 # --- Workspace pipeline variables ---
@@ -1887,14 +1891,13 @@ async def get_runner(client: BBClient, workspace: str, repo_slug: str, runner_uu
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def create_runner(client: BBClient, workspace: str, repo_slug: str, *, body: Unset = UNSET) -> Any:
+async def create_runner(client: BBClient, workspace: str, repo_slug: str) -> Any:
     """Create a self-hosted runner for a repository.
 
     Args:
         client: Authenticated :class:`~bb.cloud.sdk._client.BBClient` instance.
         workspace: Workspace slug or UUID.
         repo_slug: Repository slug or UUID.
-        body: Runner request body. Omit to use defaults.
 
     Returns:
         The created runner object, or ``None`` on error.
@@ -1911,7 +1914,7 @@ async def create_runner(client: BBClient, workspace: str, repo_slug: str, *, bod
 
         client = BBClient.from_env()
         runner = await pipelines.create_runner(
-            client, workspace="myws", repo_slug="myrepo", body=...
+            client, workspace="myws", repo_slug="myrepo"
         )
         ```
 
@@ -1919,12 +1922,12 @@ async def create_runner(client: BBClient, workspace: str, repo_slug: str, *, bod
         `POST /2.0/repositories/{workspace}/{repo_slug}/pipelines/config/runners
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pipelines/#api-repositories-workspace-repo-slug-pipelines-config-runners-post>`_
     """
-    return await create_repository_runner.asyncio(workspace, repo_slug, client=client.auth, body=body)
+    return await create_repository_runner.asyncio(workspace, repo_slug, client=client.auth)
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
 async def update_runner(
-    client: BBClient, workspace: str, repo_slug: str, runner_uuid: str, *, body: Unset = UNSET
+    client: BBClient, workspace: str, repo_slug: str, runner_uuid: str
 ) -> Any:
     """Update a repository runner.
 
@@ -1933,7 +1936,6 @@ async def update_runner(
         workspace: Workspace slug or UUID.
         repo_slug: Repository slug or UUID.
         runner_uuid: Runner UUID (e.g. ``{runner-uuid}``).
-        body: Runner request body with updated fields.
 
     Returns:
         The updated runner object, or ``None`` on error.
@@ -1951,7 +1953,7 @@ async def update_runner(
         client = BBClient.from_env()
         runner = await pipelines.update_runner(
             client, workspace="myws", repo_slug="myrepo",
-            runner_uuid="{runner-uuid}", body=...
+            runner_uuid="{runner-uuid}"
         )
         ```
 
@@ -1959,7 +1961,7 @@ async def update_runner(
         `PUT /2.0/repositories/{workspace}/{repo_slug}/pipelines/config/runners/{runner_uuid}
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pipelines/#api-repositories-workspace-repo-slug-pipelines-config-runners-runner-uuid-put>`_
     """
-    return await update_repository_runner.asyncio(workspace, repo_slug, runner_uuid, client=client.auth, body=body)
+    return await update_repository_runner.asyncio(workspace, repo_slug, runner_uuid, client=client.auth)
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -2070,13 +2072,12 @@ async def get_workspace_runner(client: BBClient, workspace: str, runner_uuid: st
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def create_workspace_runner(client: BBClient, workspace: str, *, body: Unset = UNSET) -> Any:
+async def create_workspace_runner(client: BBClient, workspace: str) -> Any:
     """Create a self-hosted runner for a workspace.
 
     Args:
         client: Authenticated :class:`~bb.cloud.sdk._client.BBClient` instance.
         workspace: Workspace slug or UUID.
-        body: Runner request body. Omit to use defaults.
 
     Returns:
         The created runner object, or ``None`` on error.
@@ -2093,7 +2094,7 @@ async def create_workspace_runner(client: BBClient, workspace: str, *, body: Uns
 
         client = BBClient.from_env()
         runner = await pipelines.create_workspace_runner(
-            client, workspace="myws", body=...
+            client, workspace="myws"
         )
         ```
 
@@ -2101,18 +2102,17 @@ async def create_workspace_runner(client: BBClient, workspace: str, *, body: Uns
         `POST /2.0/workspaces/{workspace}/pipelines-config/runners
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pipelines/#api-workspaces-workspace-pipelines-config-runners-post>`_
     """
-    return await _create_workspace_runner_api.asyncio(workspace, client=client.auth, body=body)
+    return await _create_workspace_runner_api.asyncio(workspace, client=client.auth)
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def update_workspace_runner(client: BBClient, workspace: str, runner_uuid: str, *, body: Unset = UNSET) -> Any:
+async def update_workspace_runner(client: BBClient, workspace: str, runner_uuid: str) -> Any:
     """Update a workspace runner.
 
     Args:
         client: Authenticated :class:`~bb.cloud.sdk._client.BBClient` instance.
         workspace: Workspace slug or UUID.
         runner_uuid: Runner UUID (e.g. ``{runner-uuid}``).
-        body: Runner request body with updated fields.
 
     Returns:
         The updated runner object, or ``None`` on error.
@@ -2129,7 +2129,7 @@ async def update_workspace_runner(client: BBClient, workspace: str, runner_uuid:
 
         client = BBClient.from_env()
         runner = await pipelines.update_workspace_runner(
-            client, workspace="myws", runner_uuid="{runner-uuid}", body=...
+            client, workspace="myws", runner_uuid="{runner-uuid}"
         )
         ```
 
@@ -2137,7 +2137,7 @@ async def update_workspace_runner(client: BBClient, workspace: str, runner_uuid:
         `PUT /2.0/workspaces/{workspace}/pipelines-config/runners/{runner_uuid}
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pipelines/#api-workspaces-workspace-pipelines-config-runners-runner-uuid-put>`_
     """
-    return await _update_workspace_runner_api.asyncio(workspace, runner_uuid, client=client.auth, body=body)
+    return await _update_workspace_runner_api.asyncio(workspace, runner_uuid, client=client.auth)
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -2179,14 +2179,17 @@ async def delete_workspace_runner(client: BBClient, workspace: str, runner_uuid:
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def test_reports(client: BBClient, workspace: str, repo_slug: str, pipeline_uuid: str) -> Any:
-    """Return test reports for a pipeline.
+async def test_reports(
+    client: BBClient, workspace: str, repo_slug: str, pipeline_uuid: str, step_uuid: str
+) -> Any:
+    """Return test reports for a pipeline step.
 
     Args:
         client: Authenticated :class:`~bb.cloud.sdk._client.BBClient` instance.
         workspace: Workspace slug or UUID.
         repo_slug: Repository slug or UUID.
         pipeline_uuid: Pipeline UUID (e.g. ``{abc-123-uuid}``).
+        step_uuid: Step UUID identifying the step whose test reports to retrieve.
 
     Returns:
         Test report data, or ``None`` if not available.
@@ -2204,7 +2207,7 @@ async def test_reports(client: BBClient, workspace: str, repo_slug: str, pipelin
         client = BBClient.from_env()
         reports = await pipelines.test_reports(
             client, workspace="myws", repo_slug="myrepo",
-            pipeline_uuid="{abc-123}"
+            pipeline_uuid="{abc-123}", step_uuid="{step-uuid}"
         )
         ```
 
@@ -2212,7 +2215,7 @@ async def test_reports(client: BBClient, workspace: str, repo_slug: str, pipelin
         `GET /2.0/repositories/{workspace}/{repo_slug}/pipelines/{pipeline_uuid}/steps/{step_uuid}/test-reports
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pipelines/#api-repositories-workspace-repo-slug-pipelines-pipeline-uuid-steps-step-uuid-test-reports-get>`_
     """
-    return await get_pipeline_test_reports.asyncio(workspace, repo_slug, pipeline_uuid, client=client.auth)
+    return await get_pipeline_test_reports.asyncio(workspace, repo_slug, pipeline_uuid, step_uuid, client=client.auth)
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
@@ -2480,7 +2483,7 @@ async def schedule_executions(client: BBClient, workspace: str, repo_slug: str, 
 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
-async def update_build_number(client: BBClient, workspace: str, repo_slug: str, *, body: Unset = UNSET) -> Any:
+async def update_build_number(client: BBClient, workspace: str, repo_slug: str, *, body: PipelineBuildNumber) -> Any:
     """Update the next build number for a repository's pipelines.
 
     Sets a new minimum value for the auto-incrementing build number counter.

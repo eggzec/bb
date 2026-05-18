@@ -21,7 +21,10 @@ __all__ = [
 def _get_kwargs(
     workspace: str,
     encoded_id: str,
+    *,
+    body: Snippet,
 ) -> dict[str, Any]:
+    headers: dict[str, Any] = {}
 
     _kwargs: dict[str, Any] = {
         "method": "put",
@@ -31,6 +34,11 @@ def _get_kwargs(
         ),
     }
 
+    _kwargs["json"] = body.to_dict()
+
+    headers["Content-Type"] = "application/json"
+
+    _kwargs["headers"] = headers
     return _kwargs
 
 
@@ -87,6 +95,7 @@ def sync_detailed(
     encoded_id: str,
     *,
     client: AuthenticatedClient,
+    body: Snippet,
 ) -> Response[ParsedPayload]:
     r"""Update a snippet
 
@@ -298,6 +307,7 @@ def sync_detailed(
     Args:
         workspace (str):
         encoded_id (str):
+        body (Snippet):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -310,6 +320,7 @@ def sync_detailed(
     kwargs = _get_kwargs(
         workspace=workspace,
         encoded_id=encoded_id,
+        body=body,
     )
 
     response = client.get_httpx_client().request(
@@ -324,6 +335,7 @@ def sync(
     encoded_id: str,
     *,
     client: AuthenticatedClient,
+    body: Snippet,
 ) -> ParsedPayload | None:
     r"""Update a snippet
 
@@ -535,6 +547,7 @@ def sync(
     Args:
         workspace (str):
         encoded_id (str):
+        body (Snippet):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -548,6 +561,7 @@ def sync(
         workspace=workspace,
         encoded_id=encoded_id,
         client=client,
+        body=body,
     ).parsed
 
 
@@ -556,6 +570,7 @@ async def asyncio_detailed(
     encoded_id: str,
     *,
     client: AuthenticatedClient,
+    body: Snippet,
 ) -> Response[ParsedPayload]:
     r"""Update a snippet
 
@@ -767,6 +782,7 @@ async def asyncio_detailed(
     Args:
         workspace (str):
         encoded_id (str):
+        body (Snippet):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -779,6 +795,7 @@ async def asyncio_detailed(
     kwargs = _get_kwargs(
         workspace=workspace,
         encoded_id=encoded_id,
+        body=body,
     )
 
     response = await client.get_async_httpx_client().request(**kwargs)
@@ -791,6 +808,7 @@ async def asyncio(
     encoded_id: str,
     *,
     client: AuthenticatedClient,
+    body: Snippet,
 ) -> ParsedPayload | None:
     r"""Update a snippet
 
@@ -1002,6 +1020,7 @@ async def asyncio(
     Args:
         workspace (str):
         encoded_id (str):
+        body (Snippet):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -1016,5 +1035,6 @@ async def asyncio(
             workspace=workspace,
             encoded_id=encoded_id,
             client=client,
+            body=body,
         )
     ).parsed

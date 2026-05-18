@@ -190,7 +190,7 @@ async def create(
     workspace: str,
     repo_slug: str,
     *,
-    body: Issue | Unset = UNSET,
+    body: Issue = Issue(),
 ) -> Issue | Error | None:
     """Create an issue and return the created object.
 
@@ -239,7 +239,7 @@ async def update(
     repo_slug: str,
     issue_id: int,
     *,
-    body: Issue | Unset = UNSET,
+    body: Issue = Issue(),
 ) -> Issue | Error | None:
     """Update an issue and return the updated object.
 
@@ -383,7 +383,7 @@ async def add_comment(
     repo_slug: str,
     issue_id: int,
     *,
-    body: IssueComment | Unset = UNSET,
+    body: IssueComment = IssueComment(),
 ) -> IssueComment | Error | None:
     """Add a comment to an issue and return the created comment.
 
@@ -813,7 +813,7 @@ async def update_comment(
     issue_id: int,
     comment_id: int,
     *,
-    body: IssueComment | Unset = UNSET,
+    body: IssueComment = IssueComment(),
 ) -> IssueComment | Error | None:
     """Update a comment on an issue.
 
@@ -950,7 +950,7 @@ async def add_change(
     repo_slug: str,
     issue_id: int,
     *,
-    body: IssueChange | Unset = UNSET,
+    body: IssueChange = IssueChange(type_="issue_change"),
 ) -> IssueChange | Error | None:
     """Record a change on an issue (e.g. a status transition).
 
@@ -1285,8 +1285,6 @@ async def upload_attachment(
     workspace: str,
     repo_slug: str,
     issue_id: int,
-    *,
-    body: Unset = UNSET,
 ) -> None:
     """Upload an attachment to an issue.
 
@@ -1321,7 +1319,7 @@ async def upload_attachment(
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-issue-tracker/#api-repositories-workspace-repo-slug-issues-issue-id-attachments-post>`_
     """
     await post_repositories_workspace_repo_slug_issues_issue_id_attachments.asyncio(
-        workspace, repo_slug, issue_id, client=client.auth, body=body
+        workspace, repo_slug, issue_id, client=client.auth
     )
 
 
@@ -1488,8 +1486,6 @@ async def import_data(
     client: BBClient,
     workspace: str,
     repo_slug: str,
-    *,
-    body: Unset = UNSET,
 ) -> None:
     """Start an asynchronous import of issues for a repository.
 
@@ -1521,5 +1517,5 @@ async def import_data(
         <https://developer.atlassian.com/cloud/bitbucket/rest/api-group-issue-tracker/#api-repositories-workspace-repo-slug-issues-import-post>`_
     """
     await post_repositories_workspace_repo_slug_issues_import.asyncio(
-        workspace, repo_slug, client=client.auth, body=body
+        workspace, repo_slug, client=client.auth
     )

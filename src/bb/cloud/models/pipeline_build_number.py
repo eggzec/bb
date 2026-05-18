@@ -13,7 +13,7 @@ T = TypeVar("T", bound="PipelineBuildNumber")
 
 @_attrs_define
 class PipelineBuildNumber:
-    type_: str
+    type_: str | Unset = UNSET
     next_: int | Unset = UNSET
     """ The next number that will be used as build number. """
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
@@ -25,11 +25,9 @@ class PipelineBuildNumber:
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "type": type_,
-            }
-        )
+        field_dict.update({})
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if next_ is not UNSET:
             field_dict["next"] = next_
 
@@ -38,7 +36,7 @@ class PipelineBuildNumber:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        type_ = d.pop("type")
+        type_ = d.pop("type", UNSET)
 
         next_ = d.pop("next", UNSET)
 

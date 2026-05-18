@@ -19,10 +19,12 @@ T = TypeVar("T", bound="WorkspaceMembership")
 
 @_attrs_define
 class WorkspaceMembership:
-    type_: str
+    type_: str | Unset = UNSET
     links: WorkspaceMembershipLinks | Unset = UNSET
     user: Account | Unset = UNSET
     workspace: Workspace | Unset = UNSET
+    permission: str | Unset = UNSET
+    """ The workspace permission level (e.g. owner, collaborator, create-project). """
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -40,19 +42,21 @@ class WorkspaceMembership:
         if not isinstance(self.workspace, Unset):
             workspace = self.workspace.to_dict()
 
+        permission = self.permission
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "type": type_,
-            }
-        )
+        field_dict.update({})
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if links is not UNSET:
             field_dict["links"] = links
         if user is not UNSET:
             field_dict["user"] = user
         if workspace is not UNSET:
             field_dict["workspace"] = workspace
+        if permission is not UNSET:
+            field_dict["permission"] = permission
 
         return field_dict
 
@@ -63,7 +67,7 @@ class WorkspaceMembership:
         from ..models.workspace_membership_links import WorkspaceMembershipLinks
 
         d = dict(src_dict)
-        type_ = d.pop("type")
+        type_ = d.pop("type", UNSET)
 
         _links = d.pop("links", UNSET)
         links: WorkspaceMembershipLinks | Unset
@@ -86,11 +90,14 @@ class WorkspaceMembership:
         else:
             workspace = Workspace.from_dict(_workspace)
 
+        permission = d.pop("permission", UNSET)
+
         workspace_membership = cls(
             type_=type_,
             links=links,
             user=user,
             workspace=workspace,
+            permission=permission,
         )
 
         workspace_membership.additional_properties = d

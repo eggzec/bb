@@ -6,6 +6,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from bb.cloud.sdk._pagination import _accepts
 from bb.cloud.types import UNSET
 
 
@@ -24,3 +25,16 @@ def make_page():
         return mock
 
     return _make
+
+
+@pytest.fixture(autouse=True)
+def _clear_accepts_cache():
+    """Clear the _accepts lru_cache before and after each test.
+
+    Prevents stale introspection results from bleeding between tests,
+    especially important when tests use real callables (not MagicMock)
+    that have the same identity across parameterised runs.
+    """
+    _accepts.cache_clear()
+    yield
+    _accepts.cache_clear()

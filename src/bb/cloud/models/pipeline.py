@@ -26,7 +26,7 @@ T = TypeVar("T", bound="Pipeline")
 
 @_attrs_define
 class Pipeline:
-    type_: str
+    type_: str | Unset = UNSET
     uuid: str | Unset = UNSET
     """ The UUID identifying the pipeline. """
     build_number: int | Unset = UNSET
@@ -106,11 +106,9 @@ class Pipeline:
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "type": type_,
-            }
-        )
+        field_dict.update({})
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if uuid is not UNSET:
             field_dict["uuid"] = uuid
         if build_number is not UNSET:
@@ -152,7 +150,7 @@ class Pipeline:
         from ..models.repository import Repository
 
         d = dict(src_dict)
-        type_ = d.pop("type")
+        type_ = d.pop("type", UNSET)
 
         uuid = d.pop("uuid", UNSET)
 

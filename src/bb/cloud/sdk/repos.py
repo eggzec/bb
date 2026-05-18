@@ -24,8 +24,12 @@ from bb.cloud.api.repositories import (
     put_repositories_workspace_repo_slug_permissions_config_groups_group_slug,
     put_repositories_workspace_repo_slug_permissions_config_users_selected_user_id,
 )
+from bb.cloud.models.bitbucket_apps_permissions_serializers_repo_permission_update_schema import (
+    BitbucketAppsPermissionsSerializersRepoPermissionUpdateSchema,
+)
 from bb.cloud.models.error import Error
 from bb.cloud.models.repository import Repository
+from bb.cloud.models.repository_inheritance_state import RepositoryInheritanceState
 from bb.cloud.sdk._auth_validation import AuthMethod, require_auth
 from bb.cloud.sdk._client import BBClient
 from bb.cloud.sdk._pagination import async_paginate
@@ -438,7 +442,7 @@ async def override_settings(client: BBClient, workspace: str, repo_slug: str) ->
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
 async def update_override_settings(
-    client: BBClient, workspace: str, repo_slug: str, *, body: Unset = UNSET
+    client: BBClient, workspace: str, repo_slug: str, *, body: RepositoryInheritanceState = RepositoryInheritanceState()
 ) -> Any | None:
     """Update the inheritance override settings for a repository.
 
@@ -561,7 +565,12 @@ async def get_group_permission(client: BBClient, workspace: str, repo_slug: str,
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
 async def set_group_permission(
-    client: BBClient, workspace: str, repo_slug: str, group_slug: str, *, body: Unset = UNSET
+    client: BBClient,
+    workspace: str,
+    repo_slug: str,
+    group_slug: str,
+    *,
+    body: BitbucketAppsPermissionsSerializersRepoPermissionUpdateSchema,
 ) -> Any | None:
     """Set a group's permission on a repository.
 
@@ -721,7 +730,12 @@ async def get_user_permission(client: BBClient, workspace: str, repo_slug: str, 
 
 @require_auth(AuthMethod.OAUTH2, AuthMethod.BASIC, AuthMethod.API_KEY)
 async def set_user_permission(
-    client: BBClient, workspace: str, repo_slug: str, selected_user_id: str, *, body: Unset = UNSET
+    client: BBClient,
+    workspace: str,
+    repo_slug: str,
+    selected_user_id: str,
+    *,
+    body: BitbucketAppsPermissionsSerializersRepoPermissionUpdateSchema,
 ) -> Any | None:
     """Set a user's permission on a repository.
 

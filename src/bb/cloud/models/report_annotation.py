@@ -18,7 +18,9 @@ T = TypeVar("T", bound="ReportAnnotation")
 
 @_attrs_define
 class ReportAnnotation:
-    type_: str
+    summary: str
+    """ The message to display to users. """
+    type_: str | Unset = UNSET
     external_id: str | Unset = UNSET
     """ ID of the annotation provided by the annotation creator. It can be used to identify the annotation as an
     alternative to it's generated uuid. It is not used by Bitbucket, but only by the annotation creator for updating
@@ -34,8 +36,6 @@ class ReportAnnotation:
     line: int | Unset = UNSET
     """ The line number that the annotation should belong to. If no line number is provided, then it will default to
     0 and in a pull request it will appear at the top of the file specified by the path field. """
-    summary: str | Unset = UNSET
-    """ The message to display to users. """
     details: str | Unset = UNSET
     """ The details to show to users when clicking on the annotation. """
     result: ReportAnnotationResult | Unset = UNSET
@@ -51,6 +51,8 @@ class ReportAnnotation:
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
+        summary = self.summary
+
         type_ = self.type_
 
         external_id = self.external_id
@@ -64,8 +66,6 @@ class ReportAnnotation:
         path = self.path
 
         line = self.line
-
-        summary = self.summary
 
         details = self.details
 
@@ -91,9 +91,11 @@ class ReportAnnotation:
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
-                "type": type_,
+                "summary": summary,
             }
         )
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if external_id is not UNSET:
             field_dict["external_id"] = external_id
         if uuid is not UNSET:
@@ -104,8 +106,6 @@ class ReportAnnotation:
             field_dict["path"] = path
         if line is not UNSET:
             field_dict["line"] = line
-        if summary is not UNSET:
-            field_dict["summary"] = summary
         if details is not UNSET:
             field_dict["details"] = details
         if result is not UNSET:
@@ -124,7 +124,9 @@ class ReportAnnotation:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        type_ = d.pop("type")
+        summary = d.pop("summary")
+
+        type_ = d.pop("type", UNSET)
 
         external_id = d.pop("external_id", UNSET)
 
@@ -140,8 +142,6 @@ class ReportAnnotation:
         path = d.pop("path", UNSET)
 
         line = d.pop("line", UNSET)
-
-        summary = d.pop("summary", UNSET)
 
         details = d.pop("details", UNSET)
 
@@ -176,13 +176,13 @@ class ReportAnnotation:
             updated_on = isoparse(_updated_on)
 
         report_annotation = cls(
+            summary=summary,
             type_=type_,
             external_id=external_id,
             uuid=uuid,
             annotation_type=annotation_type,
             path=path,
             line=line,
-            summary=summary,
             details=details,
             result=result,
             severity=severity,

@@ -134,7 +134,7 @@ async def create_repo(
     workspace: str,
     repo_slug: str,
     *,
-    body: WebhookSubscription | Unset = UNSET,
+    body: WebhookSubscription,
 ) -> WebhookSubscription | Error | None:
     """Create a webhook subscription for a repository.
 
@@ -181,7 +181,7 @@ async def update_repo(
     repo_slug: str,
     uid: str,
     *,
-    body: WebhookSubscription | Unset = UNSET,
+    body: WebhookSubscription,
 ) -> WebhookSubscription | Error | None:
     """Update a repository webhook subscription.
 
@@ -345,7 +345,7 @@ async def create_workspace(
     client: BBClient,
     workspace: str,
     *,
-    body: WebhookSubscription | Unset = UNSET,
+    body: WebhookSubscription,
 ) -> WebhookSubscription | Error | None:
     """Create a webhook subscription for a workspace.
 
@@ -388,7 +388,7 @@ async def update_workspace(
     workspace: str,
     uid: str,
     *,
-    body: WebhookSubscription | Unset = UNSET,
+    body: WebhookSubscription,
 ) -> WebhookSubscription | Error | None:
     """Update a workspace webhook subscription.
 
@@ -501,4 +501,4 @@ async def events(
     if isinstance(result, Error):
         return result
 
-    return list(result)
+    return [item for item in result if isinstance(item, HookEvent)]

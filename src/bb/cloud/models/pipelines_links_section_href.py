@@ -13,7 +13,7 @@ T = TypeVar("T", bound="PipelinesLinksSectionHref")
 
 @_attrs_define
 class PipelinesLinksSectionHref:
-    type_: str
+    type_: str | Unset = UNSET
     href: str | Unset = UNSET
     """ A link """
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
@@ -25,11 +25,9 @@ class PipelinesLinksSectionHref:
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "type": type_,
-            }
-        )
+        field_dict.update({})
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if href is not UNSET:
             field_dict["href"] = href
 
@@ -38,7 +36,7 @@ class PipelinesLinksSectionHref:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        type_ = d.pop("type")
+        type_ = d.pop("type", UNSET)
 
         href = d.pop("href", UNSET)
 

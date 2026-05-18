@@ -48,7 +48,7 @@ from .comment_resolution import CommentResolution
 from .commit import Commit
 from .commit_comment import CommitComment
 from .commit_file import CommitFile
-from .commit_file_attributes import CommitFileAttributes
+from .commit_file_attributes_item import CommitFileAttributesItem
 from .commitstatus import Commitstatus
 from .commitstatus_links import CommitstatusLinks
 from .commitstatus_state import CommitstatusState
@@ -60,6 +60,10 @@ from .deploy_key import DeployKey
 from .deploy_key_links import DeployKeyLinks
 from .deployment import Deployment
 from .deployment_environment import DeploymentEnvironment
+from .deployment_environment_category import DeploymentEnvironmentCategory
+from .deployment_environment_lock import DeploymentEnvironmentLock
+from .deployment_environment_restrictions import DeploymentEnvironmentRestrictions
+from .deployment_environment_type import DeploymentEnvironmentType
 from .deployment_release import DeploymentRelease
 from .deployment_state import DeploymentState
 from .deployment_state_completed import DeploymentStateCompleted
@@ -149,6 +153,7 @@ from .paginated_branch_restrictions import PaginatedBranchRestrictions
 from .paginated_branches import PaginatedBranches
 from .paginated_commit_comments import PaginatedCommitComments
 from .paginated_commit_statuses import PaginatedCommitStatuses
+from .paginated_commits import PaginatedCommits
 from .paginated_components import PaginatedComponents
 from .paginated_default_reviewer_and_type import PaginatedDefaultReviewerAndType
 from .paginated_deploy_keys import PaginatedDeployKeys
@@ -339,9 +344,9 @@ from .report_annotation_result import ReportAnnotationResult
 from .report_annotation_severity import ReportAnnotationSeverity
 from .report_data import ReportData
 from .report_data_type import ReportDataType
-from .report_data_value import ReportDataValue
 from .report_report_type import ReportReportType
 from .report_result import ReportResult
+from .report_type import ReportType
 from .repository import Repository
 from .repository_fork_policy import RepositoryForkPolicy
 from .repository_group_permission import RepositoryGroupPermission
@@ -372,12 +377,16 @@ from .ssh_key import SshKey
 from .ssh_key_links import SshKeyLinks
 from .subject_types import SubjectTypes
 from .subject_types_repository import SubjectTypesRepository
+from .subject_types_repository_links import SubjectTypesRepositoryLinks
 from .subject_types_workspace import SubjectTypesWorkspace
+from .subject_types_workspace_links import SubjectTypesWorkspaceLinks
 from .tag import Tag
 from .task import Task
 from .task_content import TaskContent
 from .task_content_markup import TaskContentMarkup
+from .task_links import TaskLinks
 from .task_state import TaskState
+from .task_type import TaskType
 from .team import Team
 from .team_links import TeamLinks
 from .tree_entry import TreeEntry
@@ -438,7 +447,7 @@ __all__ = (
     "Commit",
     "CommitComment",
     "CommitFile",
-    "CommitFileAttributes",
+    "CommitFileAttributesItem",
     "Commitstatus",
     "CommitstatusLinks",
     "CommitstatusState",
@@ -450,6 +459,10 @@ __all__ = (
     "DeployKeyLinks",
     "Deployment",
     "DeploymentEnvironment",
+    "DeploymentEnvironmentCategory",
+    "DeploymentEnvironmentLock",
+    "DeploymentEnvironmentRestrictions",
+    "DeploymentEnvironmentType",
     "DeploymentRelease",
     "DeploymentState",
     "DeploymentStateCompleted",
@@ -534,6 +547,7 @@ __all__ = (
     "PaginatedBranches",
     "PaginatedBranchRestrictions",
     "PaginatedCommitComments",
+    "PaginatedCommits",
     "PaginatedCommitStatuses",
     "PaginatedComponents",
     "PaginatedDefaultReviewerAndType",
@@ -721,9 +735,9 @@ __all__ = (
     "ReportAnnotationSeverity",
     "ReportData",
     "ReportDataType",
-    "ReportDataValue",
     "ReportReportType",
     "ReportResult",
+    "ReportType",
     "Repository",
     "RepositoryForkPolicy",
     "RepositoryGroupPermission",
@@ -754,12 +768,16 @@ __all__ = (
     "SshKeyLinks",
     "SubjectTypes",
     "SubjectTypesRepository",
+    "SubjectTypesRepositoryLinks",
     "SubjectTypesWorkspace",
+    "SubjectTypesWorkspaceLinks",
     "Tag",
     "Task",
     "TaskContent",
     "TaskContentMarkup",
+    "TaskLinks",
     "TaskState",
+    "TaskType",
     "Team",
     "TeamLinks",
     "TreeEntry",

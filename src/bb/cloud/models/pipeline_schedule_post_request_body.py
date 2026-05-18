@@ -17,22 +17,22 @@ T = TypeVar("T", bound="PipelineSchedulePostRequestBody")
 
 @_attrs_define
 class PipelineSchedulePostRequestBody:
-    type_: str
     target: PipelineSchedulePostRequestBodyTarget
     """ The target on which the schedule will be executed. """
     cron_pattern: str
     """ The cron expression with second precision (7 fields) that the schedule applies. For example, for expression:
     0 0 12 * * ? *, will execute at 12pm UTC every day. """
+    type_: str | Unset = UNSET
     enabled: bool | Unset = UNSET
     """ Whether the schedule is enabled. """
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        type_ = self.type_
-
         target = self.target.to_dict()
 
         cron_pattern = self.cron_pattern
+
+        type_ = self.type_
 
         enabled = self.enabled
 
@@ -40,11 +40,12 @@ class PipelineSchedulePostRequestBody:
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
-                "type": type_,
                 "target": target,
                 "cron_pattern": cron_pattern,
             }
         )
+        if type_ is not UNSET:
+            field_dict["type"] = type_
         if enabled is not UNSET:
             field_dict["enabled"] = enabled
 
@@ -55,18 +56,18 @@ class PipelineSchedulePostRequestBody:
         from ..models.pipeline_schedule_post_request_body_target import PipelineSchedulePostRequestBodyTarget
 
         d = dict(src_dict)
-        type_ = d.pop("type")
-
         target = PipelineSchedulePostRequestBodyTarget.from_dict(d.pop("target"))
 
         cron_pattern = d.pop("cron_pattern")
 
+        type_ = d.pop("type", UNSET)
+
         enabled = d.pop("enabled", UNSET)
 
         pipeline_schedule_post_request_body = cls(
-            type_=type_,
             target=target,
             cron_pattern=cron_pattern,
+            type_=type_,
             enabled=enabled,
         )
 
