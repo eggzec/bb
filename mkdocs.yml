@@ -1,0 +1,145 @@
+site_name: bb
+site_description: Bitbucket Cloud and Data Center Python SDK
+site_url: https://example.com/
+docs_dir: docs
+site_dir: site
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - content.code.copy
+    - content.code.annotate
+    - search.highlight
+    - search.suggest
+
+plugins:
+  - search:
+      separator: '[\s\-\.]+'
+  - gen-files:
+      scripts:
+        - scripts/gen_ref_pages.py
+  - literate-nav:
+      nav_file: SUMMARY.md
+  - section-index
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          inventories:
+            - url: https://docs.python.org/3/objects.inv
+          options:
+            docstring_style: google
+            docstring_section_style: list
+            show_root_heading: true
+            show_source: false
+            separate_signature: true
+            show_signature_annotations: true
+            signature_crossrefs: true
+            members_order: source
+            filters:
+              - "!^__"
+            merge_init_into_class: true
+  - git-revision-date-localized:
+      enable_creation_date: true
+      type: date
+      fallback_to_build_date: true
+  - llmstxt:
+      full_output: llms-full.txt
+      markdown_description: |
+        bb is a Python SDK for Bitbucket Cloud and Bitbucket Data Center.
+        It provides async-first wrappers over the Bitbucket REST APIs with
+        full type annotations and support for both token-based and OAuth authentication.
+      sections:
+        Getting Started:
+          - getting-started/index.md
+          - getting-started/installation.md
+          - getting-started/cloud-quickstart.md
+          - getting-started/datacenter-quickstart.md
+        Cloud SDK:
+          - cloud/index.md
+          - cloud/authentication.md
+          - cloud/pagination.md
+        Cloud SDK API Reference:
+          - cloud/api/_client.md
+          - cloud/api/_auth.md
+          - cloud/api/_pagination.md
+          - cloud/api/_errors.md
+          - cloud/api/repos.md
+          - cloud/api/branches.md
+          - cloud/api/commits.md
+          - cloud/api/prs.md
+          - cloud/api/projects.md
+          - cloud/api/workspaces.md
+          - cloud/api/issues.md
+          - cloud/api/pipelines.md
+          - cloud/api/deployments.md
+          - cloud/api/webhooks.md
+        Data Center SDK:
+          - datacenter/index.md
+          - datacenter/authentication.md
+          - datacenter/pagination.md
+        Data Center SDK API Reference:
+          - datacenter/api/_client.md
+          - datacenter/api/_auth.md
+          - datacenter/api/_pagination.md
+          - datacenter/api/_errors.md
+          - datacenter/api/repos.md
+          - datacenter/api/branches.md
+          - datacenter/api/commits.md
+          - datacenter/api/prs.md
+          - datacenter/api/projects.md
+          - datacenter/api/builds.md
+          - datacenter/api/security.md
+  - minify:
+      minify_html: false
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.snippets
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+
+extra:
+  version:
+    provider: mike
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - getting-started/index.md
+    - getting-started/installation.md
+    - getting-started/cloud-quickstart.md
+    - getting-started/datacenter-quickstart.md
+  - Cloud SDK:
+    - cloud/index.md
+    - cloud/authentication.md
+    - cloud/pagination.md
+    - API Reference: cloud/api/
+  - Data Center SDK:
+    - datacenter/index.md
+    - datacenter/authentication.md
+    - datacenter/pagination.md
+    - API Reference: datacenter/api/
+  - Changelog: changelog.md

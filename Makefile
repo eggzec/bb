@@ -191,3 +191,22 @@ probe-workspace:
 		exit 1; \
 	fi
 	uv run python3 scripts/probe_workspace.py
+
+# ── Documentation ─────────────────────────────────────────────────────────────
+
+.PHONY: docs-install docs-serve docs-build docs-build-clean docs-clean
+
+docs-install:
+	uv sync --group docs
+
+docs-serve:
+	uv run mkdocs serve --dev-addr 127.0.0.1:8001
+
+docs-build:
+	uv run mkdocs build --dirty
+
+docs-build-clean:
+	uv run mkdocs build --clean
+
+docs-clean:
+	rm -rf site/

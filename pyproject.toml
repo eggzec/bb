@@ -32,6 +32,18 @@ dev = [
     "pytest-asyncio>=0.24",
     "schemathesis>=3.38",
 ]
+docs = [
+    "mkdocs-material>=9.5",
+    "mkdocstrings[python]>=0.25",
+    "mkdocs-gen-files>=0.5",
+    "mkdocs-literate-nav>=0.6",
+    "mkdocs-section-index",
+    "mike>=2",
+    "mkdocs-llmstxt>=0.1",
+    "mkdocs-git-revision-date-localized-plugin>=1.2",
+    "mkdocs-minify-plugin>=0.8",
+    "ruff>=0.4",
+]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
