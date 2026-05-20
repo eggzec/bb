@@ -1,5 +1,4 @@
 from __future__ import annotations
-import asyncio
 from typing import Any
 from bb.cloud.models.error import Error
 from bb.cloud.models.get_repositories_workspace_repo_slug_pullrequests_state import GetRepositoriesWorkspaceRepoSlugPullrequestsState
@@ -51,7 +50,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.prs.list`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.list(client, workspace, repo_slug, state=state, pagelen=pagelen))
+    return client.run_sync(_async.list(client, workspace, repo_slug, state=state, pagelen=pagelen))
 
 def get(client: BBClient, workspace: str, repo_slug: str, pull_request_id: int) -> Pullrequest | Error | None:
     """Fetch a single pull request by ID.
@@ -88,7 +87,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.prs.get`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.get(client, workspace, repo_slug, pull_request_id))
+    return client.run_sync(_async.get(client, workspace, repo_slug, pull_request_id))
 
 def create(client: BBClient, workspace: str, repo_slug: str, *, body: Pullrequest | Unset=UNSET) -> Pullrequest | Error | None:
     """Create a new pull request.
@@ -127,7 +126,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.prs.create`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.create(client, workspace, repo_slug, body=body))
+    return client.run_sync(_async.create(client, workspace, repo_slug, body=body))
 
 def update(client: BBClient, workspace: str, repo_slug: str, pull_request_id: int, *, body: Pullrequest | Unset=UNSET) -> Pullrequest | Error | None:
     """Update an existing pull request.
@@ -169,7 +168,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.prs.update`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.update(client, workspace, repo_slug, pull_request_id, body=body))
+    return client.run_sync(_async.update(client, workspace, repo_slug, pull_request_id, body=body))
 
 def merge(client: BBClient, workspace: str, repo_slug: str, pull_request_id: int, *, body: PullRequestMergeParameters | Unset=UNSET, async_merge: bool | Unset=UNSET) -> Pullrequest | Error | None:
     """Merge a pull request.
@@ -211,7 +210,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.prs.merge`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.merge(client, workspace, repo_slug, pull_request_id, body=body, async_merge=async_merge))
+    return client.run_sync(_async.merge(client, workspace, repo_slug, pull_request_id, body=body, async_merge=async_merge))
 
 def approve(client: BBClient, workspace: str, repo_slug: str, pull_request_id: int) -> Participant | Error | None:
     """Approve a pull request.
@@ -251,7 +250,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.prs.approve`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.approve(client, workspace, repo_slug, pull_request_id))
+    return client.run_sync(_async.approve(client, workspace, repo_slug, pull_request_id))
 
 def unapprove(client: BBClient, workspace: str, repo_slug: str, pull_request_id: int) -> None:
     """Remove an approval from a pull request.
@@ -288,7 +287,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.prs.unapprove`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.unapprove(client, workspace, repo_slug, pull_request_id))
+    return client.run_sync(_async.unapprove(client, workspace, repo_slug, pull_request_id))
 
 def decline(client: BBClient, workspace: str, repo_slug: str, pull_request_id: int) -> Pullrequest | Error | None:
     """Decline a pull request.
@@ -328,7 +327,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.prs.decline`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.decline(client, workspace, repo_slug, pull_request_id))
+    return client.run_sync(_async.decline(client, workspace, repo_slug, pull_request_id))
 
 def request_changes(client: BBClient, workspace: str, repo_slug: str, pull_request_id: int) -> Participant | Error | None:
     """Request changes on a pull request.
@@ -368,7 +367,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.prs.request_changes`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.request_changes(client, workspace, repo_slug, pull_request_id))
+    return client.run_sync(_async.request_changes(client, workspace, repo_slug, pull_request_id))
 
 def unrequest_changes(client: BBClient, workspace: str, repo_slug: str, pull_request_id: int) -> None:
     """Remove a request for changes from a pull request.
@@ -407,7 +406,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.prs.unrequest_changes`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.unrequest_changes(client, workspace, repo_slug, pull_request_id))
+    return client.run_sync(_async.unrequest_changes(client, workspace, repo_slug, pull_request_id))
 
 def comments(client: BBClient, workspace: str, repo_slug: str, pull_request_id: int, *, pagelen: int=25) -> list[PullRequestComment] | Error:
     """List all comments on a pull request across all pages.
@@ -448,7 +447,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.prs.comments`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.comments(client, workspace, repo_slug, pull_request_id, pagelen=pagelen))
+    return client.run_sync(_async.comments(client, workspace, repo_slug, pull_request_id, pagelen=pagelen))
 
 def add_comment(client: BBClient, workspace: str, repo_slug: str, pull_request_id: int, *, body: PullRequestComment | Unset=UNSET) -> PullRequestComment | Error | None:
     """Add a comment to a pull request.
@@ -491,7 +490,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.prs.add_comment`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.add_comment(client, workspace, repo_slug, pull_request_id, body=body))
+    return client.run_sync(_async.add_comment(client, workspace, repo_slug, pull_request_id, body=body))
 
 def diff(client: BBClient, workspace: str, repo_slug: str, pull_request_id: int) -> str | Error | None:
     """Return the unified diff of a pull request as a string.
@@ -530,7 +529,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.prs.diff`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.diff(client, workspace, repo_slug, pull_request_id))
+    return client.run_sync(_async.diff(client, workspace, repo_slug, pull_request_id))
 
 def commits(client: BBClient, workspace: str, repo_slug: str, pull_request_id: int, *, pagelen: int=25) -> list[Any] | Error:
     """List all commits included in a pull request across all pages.
@@ -570,7 +569,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.prs.commits`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.commits(client, workspace, repo_slug, pull_request_id, pagelen=pagelen))
+    return client.run_sync(_async.commits(client, workspace, repo_slug, pull_request_id, pagelen=pagelen))
 
 def tasks(client: BBClient, workspace: str, repo_slug: str, pull_request_id: int, *, pagelen: int=25) -> list[Any] | Error:
     """List all tasks on a pull request across all pages.
@@ -610,7 +609,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.prs.tasks`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.tasks(client, workspace, repo_slug, pull_request_id, pagelen=pagelen))
+    return client.run_sync(_async.tasks(client, workspace, repo_slug, pull_request_id, pagelen=pagelen))
 
 def default_reviewers(client: BBClient, workspace: str, repo_slug: str, *, pagelen: int=25) -> list[Any] | Error:
     """List all default reviewers for a repository across all pages.
@@ -649,7 +648,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.prs.default_reviewers`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.default_reviewers(client, workspace, repo_slug, pagelen=pagelen))
+    return client.run_sync(_async.default_reviewers(client, workspace, repo_slug, pagelen=pagelen))
 
 def add_default_reviewer(client: BBClient, workspace: str, repo_slug: str, target_username: str) -> None:
     """Add a user as a default reviewer for a repository.
@@ -688,7 +687,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.prs.add_default_reviewer`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.add_default_reviewer(client, workspace, repo_slug, target_username))
+    return client.run_sync(_async.add_default_reviewer(client, workspace, repo_slug, target_username))
 
 def remove_default_reviewer(client: BBClient, workspace: str, repo_slug: str, target_username: str) -> None:
     """Remove a user from the default reviewers for a repository.
@@ -727,7 +726,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.prs.remove_default_reviewer`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.remove_default_reviewer(client, workspace, repo_slug, target_username))
+    return client.run_sync(_async.remove_default_reviewer(client, workspace, repo_slug, target_username))
 
 def get_default_reviewer(client: BBClient, workspace: str, repo_slug: str, target_username: str) -> Any | Error | None:
     """Fetch details of a specific default reviewer for a repository.
@@ -766,7 +765,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.prs.get_default_reviewer`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.get_default_reviewer(client, workspace, repo_slug, target_username))
+    return client.run_sync(_async.get_default_reviewer(client, workspace, repo_slug, target_username))
 
 def effective_default_reviewers(client: BBClient, workspace: str, repo_slug: str, *, pagelen: int=25) -> list[Any] | Error:
     """List the effective default reviewers for a repository across all pages.
@@ -808,7 +807,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.prs.effective_default_reviewers`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.effective_default_reviewers(client, workspace, repo_slug, pagelen=pagelen))
+    return client.run_sync(_async.effective_default_reviewers(client, workspace, repo_slug, pagelen=pagelen))
 
 def get_comment(client: BBClient, workspace: str, repo_slug: str, pull_request_id: int, comment_id: int) -> PullRequestComment | Error | None:
     """Fetch a single comment on a pull request.
@@ -850,7 +849,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.prs.get_comment`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.get_comment(client, workspace, repo_slug, pull_request_id, comment_id))
+    return client.run_sync(_async.get_comment(client, workspace, repo_slug, pull_request_id, comment_id))
 
 def update_comment(client: BBClient, workspace: str, repo_slug: str, pull_request_id: int, comment_id: int, *, body: PullRequestComment | Unset=UNSET) -> PullRequestComment | Error | None:
     """Update a comment on a pull request.
@@ -893,7 +892,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.prs.update_comment`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.update_comment(client, workspace, repo_slug, pull_request_id, comment_id, body=body))
+    return client.run_sync(_async.update_comment(client, workspace, repo_slug, pull_request_id, comment_id, body=body))
 
 def delete_comment(client: BBClient, workspace: str, repo_slug: str, pull_request_id: int, comment_id: int) -> None:
     """Delete a comment on a pull request.
@@ -934,7 +933,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.prs.delete_comment`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.delete_comment(client, workspace, repo_slug, pull_request_id, comment_id))
+    return client.run_sync(_async.delete_comment(client, workspace, repo_slug, pull_request_id, comment_id))
 
 def resolve_comment(client: BBClient, workspace: str, repo_slug: str, pull_request_id: int, comment_id: int) -> Any | Error | None:
     """Mark a pull request comment as resolved.
@@ -975,7 +974,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.prs.resolve_comment`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.resolve_comment(client, workspace, repo_slug, pull_request_id, comment_id))
+    return client.run_sync(_async.resolve_comment(client, workspace, repo_slug, pull_request_id, comment_id))
 
 def unresolve_comment(client: BBClient, workspace: str, repo_slug: str, pull_request_id: int, comment_id: int) -> None:
     """Unmark a pull request comment as resolved.
@@ -1016,7 +1015,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.prs.unresolve_comment`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.unresolve_comment(client, workspace, repo_slug, pull_request_id, comment_id))
+    return client.run_sync(_async.unresolve_comment(client, workspace, repo_slug, pull_request_id, comment_id))
 
 def create_task(client: BBClient, workspace: str, repo_slug: str, pull_request_id: int, *, body: Unset=UNSET) -> Any | Error | None:
     """Create a task on a pull request.
@@ -1057,7 +1056,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.prs.create_task`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.create_task(client, workspace, repo_slug, pull_request_id, body=body))
+    return client.run_sync(_async.create_task(client, workspace, repo_slug, pull_request_id, body=body))
 
 def get_task(client: BBClient, workspace: str, repo_slug: str, pull_request_id: int, task_id: int) -> Any | Error | None:
     """Fetch a single task on a pull request.
@@ -1098,7 +1097,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.prs.get_task`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.get_task(client, workspace, repo_slug, pull_request_id, task_id))
+    return client.run_sync(_async.get_task(client, workspace, repo_slug, pull_request_id, task_id))
 
 def update_task(client: BBClient, workspace: str, repo_slug: str, pull_request_id: int, task_id: int, *, body: Unset=UNSET) -> Any | Error | None:
     """Update a task on a pull request.
@@ -1141,7 +1140,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.prs.update_task`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.update_task(client, workspace, repo_slug, pull_request_id, task_id, body=body))
+    return client.run_sync(_async.update_task(client, workspace, repo_slug, pull_request_id, task_id, body=body))
 
 def delete_task(client: BBClient, workspace: str, repo_slug: str, pull_request_id: int, task_id: int) -> None:
     """Delete a task from a pull request.
@@ -1182,7 +1181,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.prs.delete_task`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.delete_task(client, workspace, repo_slug, pull_request_id, task_id))
+    return client.run_sync(_async.delete_task(client, workspace, repo_slug, pull_request_id, task_id))
 
 def activity(client: BBClient, workspace: str, repo_slug: str, *, pagelen: int=25) -> list[Any] | Error:
     """List activity for all pull requests in a repository across all pages.
@@ -1219,7 +1218,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.prs.activity`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.activity(client, workspace, repo_slug, pagelen=pagelen))
+    return client.run_sync(_async.activity(client, workspace, repo_slug, pagelen=pagelen))
 
 def pr_activity(client: BBClient, workspace: str, repo_slug: str, pull_request_id: int, *, pagelen: int=25) -> list[Any] | Error:
     """List activity for a specific pull request across all pages.
@@ -1259,7 +1258,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.prs.pr_activity`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.pr_activity(client, workspace, repo_slug, pull_request_id, pagelen=pagelen))
+    return client.run_sync(_async.pr_activity(client, workspace, repo_slug, pull_request_id, pagelen=pagelen))
 
 def diffstat(client: BBClient, workspace: str, repo_slug: str, pull_request_id: int) -> Any:
     """Return the diffstat (changed files summary) for a pull request.
@@ -1298,7 +1297,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.prs.diffstat`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.diffstat(client, workspace, repo_slug, pull_request_id))
+    return client.run_sync(_async.diffstat(client, workspace, repo_slug, pull_request_id))
 
 def patch(client: BBClient, workspace: str, repo_slug: str, pull_request_id: int) -> str | Error | None:
     """Return the patch for a pull request as a string.
@@ -1337,7 +1336,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.prs.patch`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.patch(client, workspace, repo_slug, pull_request_id))
+    return client.run_sync(_async.patch(client, workspace, repo_slug, pull_request_id))
 
 def statuses(client: BBClient, workspace: str, repo_slug: str, pull_request_id: int, *, pagelen: int=25) -> list[Any] | Error:
     """List all commit statuses for a pull request across all pages.
@@ -1377,7 +1376,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.prs.statuses`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.statuses(client, workspace, repo_slug, pull_request_id, pagelen=pagelen))
+    return client.run_sync(_async.statuses(client, workspace, repo_slug, pull_request_id, pagelen=pagelen))
 
 def user_prs(client: BBClient, workspace: str, selected_user: str, *, pagelen: int=25) -> list[Pullrequest] | Error:
     """List all pull requests authored by a user in a workspace across all pages.
@@ -1415,7 +1414,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.prs.user_prs`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.user_prs(client, workspace, selected_user, pagelen=pagelen))
+    return client.run_sync(_async.user_prs(client, workspace, selected_user, pagelen=pagelen))
 
 def merge_task_status(client: BBClient, workspace: str, repo_slug: str, pull_request_id: int, task_id: str) -> Any | Error | None:
     """Return the status of an asynchronous merge task.
@@ -1458,4 +1457,4 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.prs.merge_task_status`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.merge_task_status(client, workspace, repo_slug, pull_request_id, task_id))
+    return client.run_sync(_async.merge_task_status(client, workspace, repo_slug, pull_request_id, task_id))

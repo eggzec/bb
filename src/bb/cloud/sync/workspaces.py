@@ -1,5 +1,4 @@
 from __future__ import annotations
-import asyncio
 from typing import Any
 from bb.cloud.models.error import Error
 from bb.cloud.models.workspace import Workspace
@@ -40,7 +39,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.workspaces.list`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.list(client, pagelen=pagelen))
+    return client.run_sync(_async.list(client, pagelen=pagelen))
 
 def get(client: BBClient, workspace: str) -> Workspace | Error | None:
     """Fetch a single workspace by slug.
@@ -75,7 +74,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.workspaces.get`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.get(client, workspace))
+    return client.run_sync(_async.get(client, workspace))
 
 def members(client: BBClient, workspace: str, *, pagelen: int=25) -> list[Any] | Error:
     """List all members of a workspace.
@@ -111,7 +110,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.workspaces.members`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.members(client, workspace, pagelen=pagelen))
+    return client.run_sync(_async.members(client, workspace, pagelen=pagelen))
 
 def get_member(client: BBClient, workspace: str, member: str) -> Any | Error | None:
     """Fetch a specific member of a workspace.
@@ -147,7 +146,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.workspaces.get_member`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.get_member(client, workspace, member))
+    return client.run_sync(_async.get_member(client, workspace, member))
 
 def permissions(client: BBClient, workspace: str, *, pagelen: int=25) -> list[Any] | Error:
     """List all member permissions for a workspace.
@@ -183,7 +182,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.workspaces.permissions`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.permissions(client, workspace, pagelen=pagelen))
+    return client.run_sync(_async.permissions(client, workspace, pagelen=pagelen))
 
 def repo_permissions(client: BBClient, workspace: str, *, pagelen: int=25) -> list[Any] | Error:
     """List repository-level permissions for all members in a workspace.
@@ -219,7 +218,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.workspaces.repo_permissions`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.repo_permissions(client, workspace, pagelen=pagelen))
+    return client.run_sync(_async.repo_permissions(client, workspace, pagelen=pagelen))
 
 def get_repo_permission(client: BBClient, workspace: str, repo_slug: str) -> Any | Error | None:
     """Fetch the permission configuration for a specific repository within a workspace.
@@ -257,7 +256,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.workspaces.get_repo_permission`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.get_repo_permission(client, workspace, repo_slug))
+    return client.run_sync(_async.get_repo_permission(client, workspace, repo_slug))
 
 def user_prs(client: BBClient, workspace: str, selected_user: str, *, pagelen: int=25) -> list[Any] | Error:
     """List pull requests authored by a specific user in a workspace.
@@ -297,7 +296,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.workspaces.user_prs`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.user_prs(client, workspace, selected_user, pagelen=pagelen))
+    return client.run_sync(_async.user_prs(client, workspace, selected_user, pagelen=pagelen))
 
 def gpg_key(client: BBClient, workspace: str) -> Any | Error | None:
     """Fetch the GPG public key for a workspace.
@@ -332,7 +331,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.workspaces.gpg_key`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.gpg_key(client, workspace))
+    return client.run_sync(_async.gpg_key(client, workspace))
 
 def mine(client: BBClient, *, pagelen: int=25) -> list[Workspace] | Error:
     """List the authenticated user's workspaces via the /user endpoint.
@@ -367,7 +366,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.workspaces.mine`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.mine(client, pagelen=pagelen))
+    return client.run_sync(_async.mine(client, pagelen=pagelen))
 
 def my_permissions(client: BBClient, *, pagelen: int=25) -> list[Any] | Error:
     """List the current user's permissions across all workspaces.
@@ -402,7 +401,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.workspaces.my_permissions`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.my_permissions(client, pagelen=pagelen))
+    return client.run_sync(_async.my_permissions(client, pagelen=pagelen))
 
 def my_permission(client: BBClient, workspace: str) -> Any | Error | None:
     """Fetch the current user's permission in a specific workspace.
@@ -437,4 +436,4 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.workspaces.my_permission`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.my_permission(client, workspace))
+    return client.run_sync(_async.my_permission(client, workspace))

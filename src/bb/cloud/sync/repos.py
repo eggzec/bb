@@ -1,5 +1,4 @@
 from __future__ import annotations
-import asyncio
 from typing import Any
 from bb.cloud.models.error import Error
 from bb.cloud.models.repository import Repository
@@ -44,7 +43,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.repos.list`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.list(client, workspace, q=q, sort=sort, pagelen=pagelen))
+    return client.run_sync(_async.list(client, workspace, q=q, sort=sort, pagelen=pagelen))
 
 def get(client: BBClient, workspace: str, repo_slug: str) -> Repository | Error | None:
     """Fetch a single repository by slug.
@@ -80,7 +79,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.repos.get`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.get(client, workspace, repo_slug))
+    return client.run_sync(_async.get(client, workspace, repo_slug))
 
 def create(client: BBClient, workspace: str, repo_slug: str, *, body: Repository | Unset=UNSET) -> Repository | Error | None:
     """Create a new repository.
@@ -123,7 +122,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.repos.create`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.create(client, workspace, repo_slug, body=body))
+    return client.run_sync(_async.create(client, workspace, repo_slug, body=body))
 
 def update(client: BBClient, workspace: str, repo_slug: str, *, body: Repository | Unset=UNSET) -> Repository | Error | None:
     """Update an existing repository.
@@ -166,7 +165,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.repos.update`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.update(client, workspace, repo_slug, body=body))
+    return client.run_sync(_async.update(client, workspace, repo_slug, body=body))
 
 def delete(client: BBClient, workspace: str, repo_slug: str) -> None:
     """Delete a repository.
@@ -202,7 +201,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.repos.delete`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.delete(client, workspace, repo_slug))
+    return client.run_sync(_async.delete(client, workspace, repo_slug))
 
 def fork(client: BBClient, workspace: str, repo_slug: str, *, body: Repository | Unset=UNSET) -> Repository | Error | None:
     """Fork a repository.
@@ -239,7 +238,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.repos.fork`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.fork(client, workspace, repo_slug, body=body))
+    return client.run_sync(_async.fork(client, workspace, repo_slug, body=body))
 
 def forks(client: BBClient, workspace: str, repo_slug: str) -> list[Repository] | Error:
     """List all forks of a repository.
@@ -275,7 +274,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.repos.forks`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.forks(client, workspace, repo_slug))
+    return client.run_sync(_async.forks(client, workspace, repo_slug))
 
 def watchers(client: BBClient, workspace: str, repo_slug: str) -> list[Repository] | Error:
     """List all accounts watching a repository.
@@ -311,7 +310,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.repos.watchers`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.watchers(client, workspace, repo_slug))
+    return client.run_sync(_async.watchers(client, workspace, repo_slug))
 
 def override_settings(client: BBClient, workspace: str, repo_slug: str) -> Any | None:
     """Fetch the inheritance override settings for a repository.
@@ -347,7 +346,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.repos.override_settings`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.override_settings(client, workspace, repo_slug))
+    return client.run_sync(_async.override_settings(client, workspace, repo_slug))
 
 def update_override_settings(client: BBClient, workspace: str, repo_slug: str, *, body: Unset=UNSET) -> Any | None:
     """Update the inheritance override settings for a repository.
@@ -386,7 +385,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.repos.update_override_settings`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.update_override_settings(client, workspace, repo_slug, body=body))
+    return client.run_sync(_async.update_override_settings(client, workspace, repo_slug, body=body))
 
 def group_permissions(client: BBClient, workspace: str, repo_slug: str, *, pagelen: int=25) -> list[Any] | Error:
     """List all group permission configurations for a repository.
@@ -423,7 +422,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.repos.group_permissions`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.group_permissions(client, workspace, repo_slug, pagelen=pagelen))
+    return client.run_sync(_async.group_permissions(client, workspace, repo_slug, pagelen=pagelen))
 
 def get_group_permission(client: BBClient, workspace: str, repo_slug: str, group_slug: str) -> Any | None:
     """Fetch a specific group's permission configuration for a repository.
@@ -462,7 +461,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.repos.get_group_permission`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.get_group_permission(client, workspace, repo_slug, group_slug))
+    return client.run_sync(_async.get_group_permission(client, workspace, repo_slug, group_slug))
 
 def set_group_permission(client: BBClient, workspace: str, repo_slug: str, group_slug: str, *, body: Unset=UNSET) -> Any | None:
     """Set a group's permission on a repository.
@@ -502,7 +501,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.repos.set_group_permission`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.set_group_permission(client, workspace, repo_slug, group_slug, body=body))
+    return client.run_sync(_async.set_group_permission(client, workspace, repo_slug, group_slug, body=body))
 
 def delete_group_permission(client: BBClient, workspace: str, repo_slug: str, group_slug: str) -> None:
     """Remove a group's permission from a repository.
@@ -541,7 +540,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.repos.delete_group_permission`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.delete_group_permission(client, workspace, repo_slug, group_slug))
+    return client.run_sync(_async.delete_group_permission(client, workspace, repo_slug, group_slug))
 
 def user_permissions(client: BBClient, workspace: str, repo_slug: str, *, pagelen: int=25) -> list[Any] | Error:
     """List all user permission configurations for a repository.
@@ -578,7 +577,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.repos.user_permissions`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.user_permissions(client, workspace, repo_slug, pagelen=pagelen))
+    return client.run_sync(_async.user_permissions(client, workspace, repo_slug, pagelen=pagelen))
 
 def get_user_permission(client: BBClient, workspace: str, repo_slug: str, selected_user_id: str) -> Any | None:
     """Fetch a specific user's permission configuration for a repository.
@@ -617,7 +616,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.repos.get_user_permission`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.get_user_permission(client, workspace, repo_slug, selected_user_id))
+    return client.run_sync(_async.get_user_permission(client, workspace, repo_slug, selected_user_id))
 
 def set_user_permission(client: BBClient, workspace: str, repo_slug: str, selected_user_id: str, *, body: Unset=UNSET) -> Any | None:
     """Set a user's permission on a repository.
@@ -660,7 +659,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.repos.set_user_permission`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.set_user_permission(client, workspace, repo_slug, selected_user_id, body=body))
+    return client.run_sync(_async.set_user_permission(client, workspace, repo_slug, selected_user_id, body=body))
 
 def delete_user_permission(client: BBClient, workspace: str, repo_slug: str, selected_user_id: str) -> None:
     """Remove a user's permission from a repository.
@@ -702,7 +701,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.repos.delete_user_permission`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.delete_user_permission(client, workspace, repo_slug, selected_user_id))
+    return client.run_sync(_async.delete_user_permission(client, workspace, repo_slug, selected_user_id))
 
 def my_permissions(client: BBClient, *, pagelen: int=25) -> list[Any] | Error:
     """List the current user's permissions across all accessible repositories.
@@ -737,7 +736,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.repos.my_permissions`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.my_permissions(client, pagelen=pagelen))
+    return client.run_sync(_async.my_permissions(client, pagelen=pagelen))
 
 def workspace_user_permissions(client: BBClient, workspace: str, *, pagelen: int=25) -> list[Any] | Error:
     """List the current user's repository permissions within a workspace.
@@ -773,4 +772,4 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.repos.workspace_user_permissions`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.workspace_user_permissions(client, workspace, pagelen=pagelen))
+    return client.run_sync(_async.workspace_user_permissions(client, workspace, pagelen=pagelen))

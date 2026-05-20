@@ -1,5 +1,4 @@
 from __future__ import annotations
-import asyncio
 from bb.cloud.models.branch import Branch
 from bb.cloud.models.error import Error
 from bb.cloud.models.tag import Tag
@@ -45,7 +44,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.branches.list`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.list(client, workspace, repo_slug, q=q, sort=sort, pagelen=pagelen))
+    return client.run_sync(_async.list(client, workspace, repo_slug, q=q, sort=sort, pagelen=pagelen))
 
 def get(client: BBClient, workspace: str, repo_slug: str, name: str) -> Branch | Error | None:
     """Fetch a single branch by name.
@@ -84,7 +83,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.branches.get`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.get(client, workspace, repo_slug, name))
+    return client.run_sync(_async.get(client, workspace, repo_slug, name))
 
 def create(client: BBClient, workspace: str, repo_slug: str, *, name: str, target_hash: str) -> Branch | Error | None:
     """Create a branch pointing at a target commit hash.
@@ -131,7 +130,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.branches.create`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.create(client, workspace, repo_slug, name=name, target_hash=target_hash))
+    return client.run_sync(_async.create(client, workspace, repo_slug, name=name, target_hash=target_hash))
 
 def delete(client: BBClient, workspace: str, repo_slug: str, name: str) -> None:
     """Delete a branch.
@@ -172,7 +171,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.branches.delete`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.delete(client, workspace, repo_slug, name))
+    return client.run_sync(_async.delete(client, workspace, repo_slug, name))
 
 def tags(client: BBClient, workspace: str, repo_slug: str, *, q: str | Unset=UNSET, sort: str | Unset=UNSET, pagelen: int=25) -> list[Tag] | Error:
     """List all tags for a repository across all pages.
@@ -211,7 +210,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.branches.tags`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.tags(client, workspace, repo_slug, q=q, sort=sort, pagelen=pagelen))
+    return client.run_sync(_async.tags(client, workspace, repo_slug, q=q, sort=sort, pagelen=pagelen))
 
 def get_tag(client: BBClient, workspace: str, repo_slug: str, name: str) -> Tag | Error | None:
     """Fetch a single tag by name.
@@ -250,7 +249,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.branches.get_tag`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.get_tag(client, workspace, repo_slug, name))
+    return client.run_sync(_async.get_tag(client, workspace, repo_slug, name))
 
 def create_tag(client: BBClient, workspace: str, repo_slug: str, *, body: Tag | Unset=UNSET) -> Tag | Error | None:
     """Create a tag in a repository.
@@ -291,7 +290,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.branches.create_tag`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.create_tag(client, workspace, repo_slug, body=body))
+    return client.run_sync(_async.create_tag(client, workspace, repo_slug, body=body))
 
 def delete_tag(client: BBClient, workspace: str, repo_slug: str, name: str) -> None:
     """Delete a tag from a repository.
@@ -332,4 +331,4 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.branches.delete_tag`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.delete_tag(client, workspace, repo_slug, name))
+    return client.run_sync(_async.delete_tag(client, workspace, repo_slug, name))

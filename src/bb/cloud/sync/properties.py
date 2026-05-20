@@ -1,5 +1,4 @@
 from __future__ import annotations
-import asyncio
 from bb.cloud.models.application_property import ApplicationProperty
 from bb.cloud.models.error import Error
 from bb.cloud.sdk._client import BBClient
@@ -46,7 +45,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.properties.repo_get`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.repo_get(client, workspace, repo_slug, app_key, property_name))
+    return client.run_sync(_async.repo_get(client, workspace, repo_slug, app_key, property_name))
 
 def repo_set(client: BBClient, workspace: str, repo_slug: str, app_key: str, property_name: str, *, body: ApplicationProperty | Unset=UNSET) -> None:
     """Set a custom property value on a repository.
@@ -93,7 +92,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.properties.repo_set`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.repo_set(client, workspace, repo_slug, app_key, property_name, body=body))
+    return client.run_sync(_async.repo_set(client, workspace, repo_slug, app_key, property_name, body=body))
 
 def repo_delete(client: BBClient, workspace: str, repo_slug: str, app_key: str, property_name: str) -> None:
     """Delete a custom property value from a repository.
@@ -133,7 +132,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.properties.repo_delete`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.repo_delete(client, workspace, repo_slug, app_key, property_name))
+    return client.run_sync(_async.repo_delete(client, workspace, repo_slug, app_key, property_name))
 
 def commit_get(client: BBClient, workspace: str, repo_slug: str, commit: str, app_key: str, property_name: str) -> ApplicationProperty | Error | None:
     """Retrieve a custom property value set on a commit.
@@ -180,7 +179,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.properties.commit_get`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.commit_get(client, workspace, repo_slug, commit, app_key, property_name))
+    return client.run_sync(_async.commit_get(client, workspace, repo_slug, commit, app_key, property_name))
 
 def commit_set(client: BBClient, workspace: str, repo_slug: str, commit: str, app_key: str, property_name: str, *, body: ApplicationProperty | Unset=UNSET) -> None:
     """Set a custom property value on a commit.
@@ -229,7 +228,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.properties.commit_set`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.commit_set(client, workspace, repo_slug, commit, app_key, property_name, body=body))
+    return client.run_sync(_async.commit_set(client, workspace, repo_slug, commit, app_key, property_name, body=body))
 
 def commit_delete(client: BBClient, workspace: str, repo_slug: str, commit: str, app_key: str, property_name: str) -> None:
     """Delete a custom property value from a commit.
@@ -275,7 +274,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.properties.commit_delete`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.commit_delete(client, workspace, repo_slug, commit, app_key, property_name))
+    return client.run_sync(_async.commit_delete(client, workspace, repo_slug, commit, app_key, property_name))
 
 def pr_get(client: BBClient, workspace: str, repo_slug: str, pull_request_id: int, app_key: str, property_name: str) -> ApplicationProperty | Error | None:
     """Retrieve a custom property value set on a pull request.
@@ -322,7 +321,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.properties.pr_get`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.pr_get(client, workspace, repo_slug, pull_request_id, app_key, property_name))
+    return client.run_sync(_async.pr_get(client, workspace, repo_slug, pull_request_id, app_key, property_name))
 
 def pr_set(client: BBClient, workspace: str, repo_slug: str, pull_request_id: int, app_key: str, property_name: str, *, body: ApplicationProperty | Unset=UNSET) -> None:
     """Set a custom property value on a pull request.
@@ -371,7 +370,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.properties.pr_set`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.pr_set(client, workspace, repo_slug, pull_request_id, app_key, property_name, body=body))
+    return client.run_sync(_async.pr_set(client, workspace, repo_slug, pull_request_id, app_key, property_name, body=body))
 
 def pr_delete(client: BBClient, workspace: str, repo_slug: str, pull_request_id: int, app_key: str, property_name: str) -> None:
     """Delete a custom property value from a pull request.
@@ -417,7 +416,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.properties.pr_delete`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.pr_delete(client, workspace, repo_slug, pull_request_id, app_key, property_name))
+    return client.run_sync(_async.pr_delete(client, workspace, repo_slug, pull_request_id, app_key, property_name))
 
 def user_get(client: BBClient, workspace: str, username: str, app_key: str, property_name: str) -> ApplicationProperty | Error | None:
     """Retrieve a custom property value set on a user.
@@ -462,7 +461,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.properties.user_get`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.user_get(client, workspace, username, app_key, property_name))
+    return client.run_sync(_async.user_get(client, workspace, username, app_key, property_name))
 
 def user_set(client: BBClient, workspace: str, username: str, app_key: str, property_name: str, *, body: ApplicationProperty | Unset=UNSET) -> None:
     """Set a custom property value on a user.
@@ -509,7 +508,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.properties.user_set`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.user_set(client, workspace, username, app_key, property_name, body=body))
+    return client.run_sync(_async.user_set(client, workspace, username, app_key, property_name, body=body))
 
 def user_delete(client: BBClient, workspace: str, username: str, app_key: str, property_name: str) -> None:
     """Delete a custom property value from a user.
@@ -553,4 +552,4 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.properties.user_delete`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.user_delete(client, workspace, username, app_key, property_name))
+    return client.run_sync(_async.user_delete(client, workspace, username, app_key, property_name))

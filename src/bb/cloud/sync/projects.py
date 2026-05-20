@@ -1,5 +1,4 @@
 from __future__ import annotations
-import asyncio
 from typing import Any
 from bb.cloud.models.error import Error
 from bb.cloud.models.project import Project
@@ -42,7 +41,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.projects.list`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.list(client, workspace, pagelen=pagelen))
+    return client.run_sync(_async.list(client, workspace, pagelen=pagelen))
 
 def get(client: BBClient, workspace: str, project_key: str) -> Project | Error | None:
     """Fetch a single project by key.
@@ -78,7 +77,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.projects.get`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.get(client, workspace, project_key))
+    return client.run_sync(_async.get(client, workspace, project_key))
 
 def create(client: BBClient, workspace: str, *, body: Project | Unset=UNSET) -> Project | Error | None:
     """Create a new project in a workspace.
@@ -119,7 +118,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.projects.create`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.create(client, workspace, body=body))
+    return client.run_sync(_async.create(client, workspace, body=body))
 
 def update(client: BBClient, workspace: str, project_key: str, *, body: Project | Unset=UNSET) -> Project | Error | None:
     """Update an existing project.
@@ -162,7 +161,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.projects.update`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.update(client, workspace, project_key, body=body))
+    return client.run_sync(_async.update(client, workspace, project_key, body=body))
 
 def delete(client: BBClient, workspace: str, project_key: str) -> None:
     """Delete a project.
@@ -198,7 +197,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.projects.delete`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.delete(client, workspace, project_key))
+    return client.run_sync(_async.delete(client, workspace, project_key))
 
 def default_reviewers(client: BBClient, workspace: str, project_key: str, *, pagelen: int=25) -> list[Any] | Error:
     """List all default reviewers for a project.
@@ -237,7 +236,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.projects.default_reviewers`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.default_reviewers(client, workspace, project_key, pagelen=pagelen))
+    return client.run_sync(_async.default_reviewers(client, workspace, project_key, pagelen=pagelen))
 
 def get_default_reviewer(client: BBClient, workspace: str, project_key: str, selected_user: str) -> Any | Error | None:
     """Fetch a specific default reviewer for a project.
@@ -277,7 +276,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.projects.get_default_reviewer`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.get_default_reviewer(client, workspace, project_key, selected_user))
+    return client.run_sync(_async.get_default_reviewer(client, workspace, project_key, selected_user))
 
 def add_default_reviewer(client: BBClient, workspace: str, project_key: str, selected_user: str) -> None:
     """Add a user as a default reviewer for a project.
@@ -317,7 +316,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.projects.add_default_reviewer`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.add_default_reviewer(client, workspace, project_key, selected_user))
+    return client.run_sync(_async.add_default_reviewer(client, workspace, project_key, selected_user))
 
 def remove_default_reviewer(client: BBClient, workspace: str, project_key: str, selected_user: str) -> None:
     """Remove a user from the default reviewers for a project.
@@ -357,7 +356,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.projects.remove_default_reviewer`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.remove_default_reviewer(client, workspace, project_key, selected_user))
+    return client.run_sync(_async.remove_default_reviewer(client, workspace, project_key, selected_user))
 
 def group_permissions(client: BBClient, workspace: str, project_key: str, *, pagelen: int=25) -> list[Any] | Error:
     """List all group permission configurations for a project.
@@ -396,7 +395,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.projects.group_permissions`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.group_permissions(client, workspace, project_key, pagelen=pagelen))
+    return client.run_sync(_async.group_permissions(client, workspace, project_key, pagelen=pagelen))
 
 def update_group_permission(client: BBClient, workspace: str, project_key: str, group_slug: str, *, body: Unset=UNSET) -> Any | Error | None:
     """Update a group's permission on a project.
@@ -436,7 +435,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.projects.update_group_permission`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.update_group_permission(client, workspace, project_key, group_slug, body=body))
+    return client.run_sync(_async.update_group_permission(client, workspace, project_key, group_slug, body=body))
 
 def delete_group_permission(client: BBClient, workspace: str, project_key: str, group_slug: str) -> None:
     """Remove a group's permission from a project.
@@ -475,7 +474,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.projects.delete_group_permission`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.delete_group_permission(client, workspace, project_key, group_slug))
+    return client.run_sync(_async.delete_group_permission(client, workspace, project_key, group_slug))
 
 def user_permissions(client: BBClient, workspace: str, project_key: str, *, pagelen: int=25) -> list[Any] | Error:
     """List all user permission configurations for a project.
@@ -514,7 +513,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.projects.user_permissions`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.user_permissions(client, workspace, project_key, pagelen=pagelen))
+    return client.run_sync(_async.user_permissions(client, workspace, project_key, pagelen=pagelen))
 
 def update_user_permission(client: BBClient, workspace: str, project_key: str, selected_user_id: str, *, body: Unset=UNSET) -> Any | Error | None:
     """Update a user's permission on a project.
@@ -557,7 +556,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.projects.update_user_permission`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.update_user_permission(client, workspace, project_key, selected_user_id, body=body))
+    return client.run_sync(_async.update_user_permission(client, workspace, project_key, selected_user_id, body=body))
 
 def delete_user_permission(client: BBClient, workspace: str, project_key: str, selected_user_id: str) -> None:
     """Remove a user's permission from a project.
@@ -599,4 +598,4 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.projects.delete_user_permission`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.delete_user_permission(client, workspace, project_key, selected_user_id))
+    return client.run_sync(_async.delete_user_permission(client, workspace, project_key, selected_user_id))

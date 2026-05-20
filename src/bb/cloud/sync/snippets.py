@@ -1,5 +1,4 @@
 from __future__ import annotations
-import asyncio
 from typing import Any
 from bb.cloud.models.error import Error
 from bb.cloud.models.snippet import Snippet
@@ -44,7 +43,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.snippets.list`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.list(client, workspace, pagelen=pagelen))
+    return client.run_sync(_async.list(client, workspace, pagelen=pagelen))
 
 def get(client: BBClient, workspace: str, encoded_id: str) -> Snippet | Error | None:
     """Return a single snippet by encoded ID, or ``None`` if not found.
@@ -81,7 +80,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.snippets.get`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.get(client, workspace, encoded_id))
+    return client.run_sync(_async.get(client, workspace, encoded_id))
 
 def create(client: BBClient, workspace: str, *, body: Snippet | Unset=UNSET) -> Snippet | Error | None:
     """Create a snippet in a workspace and return the created object.
@@ -121,7 +120,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.snippets.create`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.create(client, workspace, body=body))
+    return client.run_sync(_async.create(client, workspace, body=body))
 
 def update(client: BBClient, workspace: str, encoded_id: str, *, body: Snippet | Unset=UNSET) -> Snippet | Error | None:
     """Update a snippet and return the updated object.
@@ -163,7 +162,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.snippets.update`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.update(client, workspace, encoded_id, body=body))
+    return client.run_sync(_async.update(client, workspace, encoded_id, body=body))
 
 def delete(client: BBClient, workspace: str, encoded_id: str) -> None:
     """Delete a snippet.
@@ -199,7 +198,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.snippets.delete`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.delete(client, workspace, encoded_id))
+    return client.run_sync(_async.delete(client, workspace, encoded_id))
 
 def comments(client: BBClient, workspace: str, encoded_id: str, *, pagelen: int=25) -> list[SnippetComment] | Error:
     """Return all comments on a snippet across all pages.
@@ -237,7 +236,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.snippets.comments`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.comments(client, workspace, encoded_id, pagelen=pagelen))
+    return client.run_sync(_async.comments(client, workspace, encoded_id, pagelen=pagelen))
 
 def add_comment(client: BBClient, workspace: str, encoded_id: str, *, body: SnippetComment | Unset=UNSET) -> SnippetComment | Error | None:
     """Add a comment to a snippet and return the created comment.
@@ -279,7 +278,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.snippets.add_comment`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.add_comment(client, workspace, encoded_id, body=body))
+    return client.run_sync(_async.add_comment(client, workspace, encoded_id, body=body))
 
 def commits(client: BBClient, workspace: str, encoded_id: str, *, pagelen: int=25) -> list[SnippetCommit] | Error:
     """Return all commits for a snippet across all pages.
@@ -317,7 +316,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.snippets.commits`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.commits(client, workspace, encoded_id, pagelen=pagelen))
+    return client.run_sync(_async.commits(client, workspace, encoded_id, pagelen=pagelen))
 
 def watch(client: BBClient, workspace: str, encoded_id: str) -> None:
     """Start watching a snippet.
@@ -353,7 +352,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.snippets.watch`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.watch(client, workspace, encoded_id))
+    return client.run_sync(_async.watch(client, workspace, encoded_id))
 
 def unwatch(client: BBClient, workspace: str, encoded_id: str) -> None:
     """Stop watching a snippet.
@@ -389,7 +388,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.snippets.unwatch`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.unwatch(client, workspace, encoded_id))
+    return client.run_sync(_async.unwatch(client, workspace, encoded_id))
 
 def watchers(client: BBClient, workspace: str, encoded_id: str, *, pagelen: int=25) -> list[Any] | Error:
     """Return all accounts watching a snippet across all pages.
@@ -426,7 +425,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.snippets.watchers`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.watchers(client, workspace, encoded_id, pagelen=pagelen))
+    return client.run_sync(_async.watchers(client, workspace, encoded_id, pagelen=pagelen))
 
 def get_file(client: BBClient, workspace: str, encoded_id: str, path: str) -> str | Error | None:
     """Return the contents of a file within a snippet.
@@ -465,7 +464,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.snippets.get_file`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.get_file(client, workspace, encoded_id, path))
+    return client.run_sync(_async.get_file(client, workspace, encoded_id, path))
 
 def list_all(client: BBClient, *, pagelen: int=25) -> list[Snippet] | Error:
     """Return all public snippets across Bitbucket Cloud.
@@ -500,7 +499,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.snippets.list_all`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.list_all(client, pagelen=pagelen))
+    return client.run_sync(_async.list_all(client, pagelen=pagelen))
 
 def create_default(client: BBClient, *, body: Snippet | Unset=UNSET) -> Snippet | Error | None:
     """Create a snippet under the authenticated user's default workspace.
@@ -537,7 +536,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.snippets.create_default`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.create_default(client, body=body))
+    return client.run_sync(_async.create_default(client, body=body))
 
 def get_comment(client: BBClient, workspace: str, encoded_id: str, comment_id: int) -> SnippetComment | Error | None:
     """Return a single comment on a snippet, or ``None`` if not found.
@@ -577,7 +576,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.snippets.get_comment`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.get_comment(client, workspace, encoded_id, comment_id))
+    return client.run_sync(_async.get_comment(client, workspace, encoded_id, comment_id))
 
 def update_comment(client: BBClient, workspace: str, encoded_id: str, comment_id: int, *, body: SnippetComment | Unset=UNSET) -> SnippetComment | Error | None:
     """Update a comment on a snippet.
@@ -620,7 +619,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.snippets.update_comment`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.update_comment(client, workspace, encoded_id, comment_id, body=body))
+    return client.run_sync(_async.update_comment(client, workspace, encoded_id, comment_id, body=body))
 
 def delete_comment(client: BBClient, workspace: str, encoded_id: str, comment_id: int) -> None:
     """Delete a comment on a snippet.
@@ -659,7 +658,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.snippets.delete_comment`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.delete_comment(client, workspace, encoded_id, comment_id))
+    return client.run_sync(_async.delete_comment(client, workspace, encoded_id, comment_id))
 
 def watching(client: BBClient, workspace: str, encoded_id: str) -> Any | Error | None:
     """Return the current user's watch status for a snippet.
@@ -696,7 +695,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.snippets.watching`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.watching(client, workspace, encoded_id))
+    return client.run_sync(_async.watching(client, workspace, encoded_id))
 
 def get_commit(client: BBClient, workspace: str, encoded_id: str, revision: str) -> SnippetCommit | Error | None:
     """Return a single commit in a snippet's history, or ``None`` if not found.
@@ -736,7 +735,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.snippets.get_commit`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.get_commit(client, workspace, encoded_id, revision))
+    return client.run_sync(_async.get_commit(client, workspace, encoded_id, revision))
 
 def get_node(client: BBClient, workspace: str, encoded_id: str, node_id: str) -> Any | Error | None:
     """Return a snippet at a specific node (commit) in its history.
@@ -776,7 +775,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.snippets.get_node`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.get_node(client, workspace, encoded_id, node_id))
+    return client.run_sync(_async.get_node(client, workspace, encoded_id, node_id))
 
 def update_node(client: BBClient, workspace: str, encoded_id: str, node_id: str, *, body: Snippet | Unset=UNSET) -> Any | Error | None:
     """Update a snippet at a specific node.
@@ -819,7 +818,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.snippets.update_node`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.update_node(client, workspace, encoded_id, node_id, body=body))
+    return client.run_sync(_async.update_node(client, workspace, encoded_id, node_id, body=body))
 
 def delete_node(client: BBClient, workspace: str, encoded_id: str, node_id: str) -> None:
     """Delete a snippet at a specific node.
@@ -858,7 +857,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.snippets.delete_node`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.delete_node(client, workspace, encoded_id, node_id))
+    return client.run_sync(_async.delete_node(client, workspace, encoded_id, node_id))
 
 def get_node_file(client: BBClient, workspace: str, encoded_id: str, node_id: str, path: str) -> Any | Error | None:
     """Return a file from a snippet at a specific node.
@@ -898,7 +897,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.snippets.get_node_file`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.get_node_file(client, workspace, encoded_id, node_id, path))
+    return client.run_sync(_async.get_node_file(client, workspace, encoded_id, node_id, path))
 
 def diff(client: BBClient, workspace: str, encoded_id: str, revision: str) -> str | Error | None:
     """Return the diff for a snippet at a specific revision.
@@ -937,7 +936,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.snippets.diff`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.diff(client, workspace, encoded_id, revision))
+    return client.run_sync(_async.diff(client, workspace, encoded_id, revision))
 
 def patch(client: BBClient, workspace: str, encoded_id: str, revision: str) -> str | Error | None:
     """Return the patch for a snippet at a specific revision.
@@ -976,4 +975,4 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.snippets.patch`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.patch(client, workspace, encoded_id, revision))
+    return client.run_sync(_async.patch(client, workspace, encoded_id, revision))

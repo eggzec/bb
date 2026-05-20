@@ -1,5 +1,4 @@
 from __future__ import annotations
-import asyncio
 from bb.cloud.models.branchrestriction import Branchrestriction
 from bb.cloud.models.error import Error
 from bb.cloud.sdk._client import BBClient
@@ -42,7 +41,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.branch_restrictions.list`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.list(client, workspace, repo_slug, pagelen=pagelen))
+    return client.run_sync(_async.list(client, workspace, repo_slug, pagelen=pagelen))
 
 def get(client: BBClient, workspace: str, repo_slug: str, id: int) -> Branchrestriction | Error | None:
     """Retrieve a single branch restriction by ID.
@@ -79,7 +78,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.branch_restrictions.get`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.get(client, workspace, repo_slug, id))
+    return client.run_sync(_async.get(client, workspace, repo_slug, id))
 
 def create(client: BBClient, workspace: str, repo_slug: str, *, body: Branchrestriction | Unset=UNSET) -> Branchrestriction | Error | None:
     """Create a branch restriction on a repository.
@@ -119,7 +118,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.branch_restrictions.create`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.create(client, workspace, repo_slug, body=body))
+    return client.run_sync(_async.create(client, workspace, repo_slug, body=body))
 
 def update(client: BBClient, workspace: str, repo_slug: str, id: int, *, body: Branchrestriction | Unset=UNSET) -> Branchrestriction | Error | None:
     """Update a branch restriction on a repository.
@@ -160,7 +159,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.branch_restrictions.update`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.update(client, workspace, repo_slug, id, body=body))
+    return client.run_sync(_async.update(client, workspace, repo_slug, id, body=body))
 
 def delete(client: BBClient, workspace: str, repo_slug: str, id: int) -> None:
     """Delete a branch restriction from a repository.
@@ -197,4 +196,4 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.branch_restrictions.delete`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.delete(client, workspace, repo_slug, id))
+    return client.run_sync(_async.delete(client, workspace, repo_slug, id))

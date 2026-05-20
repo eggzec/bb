@@ -6,7 +6,8 @@ SHELL := /bin/bash
 export
 
 .PHONY: help generate-cloud generate-dc generate diff-cloud diff-dc diff \
-        schema-test-cloud schema-discover-cloud probe-workspace
+        schema-test-cloud schema-discover-cloud probe-workspace \
+        schema-test-dc schema-discover-dc
 
 help:
 	@echo "Available targets:"
@@ -16,12 +17,18 @@ help:
 	@echo "  diff-cloud              Compare generated Cloud SDK with current version"
 	@echo "  diff-dc                 Compare generated DC SDK with current version"
 	@echo "  diff                    Compare both generated SDKs with current versions"
+	@echo ""
+	@echo "  [Cloud API Testing]"
 	@echo "  schema-test-cloud       Run schemathesis conformance tests against BB Cloud API (GET-only)"
 	@echo "  schema-discover-cloud   Discover workspace probe data and suggest .env additions"
 	@echo "  probe-workspace         Deep-probe workspace: all resources, coverage map, seeding actions"
 	@echo ""
-	@echo "schema-* targets require BB_EMAIL, BB_TOKEN, BB_WORKSPACE (set in .env or environment)."
-	@echo "Optional: BB_REPO_SLUG — improves 200-response schema coverage (auto-suggested by schema-discover-cloud)."
+	@echo "  [Data Center API Testing]"
+	@echo "  schema-test-dc          Run schemathesis conformance tests against BB DC instance (GET-only)"
+	@echo "  schema-discover-dc      Discover DC workspace and suggest .env additions"
+	@echo ""
+	@echo "Cloud schema-* targets require BB_EMAIL, BB_TOKEN, BB_WORKSPACE (set in .env)."
+	@echo "DC schema-* targets require BB_DC_BASE_URL and BB_DC_ADMIN_PASSWORD (set in .env)."
 
 # Cloud SDK generation
 generate-cloud:
@@ -191,3 +198,64 @@ probe-workspace:
 		exit 1; \
 	fi
 	uv run python3 scripts/probe_workspace.py
+
+# ---------------------------------------------------------------------------
+# Data Center API conformance testing
+# ---------------------------------------------------------------------------
+#
+# schema-test-dc runs schemathesis against a running Bitbucket DC instance.
+# It only issues GET requests so it is safe to run at any time.
+# The instance must be running and BB_DC_BASE_URL must point to its /rest endpoint.
+#
+# What it catches even without seed data (random path params → 404s):
+#   status_code_conformance     — flags any status code the spec doesn't document
+#   response_schema_conformance — flags response bodies that don't match the schema
+#   not_a_server_error          — flags 5xx responses
+#   content_type_conformance    — flags undocumented Content-Type headers
+#
+# Uses Basic auth (admin:BB_DC_ADMIN_PASSWORD) to access the instance.
+# Run scripts/seed_dc.py first to create seed data for better 200-response coverage.
+
+schema-test-dc:
+	@if [ -z "$(BB_DC_BASE_URL)" ] || [ -z "$(BB_DC_ADMIN_PASSWORD)" ]; then \
+		echo "ERROR: BB_DC_BASE_URL and BB_DC_ADMIN_PASSWORD must be set."; \
+		echo "       Add them to .env (see .env.example) or export them before running make."; \
+		exit 1; \
+	fi
+	@mkdir -p cmd_outputs
+	@TS=$$(date +%Y%m%d_%H%M%S); \
+	XMLOUT="cmd_outputs/$${TS}_schemathesis_dc.xml"; \
+	JSONOUT="cmd_outputs/$${TS}_schemathesis_dc.ndjson"; \
+	TXTOUT="cmd_outputs/$${TS}_schemathesis_dc_stdout.txt"; \
+	echo "schemathesis conformance run — reports: cmd_outputs/$${TS}_schemathesis_dc.*"; \
+	uvx schemathesis run bb_datacenter_fixed.openapi.json \
+		--url "$(BB_DC_BASE_URL)" \
+		--auth "admin:$(BB_DC_ADMIN_PASSWORD)" \
+		--checks status_code_conformance,response_schema_conformance,not_a_server_error,content_type_conformance \
+		--include-method GET \
+		--mode positive \
+		--phases coverage \
+		-n 1 \
+		--seed 42 \
+		--no-color \
+		--report junit \
+		--report-junit-path "$$XMLOUT" \
+		--report ndjson \
+		--report-ndjson-path "$$JSONOUT" \
+		2>&1 | tee "$$TXTOUT"; \
+	EXIT=$${PIPESTATUS[0]}; \
+	echo ""; \
+	echo "stdout saved : $$TXTOUT"; \
+	echo "JUnit report : $$XMLOUT"; \
+	echo "NDJSON events: $$JSONOUT"; \
+	exit $$EXIT
+
+# Probe the DC instance via the REST API and print suggested .env additions.
+# Run this after scripts/seed_dc.py to populate BB_DC_PROJECT_KEY and BB_DC_REPO_SLUG.
+schema-discover-dc:
+	@if [ -z "$(BB_DC_BASE_URL)" ] || [ -z "$(BB_DC_TOKEN)" ]; then \
+		echo "ERROR: BB_DC_BASE_URL and BB_DC_TOKEN must be set."; \
+		echo "       Add them to .env (see .env.example) or export them before running make."; \
+		exit 1; \
+	fi
+	uv run python3 scripts/discover_dc_probe.py

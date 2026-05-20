@@ -1,5 +1,4 @@
 from __future__ import annotations
-import asyncio
 from bb.cloud.models.error import Error
 from bb.cloud.models.report import Report
 from bb.cloud.models.report_annotation import ReportAnnotation
@@ -46,7 +45,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.reports.list`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.list(client, workspace, repo_slug, commit, pagelen=pagelen))
+    return client.run_sync(_async.list(client, workspace, repo_slug, commit, pagelen=pagelen))
 
 def get(client: BBClient, workspace: str, repo_slug: str, commit: str, report_id: str) -> Report | Error | None:
     """Retrieve a single report by ID.
@@ -86,7 +85,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.reports.get`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.get(client, workspace, repo_slug, commit, report_id))
+    return client.run_sync(_async.get(client, workspace, repo_slug, commit, report_id))
 
 def create_or_update(client: BBClient, workspace: str, repo_slug: str, commit: str, report_id: str, *, body: Report | Unset=UNSET) -> Report | Error | None:
     """Create or update a report for a commit.
@@ -133,7 +132,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.reports.create_or_update`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.create_or_update(client, workspace, repo_slug, commit, report_id, body=body))
+    return client.run_sync(_async.create_or_update(client, workspace, repo_slug, commit, report_id, body=body))
 
 def delete(client: BBClient, workspace: str, repo_slug: str, commit: str, report_id: str) -> None:
     """Delete a report from a commit.
@@ -173,7 +172,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.reports.delete`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.delete(client, workspace, repo_slug, commit, report_id))
+    return client.run_sync(_async.delete(client, workspace, repo_slug, commit, report_id))
 
 def annotations(client: BBClient, workspace: str, repo_slug: str, commit: str, report_id: str, *, pagelen: int=25) -> list[ReportAnnotation] | Error:
     """List all annotations for a report.
@@ -214,7 +213,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.reports.annotations`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.annotations(client, workspace, repo_slug, commit, report_id, pagelen=pagelen))
+    return client.run_sync(_async.annotations(client, workspace, repo_slug, commit, report_id, pagelen=pagelen))
 
 def get_annotation(client: BBClient, workspace: str, repo_slug: str, commit: str, report_id: str, annotation_id: str) -> ReportAnnotation | Error | None:
     """Retrieve a single annotation by ID.
@@ -260,7 +259,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.reports.get_annotation`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.get_annotation(client, workspace, repo_slug, commit, report_id, annotation_id))
+    return client.run_sync(_async.get_annotation(client, workspace, repo_slug, commit, report_id, annotation_id))
 
 def create_annotation(client: BBClient, workspace: str, repo_slug: str, commit: str, report_id: str, annotation_id: str, *, body: ReportAnnotation | Unset=UNSET) -> ReportAnnotation | Error | None:
     """Create or update an annotation on a report.
@@ -310,7 +309,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.reports.create_annotation`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.create_annotation(client, workspace, repo_slug, commit, report_id, annotation_id, body=body))
+    return client.run_sync(_async.create_annotation(client, workspace, repo_slug, commit, report_id, annotation_id, body=body))
 
 def bulk_annotations(client: BBClient, workspace: str, repo_slug: str, commit: str, report_id: str, *, body: Unset=UNSET) -> list[ReportAnnotation] | Error:
     """Bulk create or update annotations for a report.
@@ -356,7 +355,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.reports.bulk_annotations`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.bulk_annotations(client, workspace, repo_slug, commit, report_id, body=body))
+    return client.run_sync(_async.bulk_annotations(client, workspace, repo_slug, commit, report_id, body=body))
 
 def delete_annotation(client: BBClient, workspace: str, repo_slug: str, commit: str, report_id: str, annotation_id: str) -> None:
     """Delete an annotation from a report.
@@ -402,4 +401,4 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.reports.delete_annotation`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.delete_annotation(client, workspace, repo_slug, commit, report_id, annotation_id))
+    return client.run_sync(_async.delete_annotation(client, workspace, repo_slug, commit, report_id, annotation_id))

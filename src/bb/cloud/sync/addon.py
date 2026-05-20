@@ -1,5 +1,4 @@
 from __future__ import annotations
-import asyncio
 from typing import Any
 from bb.cloud.models.error import Error
 from bb.cloud.sdk._client import BBClient
@@ -39,7 +38,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.addon.delete`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.delete(client))
+    return client.run_sync(_async.delete(client))
 
 def update(client: BBClient, *, body: Unset=UNSET) -> Any | Error | None:
     """Update the addon descriptor.
@@ -74,7 +73,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.addon.update`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.update(client, body=body))
+    return client.run_sync(_async.update(client, body=body))
 
 def linkers(client: BBClient) -> Any | Error | None:
     """List all addon linkers.
@@ -108,7 +107,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.addon.linkers`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.linkers(client))
+    return client.run_sync(_async.linkers(client))
 
 def get_linker(client: BBClient, linker_key: str) -> Any | Error | None:
     """Fetch a specific addon linker.
@@ -143,7 +142,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.addon.get_linker`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.get_linker(client, linker_key))
+    return client.run_sync(_async.get_linker(client, linker_key))
 
 def linker_values(client: BBClient, linker_key: str) -> Any | Error | None:
     """List all values for an addon linker.
@@ -178,7 +177,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.addon.linker_values`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.linker_values(client, linker_key))
+    return client.run_sync(_async.linker_values(client, linker_key))
 
 def get_linker_value(client: BBClient, linker_key: str, value_id: str) -> Any | Error | None:
     """Fetch a specific value for an addon linker.
@@ -214,7 +213,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.addon.get_linker_value`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.get_linker_value(client, linker_key, value_id))
+    return client.run_sync(_async.get_linker_value(client, linker_key, value_id))
 
 def create_linker_value(client: BBClient, linker_key: str, *, body: Unset=UNSET) -> Any | Error | None:
     """Create a new value for an addon linker.
@@ -250,7 +249,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.addon.create_linker_value`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.create_linker_value(client, linker_key, body=body))
+    return client.run_sync(_async.create_linker_value(client, linker_key, body=body))
 
 def set_linker_values(client: BBClient, linker_key: str, *, body: Unset=UNSET) -> Any | Error | None:
     """Set (replace) all values for an addon linker.
@@ -286,7 +285,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.addon.set_linker_values`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.set_linker_values(client, linker_key, body=body))
+    return client.run_sync(_async.set_linker_values(client, linker_key, body=body))
 
 def clear_linker_values(client: BBClient, linker_key: str) -> None:
     """Delete all values for an addon linker.
@@ -321,7 +320,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.addon.clear_linker_values`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.clear_linker_values(client, linker_key))
+    return client.run_sync(_async.clear_linker_values(client, linker_key))
 
 def delete_linker_value(client: BBClient, linker_key: str, value_id: str) -> None:
     """Delete a specific value from an addon linker.
@@ -357,4 +356,4 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.addon.delete_linker_value`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.delete_linker_value(client, linker_key, value_id))
+    return client.run_sync(_async.delete_linker_value(client, linker_key, value_id))

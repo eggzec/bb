@@ -1,5 +1,4 @@
 from __future__ import annotations
-import asyncio
 from bb.cloud.models.base_commit import BaseCommit
 from bb.cloud.models.commit import Commit
 from bb.cloud.models.error import Error
@@ -43,7 +42,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.commits.list`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.list(client, workspace, repo_slug, pagelen=pagelen))
+    return client.run_sync(_async.list(client, workspace, repo_slug, pagelen=pagelen))
 
 def get(client: BBClient, workspace: str, repo_slug: str, commit: str) -> Commit | Error | None:
     """Fetch a single commit by hash.
@@ -82,7 +81,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.commits.get`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.get(client, workspace, repo_slug, commit))
+    return client.run_sync(_async.get(client, workspace, repo_slug, commit))
 
 def prs(client: BBClient, workspace: str, repo_slug: str, commit: str, *, pagelen: int=25) -> list[Pullrequest] | Error:
     """List all pull requests that include a given commit across all pages.
@@ -123,4 +122,4 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.commits.prs`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.prs(client, workspace, repo_slug, commit, pagelen=pagelen))
+    return client.run_sync(_async.prs(client, workspace, repo_slug, commit, pagelen=pagelen))

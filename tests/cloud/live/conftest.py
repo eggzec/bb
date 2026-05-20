@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import os
 import uuid
+from collections.abc import Generator
 from pathlib import Path
 
 import pytest
@@ -80,13 +81,15 @@ def workspace() -> str:
 
 
 @pytest.fixture
-def client() -> BBClient:
-    return BBClient.from_env()
+def client() -> Generator[BBClient, None, None]:
+    with BBClient.from_env() as c:
+        yield c
 
 
 @pytest.fixture(scope="session")
-def _session_client() -> BBClient:
-    return BBClient.from_env()
+def _session_client() -> Generator[BBClient, None, None]:
+    with BBClient.from_env() as c:
+        yield c
 
 
 @pytest.fixture(scope="session")

@@ -1,7 +1,12 @@
+import asyncio
 import os
+from collections.abc import Coroutine
+from typing import Any, TypeVar
 
 from bb.cloud.client import AuthenticatedClient
 from bb.cloud.sdk._auth import BaseAuth, auto_detect_auth
+
+_T = TypeVar("_T")
 
 
 class BBClient:
@@ -29,6 +34,7 @@ class BBClient:
         self._auth_method = auth
         self._client: AuthenticatedClient = auth.get_authenticated_client()
         self.workspace = workspace or os.environ.get("BB_WORKSPACE")
+        self._runner: asyncio.Runner | None = None
 
     @classmethod
     def from_env(cls) -> "BBClient":
@@ -56,3 +62,83 @@ class BBClient:
         if self._auth_method.is_expired():
             self._client = self._auth_method.get_authenticated_client()
         return self._client
+
+    # ------------------------------------------------------------------
+    # Context manager support
+    # ------------------------------------------------------------------
+
+    def __enter__(self) -> "BBClient":
+        """Open a sync context: starts a persistent asyncio.Runner.
+
+        Use this when making multiple sequential sync SDK calls on the same
+        client.  The runner keeps its event loop open between calls, allowing
+        the underlying async httpx client to reuse connections.
+
+        Example::
+
+            with BBClient.from_env() as client:
+                repos_list = sync.repos.list(client, workspace)
+                branches   = sync.branches.list(client, workspace, repo_slug)
+        """
+        self._runner = asyncio.Runner()
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: object,
+    ) -> None:
+        """Close the runner and reset the cached async httpx client."""
+        if self._runner is not None:
+            self._runner.close()
+            self._runner = None
+        self._client._async_client = None  # type: ignore[attr-defined]
+
+    async def __aenter__(self) -> "BBClient":
+        """Open an async context (no-op — async SDK manages its own loop).
+
+        Primarily useful for ensuring ``__aexit__`` cleanup runs.
+
+        Example::
+
+            async with BBClient.from_env() as client:
+                result = await repos.list(client, workspace)
+        """
+        return self
+
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: object,
+    ) -> None:
+        """Close and clean up the cached async httpx client."""
+        async_client = self._client._async_client  # type: ignore[attr-defined]
+        if async_client is not None:
+            await async_client.aclose()
+            self._client._async_client = None  # type: ignore[attr-defined]
+
+    def run_sync(self, coro: Coroutine[Any, Any, _T]) -> _T:
+        """Run a coroutine synchronously.
+
+        When ``BBClient`` is used as a sync context manager the persistent
+        ``asyncio.Runner`` is reused across calls — the event loop stays open
+        and the underlying httpx connection pool is shared.
+
+        Outside a context manager a fresh ``asyncio.run()`` is used per call
+        and the cached async httpx client is reset afterwards to prevent
+        ``RuntimeError: Event loop is closed`` on subsequent calls.
+
+        Args:
+            coro: Coroutine to run (typically ``_async.some_function(client, ...)``).
+
+        Returns:
+            Whatever the coroutine returns.
+        """
+        if self._runner is not None:
+            return self._runner.run(coro)
+        try:
+            return asyncio.run(coro)
+        finally:
+            self._client._async_client = None  # type: ignore[attr-defined]

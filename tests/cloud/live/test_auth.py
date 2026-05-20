@@ -102,3 +102,26 @@ async def test_authenticated_request_succeeds(client: BBClient) -> None:
         f"{me.error.message if me.error else me!r}"
     )
     assert isinstance(me, Account), f"expected Account, got {type(me).__name__}"
+
+
+@pytest.mark.live
+async def test_bad_token_does_not_return_account(workspace: str) -> None:
+    """SDK must not return a valid Account for invalid credentials.
+
+    Uses users.me() which requires a valid session. On a 401, Bitbucket may
+    return a non-JSON body; the content-type guard (BUG-GENERATOR-001 fix) then
+    returns None rather than Error — both outcomes are acceptable.
+    What is NOT acceptable is the SDK returning an Account object for bad creds.
+    """
+    from bb.cloud.models.account import Account
+    from bb.cloud.sdk import users
+
+    bad_client = BBClient(
+        auth=APITokenAuth(email="nobody@example.com", token="invalid-token-xyz-000"),
+        workspace=workspace,
+    )
+    result = await users.me(bad_client)
+    assert not isinstance(result, Account), (
+        f"SDK returned Account for invalid credentials — auth was not enforced. "
+        f"Got: {result!r}"
+    )

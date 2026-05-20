@@ -1,5 +1,4 @@
 from __future__ import annotations
-import asyncio
 from typing import Any
 from bb.cloud.models.deploy_key import DeployKey
 from bb.cloud.models.deployment import Deployment
@@ -45,7 +44,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.deployments.list`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.list(client, workspace, repo_slug, pagelen=pagelen))
+    return client.run_sync(_async.list(client, workspace, repo_slug, pagelen=pagelen))
 
 def get(client: BBClient, workspace: str, repo_slug: str, deployment_uuid: str) -> Deployment | Error | None:
     """Return a single deployment by UUID.
@@ -85,7 +84,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.deployments.get`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.get(client, workspace, repo_slug, deployment_uuid))
+    return client.run_sync(_async.get(client, workspace, repo_slug, deployment_uuid))
 
 def envs(client: BBClient, workspace: str, repo_slug: str, *, pagelen: int=25) -> list[DeploymentEnvironment] | Error:
     """Return all deployment environments for a repository.
@@ -122,7 +121,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.deployments.envs`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.envs(client, workspace, repo_slug, pagelen=pagelen))
+    return client.run_sync(_async.envs(client, workspace, repo_slug, pagelen=pagelen))
 
 def get_env(client: BBClient, workspace: str, repo_slug: str, environment_uuid: str) -> DeploymentEnvironment | Error | None:
     """Return a single deployment environment by UUID.
@@ -163,7 +162,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.deployments.get_env`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.get_env(client, workspace, repo_slug, environment_uuid))
+    return client.run_sync(_async.get_env(client, workspace, repo_slug, environment_uuid))
 
 def create_env(client: BBClient, workspace: str, repo_slug: str, *, body: DeploymentEnvironment | Unset=UNSET) -> DeploymentEnvironment | Error | None:
     """Create a deployment environment for a repository.
@@ -205,7 +204,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.deployments.create_env`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.create_env(client, workspace, repo_slug, body=body))
+    return client.run_sync(_async.create_env(client, workspace, repo_slug, body=body))
 
 def update_env(client: BBClient, workspace: str, repo_slug: str, environment_uuid: str, *, body: DeploymentEnvironment | Unset=UNSET) -> DeploymentEnvironment | Error | None:
     """Update a deployment environment.
@@ -249,7 +248,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.deployments.update_env`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.update_env(client, workspace, repo_slug, environment_uuid, body=body))
+    return client.run_sync(_async.update_env(client, workspace, repo_slug, environment_uuid, body=body))
 
 def delete_env(client: BBClient, workspace: str, repo_slug: str, environment_uuid: str) -> None:
     """Delete a deployment environment.
@@ -289,7 +288,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.deployments.delete_env`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.delete_env(client, workspace, repo_slug, environment_uuid))
+    return client.run_sync(_async.delete_env(client, workspace, repo_slug, environment_uuid))
 
 def deploy_keys(client: BBClient, workspace: str, repo_slug: str, *, pagelen: int=25) -> list[Any] | Error:
     """Return all deploy keys for a repository.
@@ -326,7 +325,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.deployments.deploy_keys`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.deploy_keys(client, workspace, repo_slug, pagelen=pagelen))
+    return client.run_sync(_async.deploy_keys(client, workspace, repo_slug, pagelen=pagelen))
 
 def get_deploy_key(client: BBClient, workspace: str, repo_slug: str, key_id: int) -> Any:
     """Return a single deploy key by ID.
@@ -365,7 +364,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.deployments.get_deploy_key`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.get_deploy_key(client, workspace, repo_slug, key_id))
+    return client.run_sync(_async.get_deploy_key(client, workspace, repo_slug, key_id))
 
 def create_deploy_key(client: BBClient, workspace: str, repo_slug: str, *, body: DeployKey | Unset=UNSET) -> Any:
     """Create a deploy key for a repository.
@@ -405,7 +404,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.deployments.create_deploy_key`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.create_deploy_key(client, workspace, repo_slug, body=body))
+    return client.run_sync(_async.create_deploy_key(client, workspace, repo_slug, body=body))
 
 def update_deploy_key(client: BBClient, workspace: str, repo_slug: str, key_id: int, *, body: DeployKey | Unset=UNSET) -> Any:
     """Update a deploy key for a repository.
@@ -446,7 +445,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.deployments.update_deploy_key`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.update_deploy_key(client, workspace, repo_slug, key_id, body=body))
+    return client.run_sync(_async.update_deploy_key(client, workspace, repo_slug, key_id, body=body))
 
 def delete_deploy_key(client: BBClient, workspace: str, repo_slug: str, key_id: int) -> None:
     """Delete a deploy key from a repository.
@@ -485,7 +484,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.deployments.delete_deploy_key`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.delete_deploy_key(client, workspace, repo_slug, key_id))
+    return client.run_sync(_async.delete_deploy_key(client, workspace, repo_slug, key_id))
 
 def env_variables(client: BBClient, workspace: str, repo_slug: str, environment_uuid: str, *, pagelen: int=25) -> list[Any] | Error:
     """Return all variables for a deployment environment.
@@ -526,7 +525,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.deployments.env_variables`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.env_variables(client, workspace, repo_slug, environment_uuid, pagelen=pagelen))
+    return client.run_sync(_async.env_variables(client, workspace, repo_slug, environment_uuid, pagelen=pagelen))
 
 def create_env_variable(client: BBClient, workspace: str, repo_slug: str, environment_uuid: str, *, body: Any | Unset=UNSET) -> Any:
     """Create a variable for a deployment environment.
@@ -568,7 +567,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.deployments.create_env_variable`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.create_env_variable(client, workspace, repo_slug, environment_uuid, body=body))
+    return client.run_sync(_async.create_env_variable(client, workspace, repo_slug, environment_uuid, body=body))
 
 def update_env_variable(client: BBClient, workspace: str, repo_slug: str, environment_uuid: str, variable_uuid: str, *, body: Any | Unset=UNSET) -> Any:
     """Update a variable for a deployment environment.
@@ -611,7 +610,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.deployments.update_env_variable`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.update_env_variable(client, workspace, repo_slug, environment_uuid, variable_uuid, body=body))
+    return client.run_sync(_async.update_env_variable(client, workspace, repo_slug, environment_uuid, variable_uuid, body=body))
 
 def delete_env_variable(client: BBClient, workspace: str, repo_slug: str, environment_uuid: str, variable_uuid: str) -> None:
     """Delete a variable from a deployment environment.
@@ -652,4 +651,4 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.deployments.delete_env_variable`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.delete_env_variable(client, workspace, repo_slug, environment_uuid, variable_uuid))
+    return client.run_sync(_async.delete_env_variable(client, workspace, repo_slug, environment_uuid, variable_uuid))

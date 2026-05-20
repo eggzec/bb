@@ -31,6 +31,7 @@ dev = [
     "pytest>=8.0",
     "pytest-asyncio>=0.24",
     "schemathesis>=3.38",
+    "python-dotenv>=1.0.0",
 ]
 
 [tool.pytest.ini_options]
@@ -38,7 +39,7 @@ asyncio_mode = "auto"
 testpaths = ["tests"]
 pythonpath = ["."]
 markers = [
-    "live: integration test that hits the real Bitbucket Cloud API (needs BB_EMAIL/BB_TOKEN/BB_WORKSPACE)",
+    "live: integration test that hits the real Bitbucket Cloud or DC API (needs credentials)",
     "writes: live test that creates/deletes resources; requires workspace write permission",
 ]
 

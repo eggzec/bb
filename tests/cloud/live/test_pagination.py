@@ -88,3 +88,29 @@ async def test_aiter_pages_yields_same_items_as_paginate(
         f"  aiter  : {collected!r}\n"
         f"  collect: {expected_names!r}"
     )
+
+
+@pytest.mark.live
+def test_sync_sdk_paglen_consistency(client: BBClient, workspace: str) -> None:
+    """sync.repos.list with paglen=1 and paglen=50 must return the same complete set.
+
+    With BBClient as a context manager (provided by the function-scoped `client`
+    fixture), a persistent asyncio.Runner keeps the event loop open between the
+    two calls — multiple sync calls on the same client now work correctly.
+    """
+    from bb.cloud import sync
+
+    small = sync.repos.list(client, workspace, pagelen=1)
+    large = sync.repos.list(client, workspace, pagelen=50)
+
+    if isinstance(small, Error):
+        pytest.skip(f"sync.repos.list(paglen=1) returned Error: {small}")
+    if isinstance(large, Error):
+        pytest.skip(f"sync.repos.list(paglen=50) returned Error: {large}")
+
+    small_names = sorted(r.full_name for r in small if r.full_name)
+    large_names = sorted(r.full_name for r in large if r.full_name)
+    assert small_names == large_names, (
+        f"sync paglen mismatch: paglen=1 → {len(small_names)} repos, "
+        f"paglen=50 → {len(large_names)} repos."
+    )

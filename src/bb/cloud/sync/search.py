@@ -1,5 +1,4 @@
 from __future__ import annotations
-import asyncio
 from bb.cloud.models.error import Error
 from bb.cloud.models.search_code_search_result import SearchCodeSearchResult
 from bb.cloud.sdk._client import BBClient
@@ -45,7 +44,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.search.code`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.code(client, workspace, query=query, search_query=search_query, pagelen=pagelen))
+    return client.run_sync(_async.code(client, workspace, query=query, search_query=search_query, pagelen=pagelen))
 
 def account(client: BBClient, selected_user: str, *, search_query: str, pagelen: int=10) -> list[SearchCodeSearchResult] | Error:
     """Search for code in a user account.
@@ -89,7 +88,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.search.account`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.account(client, selected_user, search_query=search_query, pagelen=pagelen))
+    return client.run_sync(_async.account(client, selected_user, search_query=search_query, pagelen=pagelen))
 
 def team(client: BBClient, username: str, *, search_query: str, pagelen: int=10) -> list[SearchCodeSearchResult] | Error:
     """Search for code in a team.
@@ -133,4 +132,4 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.search.team`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.team(client, username, search_query=search_query, pagelen=pagelen))
+    return client.run_sync(_async.team(client, username, search_query=search_query, pagelen=pagelen))

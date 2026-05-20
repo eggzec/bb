@@ -1,5 +1,4 @@
 from __future__ import annotations
-import asyncio
 from bb.cloud.models.error import Error
 from bb.cloud.models.get_hook_events_subject_type_subject_type import GetHookEventsSubjectTypeSubjectType
 from bb.cloud.models.hook_event import HookEvent
@@ -45,7 +44,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.webhooks.list_repo`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.list_repo(client, workspace, repo_slug, pagelen=pagelen))
+    return client.run_sync(_async.list_repo(client, workspace, repo_slug, pagelen=pagelen))
 
 def get_repo(client: BBClient, workspace: str, repo_slug: str, uid: str) -> WebhookSubscription | Error | None:
     """Return a single repository webhook by UID, or ``None`` if not found.
@@ -82,7 +81,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.webhooks.get_repo`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.get_repo(client, workspace, repo_slug, uid))
+    return client.run_sync(_async.get_repo(client, workspace, repo_slug, uid))
 
 def create_repo(client: BBClient, workspace: str, repo_slug: str, *, body: WebhookSubscription | Unset=UNSET) -> WebhookSubscription | Error | None:
     """Create a webhook subscription for a repository.
@@ -120,7 +119,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.webhooks.create_repo`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.create_repo(client, workspace, repo_slug, body=body))
+    return client.run_sync(_async.create_repo(client, workspace, repo_slug, body=body))
 
 def update_repo(client: BBClient, workspace: str, repo_slug: str, uid: str, *, body: WebhookSubscription | Unset=UNSET) -> WebhookSubscription | Error | None:
     """Update a repository webhook subscription.
@@ -159,7 +158,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.webhooks.update_repo`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.update_repo(client, workspace, repo_slug, uid, body=body))
+    return client.run_sync(_async.update_repo(client, workspace, repo_slug, uid, body=body))
 
 def delete_repo(client: BBClient, workspace: str, repo_slug: str, uid: str) -> None:
     """Delete a repository webhook subscription.
@@ -196,7 +195,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.webhooks.delete_repo`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.delete_repo(client, workspace, repo_slug, uid))
+    return client.run_sync(_async.delete_repo(client, workspace, repo_slug, uid))
 
 def list_workspace(client: BBClient, workspace: str, *, pagelen: int=25) -> list[WebhookSubscription] | Error:
     """Return all webhook subscriptions for a workspace.
@@ -232,7 +231,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.webhooks.list_workspace`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.list_workspace(client, workspace, pagelen=pagelen))
+    return client.run_sync(_async.list_workspace(client, workspace, pagelen=pagelen))
 
 def get_workspace(client: BBClient, workspace: str, uid: str) -> WebhookSubscription | Error | None:
     """Return a single workspace webhook by UID, or ``None`` if not found.
@@ -268,7 +267,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.webhooks.get_workspace`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.get_workspace(client, workspace, uid))
+    return client.run_sync(_async.get_workspace(client, workspace, uid))
 
 def create_workspace(client: BBClient, workspace: str, *, body: WebhookSubscription | Unset=UNSET) -> WebhookSubscription | Error | None:
     """Create a webhook subscription for a workspace.
@@ -305,7 +304,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.webhooks.create_workspace`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.create_workspace(client, workspace, body=body))
+    return client.run_sync(_async.create_workspace(client, workspace, body=body))
 
 def update_workspace(client: BBClient, workspace: str, uid: str, *, body: WebhookSubscription | Unset=UNSET) -> WebhookSubscription | Error | None:
     """Update a workspace webhook subscription.
@@ -343,7 +342,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.webhooks.update_workspace`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.update_workspace(client, workspace, uid, body=body))
+    return client.run_sync(_async.update_workspace(client, workspace, uid, body=body))
 
 def delete_workspace(client: BBClient, workspace: str, uid: str) -> None:
     """Delete a workspace webhook subscription.
@@ -379,7 +378,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.webhooks.delete_workspace`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.delete_workspace(client, workspace, uid))
+    return client.run_sync(_async.delete_workspace(client, workspace, uid))
 
 def events(client: BBClient, subject_type: GetHookEventsSubjectTypeSubjectType) -> list[HookEvent] | Error:
     """Return all event types available for a given webhook subject type.
@@ -415,4 +414,4 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.webhooks.events`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.events(client, subject_type))
+    return client.run_sync(_async.events(client, subject_type))

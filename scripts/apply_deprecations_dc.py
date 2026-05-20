@@ -47,19 +47,19 @@ def find_project_root() -> Path:
     candidates.append(Path.cwd())
 
     for candidate in candidates:
-        if (candidate / "bb_datacenter.openapi.json").exists():
+        if (candidate / "bb_datacenter_fixed.openapi.json").exists():
             return candidate
 
     searched = ", ".join(str(p) for p in candidates)
     raise RuntimeError(
-        "Cannot locate project root (bb_datacenter.openapi.json not found).\n"
+        "Cannot locate project root (bb_datacenter_fixed.openapi.json not found).\n"
         f"Searched: {searched}\n"
         "Set BB_PROJECT_ROOT to the project directory and retry."
     )
 
 
 PROJECT_ROOT = find_project_root()
-SPEC_FILE = PROJECT_ROOT / "bb_datacenter.openapi.json"
+SPEC_FILE = PROJECT_ROOT / "bb_datacenter_fixed.openapi.json"
 
 
 def find_api_dir() -> Path | None:

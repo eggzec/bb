@@ -1,5 +1,4 @@
 from __future__ import annotations
-import asyncio
 from bb.cloud.models.commitstatus import Commitstatus
 from bb.cloud.models.error import Error
 from bb.cloud.sdk._client import BBClient
@@ -45,7 +44,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.commit_statuses.list`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.list(client, workspace, repo_slug, commit, pagelen=pagelen))
+    return client.run_sync(_async.list(client, workspace, repo_slug, commit, pagelen=pagelen))
 
 def get(client: BBClient, workspace: str, repo_slug: str, commit: str, key: str) -> Commitstatus | Error | None:
     """Retrieve a single commit status by build key.
@@ -85,7 +84,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.commit_statuses.get`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.get(client, workspace, repo_slug, commit, key))
+    return client.run_sync(_async.get(client, workspace, repo_slug, commit, key))
 
 def create(client: BBClient, workspace: str, repo_slug: str, commit: str, *, body: Commitstatus | Unset=UNSET) -> Commitstatus | Error | None:
     """Create a commit status (build result) for a commit.
@@ -126,7 +125,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.commit_statuses.create`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.create(client, workspace, repo_slug, commit, body=body))
+    return client.run_sync(_async.create(client, workspace, repo_slug, commit, body=body))
 
 def update(client: BBClient, workspace: str, repo_slug: str, commit: str, key: str, *, body: Commitstatus | Unset=UNSET) -> Commitstatus | Error | None:
     """Update an existing commit status by build key.
@@ -173,4 +172,4 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.commit_statuses.update`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.update(client, workspace, repo_slug, commit, key, body=body))
+    return client.run_sync(_async.update(client, workspace, repo_slug, commit, key, body=body))

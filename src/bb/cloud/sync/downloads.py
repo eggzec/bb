@@ -1,5 +1,4 @@
 from __future__ import annotations
-import asyncio
 from typing import Any
 from bb.cloud.models.error import Error
 from bb.cloud.sdk._client import BBClient
@@ -42,7 +41,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.downloads.list`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.list(client, workspace, repo_slug, pagelen=pagelen))
+    return client.run_sync(_async.list(client, workspace, repo_slug, pagelen=pagelen))
 
 def get(client: BBClient, workspace: str, repo_slug: str, filename: str) -> Any:
     """Return a single download artifact by filename, or ``None`` if not found.
@@ -79,7 +78,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.downloads.get`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.get(client, workspace, repo_slug, filename))
+    return client.run_sync(_async.get(client, workspace, repo_slug, filename))
 
 def upload(client: BBClient, workspace: str, repo_slug: str, *, body: Unset=UNSET) -> Any:
     """Upload a file as a download artifact for a repository.
@@ -116,7 +115,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.downloads.upload`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.upload(client, workspace, repo_slug, body=body))
+    return client.run_sync(_async.upload(client, workspace, repo_slug, body=body))
 
 def delete(client: BBClient, workspace: str, repo_slug: str, filename: str) -> None:
     """Delete a download artifact by filename.
@@ -153,4 +152,4 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.downloads.delete`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.delete(client, workspace, repo_slug, filename))
+    return client.run_sync(_async.delete(client, workspace, repo_slug, filename))

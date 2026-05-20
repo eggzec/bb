@@ -21,6 +21,7 @@ from bb.cloud.models.error import Error
 from bb.cloud.models.tag import Tag
 from bb.cloud.sdk import branches
 from bb.cloud.sdk._client import BBClient
+from bb.cloud.types import UNSET
 
 pytestmark = [pytest.mark.live]
 
@@ -52,6 +53,7 @@ async def test_list_returns_branches(
             f"branches.list[{idx}] is {type(branch).__name__}, expected Branch"
         )
         assert branch.name, f"branches.list[{idx}] has empty name: {branch!r}"
+        assert isinstance(branch.type_, str), f"branch[{idx}].type_ expected str"
 
 
 async def test_list_includes_main(
@@ -105,6 +107,9 @@ async def test_get_returns_main_branch(
     assert result.name == SEED_BRANCH, (
         f"branches.get returned name={result.name!r}, expected {SEED_BRANCH!r}"
     )
+    # field-level type checks
+    assert isinstance(result.type_, str), f"Branch.type_ expected str, got {type(result.type_)}"
+    assert result.target is not UNSET, "Branch.target missing — expected Commit reference"
 
 
 async def test_get_returns_branch_for_probe(

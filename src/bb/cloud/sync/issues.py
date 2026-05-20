@@ -1,5 +1,4 @@
 from __future__ import annotations
-import asyncio
 from typing import Any
 from bb.cloud.models.component import Component
 from bb.cloud.models.error import Error
@@ -51,7 +50,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.issues.list`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.list(client, workspace, repo_slug, q=q, sort=sort, pagelen=pagelen))
+    return client.run_sync(_async.list(client, workspace, repo_slug, q=q, sort=sort, pagelen=pagelen))
 
 def get(client: BBClient, workspace: str, repo_slug: str, issue_id: int) -> Issue | Error | None:
     """Return a single issue by ID, or ``None`` if not found.
@@ -89,7 +88,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.issues.get`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.get(client, workspace, repo_slug, issue_id))
+    return client.run_sync(_async.get(client, workspace, repo_slug, issue_id))
 
 def create(client: BBClient, workspace: str, repo_slug: str, *, body: Issue | Unset=UNSET) -> Issue | Error | None:
     """Create an issue and return the created object.
@@ -129,7 +128,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.issues.create`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.create(client, workspace, repo_slug, body=body))
+    return client.run_sync(_async.create(client, workspace, repo_slug, body=body))
 
 def update(client: BBClient, workspace: str, repo_slug: str, issue_id: int, *, body: Issue | Unset=UNSET) -> Issue | Error | None:
     """Update an issue and return the updated object.
@@ -171,7 +170,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.issues.update`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.update(client, workspace, repo_slug, issue_id, body=body))
+    return client.run_sync(_async.update(client, workspace, repo_slug, issue_id, body=body))
 
 def delete(client: BBClient, workspace: str, repo_slug: str, issue_id: int) -> None:
     """Delete an issue.
@@ -208,7 +207,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.issues.delete`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.delete(client, workspace, repo_slug, issue_id))
+    return client.run_sync(_async.delete(client, workspace, repo_slug, issue_id))
 
 def comments(client: BBClient, workspace: str, repo_slug: str, issue_id: int, *, pagelen: int=25) -> list[IssueComment] | Error:
     """Return all comments on an issue across all pages.
@@ -249,7 +248,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.issues.comments`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.comments(client, workspace, repo_slug, issue_id, pagelen=pagelen))
+    return client.run_sync(_async.comments(client, workspace, repo_slug, issue_id, pagelen=pagelen))
 
 def add_comment(client: BBClient, workspace: str, repo_slug: str, issue_id: int, *, body: IssueComment | Unset=UNSET) -> IssueComment | Error | None:
     """Add a comment to an issue and return the created comment.
@@ -292,7 +291,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.issues.add_comment`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.add_comment(client, workspace, repo_slug, issue_id, body=body))
+    return client.run_sync(_async.add_comment(client, workspace, repo_slug, issue_id, body=body))
 
 def changes(client: BBClient, workspace: str, repo_slug: str, issue_id: int, *, pagelen: int=25) -> list[IssueChange] | Error:
     """Return all changes (edit history) for an issue across all pages.
@@ -333,7 +332,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.issues.changes`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.changes(client, workspace, repo_slug, issue_id, pagelen=pagelen))
+    return client.run_sync(_async.changes(client, workspace, repo_slug, issue_id, pagelen=pagelen))
 
 def vote(client: BBClient, workspace: str, repo_slug: str, issue_id: int) -> None:
     """Cast a vote on an issue.
@@ -370,7 +369,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.issues.vote`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.vote(client, workspace, repo_slug, issue_id))
+    return client.run_sync(_async.vote(client, workspace, repo_slug, issue_id))
 
 def unvote(client: BBClient, workspace: str, repo_slug: str, issue_id: int) -> None:
     """Remove a vote from an issue.
@@ -407,7 +406,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.issues.unvote`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.unvote(client, workspace, repo_slug, issue_id))
+    return client.run_sync(_async.unvote(client, workspace, repo_slug, issue_id))
 
 def watch(client: BBClient, workspace: str, repo_slug: str, issue_id: int) -> None:
     """Start watching an issue.
@@ -444,7 +443,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.issues.watch`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.watch(client, workspace, repo_slug, issue_id))
+    return client.run_sync(_async.watch(client, workspace, repo_slug, issue_id))
 
 def unwatch(client: BBClient, workspace: str, repo_slug: str, issue_id: int) -> None:
     """Stop watching an issue.
@@ -481,7 +480,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.issues.unwatch`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.unwatch(client, workspace, repo_slug, issue_id))
+    return client.run_sync(_async.unwatch(client, workspace, repo_slug, issue_id))
 
 def milestones(client: BBClient, workspace: str, repo_slug: str) -> list[Milestone] | Error:
     """Return all milestones for a repository.
@@ -518,7 +517,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.issues.milestones`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.milestones(client, workspace, repo_slug))
+    return client.run_sync(_async.milestones(client, workspace, repo_slug))
 
 def versions(client: BBClient, workspace: str, repo_slug: str) -> list[Version] | Error:
     """Return all versions for a repository.
@@ -554,7 +553,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.issues.versions`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.versions(client, workspace, repo_slug))
+    return client.run_sync(_async.versions(client, workspace, repo_slug))
 
 def components(client: BBClient, workspace: str, repo_slug: str) -> list[Component] | Error:
     """Return all components for a repository.
@@ -591,7 +590,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.issues.components`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.components(client, workspace, repo_slug))
+    return client.run_sync(_async.components(client, workspace, repo_slug))
 
 def get_comment(client: BBClient, workspace: str, repo_slug: str, issue_id: int, comment_id: int) -> IssueComment | Error | None:
     """Return a single comment on an issue, or ``None`` if not found.
@@ -632,7 +631,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.issues.get_comment`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.get_comment(client, workspace, repo_slug, issue_id, comment_id))
+    return client.run_sync(_async.get_comment(client, workspace, repo_slug, issue_id, comment_id))
 
 def update_comment(client: BBClient, workspace: str, repo_slug: str, issue_id: int, comment_id: int, *, body: IssueComment | Unset=UNSET) -> IssueComment | Error | None:
     """Update a comment on an issue.
@@ -676,7 +675,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.issues.update_comment`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.update_comment(client, workspace, repo_slug, issue_id, comment_id, body=body))
+    return client.run_sync(_async.update_comment(client, workspace, repo_slug, issue_id, comment_id, body=body))
 
 def delete_comment(client: BBClient, workspace: str, repo_slug: str, issue_id: int, comment_id: int) -> None:
     """Delete a comment on an issue.
@@ -716,7 +715,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.issues.delete_comment`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.delete_comment(client, workspace, repo_slug, issue_id, comment_id))
+    return client.run_sync(_async.delete_comment(client, workspace, repo_slug, issue_id, comment_id))
 
 def get_change(client: BBClient, workspace: str, repo_slug: str, issue_id: int, change_id: int) -> IssueChange | Error | None:
     """Return a single change entry for an issue, or ``None`` if not found.
@@ -757,7 +756,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.issues.get_change`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.get_change(client, workspace, repo_slug, issue_id, change_id))
+    return client.run_sync(_async.get_change(client, workspace, repo_slug, issue_id, change_id))
 
 def add_change(client: BBClient, workspace: str, repo_slug: str, issue_id: int, *, body: IssueChange | Unset=UNSET) -> IssueChange | Error | None:
     """Record a change on an issue (e.g. a status transition).
@@ -800,7 +799,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.issues.add_change`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.add_change(client, workspace, repo_slug, issue_id, body=body))
+    return client.run_sync(_async.add_change(client, workspace, repo_slug, issue_id, body=body))
 
 def voted(client: BBClient, workspace: str, repo_slug: str, issue_id: int) -> Any | Error | None:
     """Return the current user's vote status on an issue.
@@ -838,7 +837,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.issues.voted`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.voted(client, workspace, repo_slug, issue_id))
+    return client.run_sync(_async.voted(client, workspace, repo_slug, issue_id))
 
 def watching(client: BBClient, workspace: str, repo_slug: str, issue_id: int) -> Any | Error | None:
     """Return the current user's watch status on an issue.
@@ -876,7 +875,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.issues.watching`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.watching(client, workspace, repo_slug, issue_id))
+    return client.run_sync(_async.watching(client, workspace, repo_slug, issue_id))
 
 def get_milestone(client: BBClient, workspace: str, repo_slug: str, milestone_id: int) -> Milestone | Error | None:
     """Return a single milestone by ID, or ``None`` if not found.
@@ -916,7 +915,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.issues.get_milestone`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.get_milestone(client, workspace, repo_slug, milestone_id))
+    return client.run_sync(_async.get_milestone(client, workspace, repo_slug, milestone_id))
 
 def get_version(client: BBClient, workspace: str, repo_slug: str, version_id: int) -> Version | Error | None:
     """Return a single version by ID, or ``None`` if not found.
@@ -956,7 +955,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.issues.get_version`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.get_version(client, workspace, repo_slug, version_id))
+    return client.run_sync(_async.get_version(client, workspace, repo_slug, version_id))
 
 def get_component(client: BBClient, workspace: str, repo_slug: str, component_id: int) -> Component | Error | None:
     """Return a single component by ID, or ``None`` if not found.
@@ -996,7 +995,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.issues.get_component`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.get_component(client, workspace, repo_slug, component_id))
+    return client.run_sync(_async.get_component(client, workspace, repo_slug, component_id))
 
 def attachments(client: BBClient, workspace: str, repo_slug: str, issue_id: int) -> Any | Error | None:
     """Return the list of attachments on an issue.
@@ -1036,7 +1035,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.issues.attachments`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.attachments(client, workspace, repo_slug, issue_id))
+    return client.run_sync(_async.attachments(client, workspace, repo_slug, issue_id))
 
 def get_attachment(client: BBClient, workspace: str, repo_slug: str, issue_id: int, path: str) -> Any | Error | None:
     """Return the redirect URL for a specific attachment on an issue.
@@ -1076,7 +1075,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.issues.get_attachment`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.get_attachment(client, workspace, repo_slug, issue_id, path))
+    return client.run_sync(_async.get_attachment(client, workspace, repo_slug, issue_id, path))
 
 def upload_attachment(client: BBClient, workspace: str, repo_slug: str, issue_id: int, *, body: Unset=UNSET) -> None:
     """Upload an attachment to an issue.
@@ -1116,7 +1115,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.issues.upload_attachment`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.upload_attachment(client, workspace, repo_slug, issue_id, body=body))
+    return client.run_sync(_async.upload_attachment(client, workspace, repo_slug, issue_id, body=body))
 
 def delete_attachment(client: BBClient, workspace: str, repo_slug: str, issue_id: int, path: str) -> None:
     """Delete an attachment from an issue.
@@ -1156,7 +1155,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.issues.delete_attachment`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.delete_attachment(client, workspace, repo_slug, issue_id, path))
+    return client.run_sync(_async.delete_attachment(client, workspace, repo_slug, issue_id, path))
 
 def export(client: BBClient, workspace: str, repo_slug: str, *, body: Unset=UNSET) -> None:
     """Start an asynchronous export of all issues for a repository.
@@ -1193,7 +1192,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.issues.export`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.export(client, workspace, repo_slug, body=body))
+    return client.run_sync(_async.export(client, workspace, repo_slug, body=body))
 
 def export_status(client: BBClient, workspace: str, repo_slug: str, repo_name: str, task_id: str) -> Any | Error | None:
     """Check the status of an in-progress issue export task.
@@ -1235,7 +1234,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.issues.export_status`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.export_status(client, workspace, repo_slug, repo_name, task_id))
+    return client.run_sync(_async.export_status(client, workspace, repo_slug, repo_name, task_id))
 
 def import_status(client: BBClient, workspace: str, repo_slug: str) -> Any | Error | None:
     """Check the status of an in-progress issue import task.
@@ -1272,7 +1271,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.issues.import_status`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.import_status(client, workspace, repo_slug))
+    return client.run_sync(_async.import_status(client, workspace, repo_slug))
 
 def import_data(client: BBClient, workspace: str, repo_slug: str, *, body: Unset=UNSET) -> None:
     """Start an asynchronous import of issues for a repository.
@@ -1309,4 +1308,4 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.issues.import_data`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.import_data(client, workspace, repo_slug, body=body))
+    return client.run_sync(_async.import_data(client, workspace, repo_slug, body=body))

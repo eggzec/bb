@@ -1,5 +1,4 @@
 from __future__ import annotations
-import asyncio
 from bb.cloud.models.error import Error
 from bb.cloud.sdk._client import BBClient
 from bb.cloud.types import UNSET, Unset
@@ -42,7 +41,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.source.get`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.get(client, workspace, repo_slug, commit, path))
+    return client.run_sync(_async.get(client, workspace, repo_slug, commit, path))
 
 def root(client: BBClient, workspace: str, repo_slug: str) -> object | Error | None:
     """Return the root directory listing of the default branch.
@@ -78,7 +77,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.source.root`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.root(client, workspace, repo_slug))
+    return client.run_sync(_async.root(client, workspace, repo_slug))
 
 def history(client: BBClient, workspace: str, repo_slug: str, commit: str, path: str) -> object | Error | None:
     """Return the file history — commits that touched a given path.
@@ -116,7 +115,7 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.source.history`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.history(client, workspace, repo_slug, commit, path))
+    return client.run_sync(_async.history(client, workspace, repo_slug, commit, path))
 
 def upload(client: BBClient, workspace: str, repo_slug: str, *, body: Unset=UNSET) -> object | Error | None:
     """Upload files to a repository via the source endpoint.
@@ -153,4 +152,4 @@ References:
 Note:
     This synchronous wrapper executes :func:`~bb.cloud.sdk.source.upload`
     with :func:`asyncio.run`. Use the async SDK directly from an existing event loop."""
-    return asyncio.run(_async.upload(client, workspace, repo_slug, body=body))
+    return client.run_sync(_async.upload(client, workspace, repo_slug, body=body))
