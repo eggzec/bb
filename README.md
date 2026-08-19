@@ -1,4 +1,4 @@
-![bb](assets/bb-banner.png)
+![bb](https://raw.githubusercontent.com/eggzec/bb/master/assets/bb-banner.png)
 
 # bb
 
